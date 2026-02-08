@@ -1,0 +1,44 @@
+package me.itzvirtual.myunitox.data.models
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import me.itzvirtual.myunitox.data.remote.CinecaDateSerializer
+
+@Serializable
+data class ExamDate(
+    @SerialName("title")
+    val title: String = "",
+    @SerialName("description")
+    val description: String = "",
+    @SerialName("note")
+    val note: String = "",
+
+    @SerialName("ad_cod")
+    val adCode: String = "",
+    @SerialName("ad_des")
+    val adDescription: String = "",
+    @SerialName("app_des")
+    val appDescription: String = "",
+
+    @Serializable(with = CinecaDateSerializer::class)
+    @SerialName("date")
+    val date: String,
+    @Serializable(with = CinecaDateSerializer::class)
+    @SerialName("bookingStartDate")
+    val bookingStartDate: String,
+    @Serializable(with = CinecaDateSerializer::class)
+    @SerialName("bookingEndDate")
+    val bookingEndDate: String,
+    @SerialName("bookableExam")
+    val bookableExam: Boolean = false,
+    @SerialName("bookingEnabled")
+    val bookingEnabled: Boolean = false,
+    @SerialName("unbookingEnabled")
+    val unbookingEnabled: Boolean = false,
+
+    @SerialName("iscritti")
+    val students: Int = 0,
+
+    @SerialName("presidente")
+    val president: String = "",
+)

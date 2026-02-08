@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MyUniTOX</string>
+    <string name="no_data">Nessun dato disponibile</string>
+    <string name="exam_results_title">Esito Esami</string>
+    <string name="date">%1$s</string>
+    <string name="editable_until">Modificabile entro</string>
+    <string name="exam_dates_title">Appelli</string>
+    <string name="booking_period">Apertura iscrizioni: %1$s - %2$s</string>
+    <string name="students_enrolled">Studenti: %1$s</string>
+    <string name="booking_open">Iscrizioni aperte</string>
+    <string name="booking_closed">Iscrizioni chiuse</string>
+</resources>

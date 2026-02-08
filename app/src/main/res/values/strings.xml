@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">MyUniTOX</string>
+
+    <string name="no_data">No data available</string>
+
+    <string name="exam_results_title">Exam Results</string>
+    <string name="date">%1$s</string>
+    <string name="editable_until">Editable until</string>
+
+    <string name="exam_dates_title">Exam Dates</string>
+    <string name="booking_period">Booking: %1$s - %2$s</string>
+    <string name="students_enrolled">Students: %1$d</string>
+    <string name="booking_open">Booking Open</string>
+    <string name="booking_closed">Booking Closed</string>
+</resources>
