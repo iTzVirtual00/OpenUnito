@@ -12,4 +12,6 @@
     <string name="students_enrolled">Students: %1$d</string>
     <string name="booking_open">Booking Open</string>
     <string name="booking_closed">Booking Closed</string>
+    <string name="credits_section_title">Credits</string>
+    <string name="grades_section_title">Grades</string>
 </resources>

@@ -26,12 +26,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
-import me.itzvirtual.myunitox.ui.theme.MyUniTOXTheme
+import me.itzvirtual.myunitox.ui.theme.MyUnitoXTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -72,7 +71,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         updateAppLanguage("it")
         setContent {
-            MyUniTOXTheme {
+            MyUnitoXTheme {
                 MyUniTOXApp()
             }
         }

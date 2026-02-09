@@ -47,7 +47,7 @@ data class StudentStats(
 //    @SerialName("TipoMediaCod") val meanTypeCode: String,
 //    @SerialName("AdPianif") val plannedActivities: Int,
 //    @SerialName("CfuAdPianif") val plannedCredits: Int,
-//    @SerialName("CfuPiano") val totalPlanCredits: Int,
+    @SerialName("CfuPiano") val totalPlanCredits: Int,
 
     // wtf are these two
 //    @SerialName("BaseVotoAritmetica") val arithmeticBaseVote: Double,
@@ -61,7 +61,6 @@ data class StudentStats(
     @SerialName("weight_avg") val weightAvg: Double,
 
     @SerialName("cfu_gained") val creditsGained: Double,
-    @SerialName("cfu_calculated") val creditsCalculated: Double,
     @SerialName("cfu_tot") val totalCredits: Int,
     @SerialName("cfu_progression") val progressionPercentage: Double,
 
@@ -80,4 +79,69 @@ data class Mean(
     @SerialName("definizione") val definition: String,
     @SerialName("tipo") val type: String, // "A" or "P"
     @SerialName("value") val value: Double
+)
+
+val dashboardDataSample = DashboardDataResponse(
+    grades = listOf(
+        Grade(
+            language = "en",
+            idStudent = 1483920,
+            id = null,
+            name = "other activities",
+            description = "29.000000",
+            date = CinecaDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
+            value = 29.0,
+            average = 29.0,
+            position = 1
+        ),
+        Grade(
+            language = "en",
+            idStudent = 1483920,
+            id = null,
+            name = "OTHER ACTIVITIES",
+            description = "18.000000",
+            date = CinecaDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
+            value = 18.0,
+            average = 23.5,
+            position = 2
+        ),
+        Grade(
+            language = "en",
+            idStudent = 1483920,
+            id = null,
+            name = "DISCRETE MATHEMATICS, ALGEBRA AND GEOMETRY",
+            description = "25.000000",
+            date = CinecaDateSerializer.deserializeString("/Date(1768518000000+0100)/"),
+            value = 25.0,
+            average = 24.0,
+            position = 3
+        )
+    ),
+    career = Career(
+        language = "eng",
+        id = null,
+        description = null,
+        total = 180.0,
+        registered = 24.0,
+        calculated = 24.0,
+        idStudent = 1483920
+    ),
+    stats = StudentStats(
+        personId = null,
+        matriculationNumber = null,
+        numExams = 4,
+        arithmeticAvg = 24.25,
+        weightAvg = 24.25,
+        creditsGained = 24.0,
+        totalCredits = 180,
+        progressionPercentage = 13.333333,
+        completedActivities = 4,
+        remainingActivities = 8,
+        studentId = 1483920,
+        averages = listOf(
+            Mean(base = 30, definition = "CDSORD", type = "A", value = 24.0),
+            Mean(base = 30, definition = "CDSORD", type = "P", value = 24.25)
+        ),
+        totalPlanCredits = 66
+    )
 )

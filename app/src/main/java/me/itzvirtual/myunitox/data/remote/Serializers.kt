@@ -16,6 +16,9 @@ object CinecaDateSerializer : KSerializer<String> {
 
     override fun deserialize(decoder: Decoder): String {
         val input = decoder.decodeString()
+        return deserializeString(input)
+    }
+    fun deserializeString(input: String): String {
         val match = regex.find(input)
 
         return if (match != null) {
@@ -26,6 +29,7 @@ object CinecaDateSerializer : KSerializer<String> {
             input // Fallback to raw string if regex fails
         }
     }
+
 
     override fun serialize(encoder: Encoder, value: String) {
         encoder.encodeString(value)

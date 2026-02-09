@@ -10,4 +10,6 @@
     <string name="students_enrolled">Studenti: %1$s</string>
     <string name="booking_open">Iscrizioni aperte</string>
     <string name="booking_closed">Iscrizioni chiuse</string>
+    <string name="credits_section_title">Crediti</string>
+    <string name="grades_section_title">Voti</string>
 </resources>
