@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox.ui.theme
+package me.itzvirtual.myunitox.ui.themes
 
 import androidx.compose.ui.graphics.Color
 

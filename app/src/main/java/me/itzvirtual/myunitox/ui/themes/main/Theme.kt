@@ -1,6 +1,5 @@
-package me.itzvirtual.myunitox.ui.theme
+package me.itzvirtual.myunitox.ui.themes
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +14,8 @@ private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80
+
+
 )
 
 private val LightColorScheme = lightColorScheme(

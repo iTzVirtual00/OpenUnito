@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox.ui.theme
+package me.itzvirtual.myunitox.ui.themes
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
