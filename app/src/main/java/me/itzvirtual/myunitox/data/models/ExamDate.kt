@@ -3,6 +3,7 @@ package me.itzvirtual.myunitox.data.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import me.itzvirtual.myunitox.data.remote.CinecaDateSerializer
+import java.util.Date
 
 @Serializable
 data class ExamDate(
@@ -22,13 +23,13 @@ data class ExamDate(
 
     @Serializable(with = CinecaDateSerializer::class)
     @SerialName("date")
-    val date: String,
+    val date: Date,
     @Serializable(with = CinecaDateSerializer::class)
     @SerialName("bookingStartDate")
-    val bookingStartDate: String,
+    val bookingStartDate: Date,
     @Serializable(with = CinecaDateSerializer::class)
     @SerialName("bookingEndDate")
-    val bookingEndDate: String,
+    val bookingEndDate: Date,
     @SerialName("bookableExam")
     val bookableExam: Boolean = false,
     @SerialName("bookingEnabled")

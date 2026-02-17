@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.data.models.ExamDate
-import me.itzvirtual.myunitox.data.models.ExamResult
+import me.itzvirtual.myunitox.ui.util.formatDate
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), modifier: Modifier) {
@@ -62,20 +60,6 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), modifier: Modifier) {
                             ExamDateRow(item)
                         }
                     }
-
-                    item {
-                        Text(
-                            stringResource(R.string.exam_results_title),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    if (state.examResults.isEmpty()) {
-                        item { EmptyStateMessage(stringResource(R.string.no_data)) }
-                    } else {
-                        items(state.examResults) { exam ->
-                            ExamResultRow(exam)
-                        }
-                    }
                 }
             }
         }
@@ -97,7 +81,7 @@ fun EmptyStateMessage(message: String) {
 
 @Composable
 fun ExamDateRow(date: ExamDate) {
-    Card(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -131,7 +115,7 @@ fun ExamDateRow(date: ExamDate) {
 
             // Date
             Text(
-                text = stringResource(R.string.date, date.date),
+                text = stringResource(R.string.date, formatDate(date.date)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -160,7 +144,7 @@ fun ExamDateRow(date: ExamDate) {
                     )
                 }
                 Text(
-                    text = "${date.bookingStartDate} - ${date.bookingEndDate}",
+                    text = "${formatDate(date.bookingStartDate)} - ${formatDate(date.bookingEndDate)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
@@ -169,86 +153,3 @@ fun ExamDateRow(date: ExamDate) {
         }
     }
 }
-
-@Composable
-fun ExamResultRow(result: ExamResult) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // info
-                Column(modifier = Modifier.weight(1f)) {
-                    Row() {
-                        Text(
-                            text = result.courseName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2
-                        )
-                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                        Text(
-                            text = "\u2022 ${result.weight} CFU",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Normal,
-                            maxLines = 2
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(R.string.date, result.date),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                }
-
-                // grade
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = result.grade,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color(0xFF388E3C),
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    if (result.maxGrade != 30) {
-                        Text(
-                            text = "/ ${result.maxGrade}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = stringResource(R.string.editable_until),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color(255, 170, 0)
-                )
-//                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = result.editableUntil,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-

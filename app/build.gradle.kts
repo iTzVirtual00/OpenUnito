@@ -29,7 +29,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -66,8 +67,12 @@ dependencies {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
-    implementation(libs.core.ktx)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.retrofit)
     implementation(libs.kotlinx.coroutines.android)
 
@@ -83,4 +88,7 @@ dependencies {
     // Json
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
+
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.compose.material.icons.extended)
 }

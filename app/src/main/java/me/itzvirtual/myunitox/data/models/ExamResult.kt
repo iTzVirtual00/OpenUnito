@@ -2,11 +2,21 @@ package me.itzvirtual.myunitox.data.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import me.itzvirtual.myunitox.data.remote.GradeStatusSerializer
+import me.itzvirtual.myunitox.data.remote.IntToBooleanSerializer
+import me.itzvirtual.myunitox.data.remote.SmartNumberSerializer
 
 @Serializable
 data class ExamResult(
+
+    @SerialName("applistaId")
+    val id: String = "",
+
     @SerialName("adStuDes")
     val courseName: String = "",
+
+    @SerialName("adStuCod")
+    val courseCode: String = "",
 
     @SerialName("dataEsa")
     val date: String = "",
@@ -17,10 +27,77 @@ data class ExamResult(
     @SerialName("dataRifEsitoStu")
     val editableUntil: String = "",
 
-    @SerialName("gruppoVotoCod")
-    val grade: String = "",
+//    @SerialName("gruppoVotoCod")
+//    @Serializable(with=SmartNumberSerializer::class)
+//    val grade: String = "",
 
     @SerialName("gruppoVotoMaxPunti")
-    val maxGrade: Int = -1
+    @Serializable(with = SmartNumberSerializer::class)
+    val maxGrade: String = "",
+
+    @SerialName("presaVisione")
+    val status: GradeStatus,
+
+    @SerialName("esito")
+    val gradeResult: GradeResult?
 )
 
+//"esito": {
+//    "modValCod": {
+//    "value": "V"
+//    },
+//    "superatoFlg": 1,
+//    "votoEsa": 24,
+//    "tipoGiudCod": "",
+//    "tipoGiudizioDes": "",
+//    "assenteFlg": 0,
+//    "ritiratoFlg": 0,
+//    "acceptEnabled": 0,
+//    "rejectEnabled": 0,
+//    "repeatable": 1
+//}
+
+@Serializable
+data class GradeResult(
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("superatoFlg")
+    val passed: Boolean,
+
+    @SerialName("votoEsa")
+    @Serializable(with = SmartNumberSerializer::class)
+    val grade: String = "",
+
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("assenteFlg")
+    val isAbsent: Boolean,
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("ritiratoFlg")
+    val isWithdrawn: Boolean,
+
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("acceptEnabled")
+    val canAccept: Boolean,
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("rejectEnabled")
+    val canReject: Boolean,
+
+    @Serializable(with = IntToBooleanSerializer::class)
+    @SerialName("laude")
+    val laude: Boolean = false
+)
+
+@Serializable(with = GradeStatusSerializer::class)
+enum class GradeStatus(val serialName: String) {
+    @SerialName("V")
+    VIEWED("V"),
+    @SerialName("A")
+    ACCEPTED("A"),
+    @SerialName("R")
+    REJECTED("R"),
+    @SerialName("N")
+    NOT_TOUCHED("N"),
+    UNKNOWN("UNKNOWN");
+
+    // No reflection, no crash, 3MB app safe!
+    override fun toString(): String = serialName
+}

@@ -14,4 +14,6 @@
     <string name="booking_closed">Booking Closed</string>
     <string name="credits_section_title">Credits</string>
     <string name="grades_section_title">Grades</string>
+    <string name="yearly_progress_title">Yearly Progress</string>
+    <string name="remaining_cfu_title">%1$d CFU remaining for degree</string>
 </resources>
