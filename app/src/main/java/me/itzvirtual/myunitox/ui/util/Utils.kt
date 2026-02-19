@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.myunitox.data.models.GradeStatus
+import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -131,11 +132,11 @@ fun parseDate(dateStr: String): Date {
 
 @Composable
 fun GradeStatus.toColor(): Color = when (this) {
-    GradeStatus.VIEWED -> Color(0xFF9E9E9E)
+    GradeStatus.VIEWED -> MaterialTheme.colorScheme.tertiaryContainer
     GradeStatus.NOT_TOUCHED -> Color.Transparent
 
-    GradeStatus.ACCEPTED -> Color(0xFF4CAF50)
-    GradeStatus.REJECTED -> Color(0xFFF44336)
+    GradeStatus.ACCEPTED -> LocalCustomColorsPalette.current.gradePassed
+    GradeStatus.REJECTED -> LocalCustomColorsPalette.current.gradeNotPassed
 
     GradeStatus.UNKNOWN -> Color.DarkGray
 }

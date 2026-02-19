@@ -41,7 +41,7 @@ import me.itzvirtual.myunitox.ui.devtools.DevtoolsScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
 import me.itzvirtual.myunitox.ui.login.AuthViewModel
 import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
-import me.itzvirtual.myunitox.ui.themes.main.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

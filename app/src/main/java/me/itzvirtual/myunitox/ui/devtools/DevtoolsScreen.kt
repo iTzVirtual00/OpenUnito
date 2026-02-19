@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import me.itzvirtual.myunitox.ui.themes.main.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.util.restartApp
 
 

@@ -86,7 +86,8 @@ import me.itzvirtual.myunitox.data.models.GradeResult
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.data.models.Score
 import me.itzvirtual.myunitox.data.models.dashboardDataSample
-import me.itzvirtual.myunitox.ui.themes.main.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.util.AnimatedSymmetricalBorder
 import me.itzvirtual.myunitox.ui.util.ErrorItem
 import me.itzvirtual.myunitox.ui.util.LoadingIconItem
@@ -123,7 +124,43 @@ fun DashboardScreenPreview() {
                                 GradeStatus.VIEWED,
                                 GradeResult(
                                     passed = false,
-                                    grade = "30",
+                                    grade = "0",
+                                    isAbsent = false,
+                                    isWithdrawn = false,
+                                    canAccept = false,
+                                    canReject = false,
+                                ),
+                            ),
+                            ExamResult(
+                                "placeholder1",
+                                "PROGRAMMAZIONE I",
+                                "0801L31",
+                                "22/01/2026",
+                                9,
+                                "07/02/2026 23:59:59",
+                                "30",
+                                GradeStatus.VIEWED,
+                                GradeResult(
+                                    passed = false,
+                                    grade = "10",
+                                    isAbsent = false,
+                                    isWithdrawn = false,
+                                    canAccept = false,
+                                    canReject = false,
+                                ),
+                            ),
+                            ExamResult(
+                                "placeholder1",
+                                "PROGRAMMAZIONE I",
+                                "0801L31",
+                                "22/01/2026",
+                                9,
+                                "07/02/2026 23:59:59",
+                                "30",
+                                GradeStatus.VIEWED,
+                                GradeResult(
+                                    passed = true,
+                                    grade = "30L",
                                     isAbsent = false,
                                     isWithdrawn = false,
                                     canAccept = false,
@@ -387,7 +424,7 @@ fun ExamResultRow(result: ExamResult) {
                     Text(
                         text = stringResource(R.string.editable_until),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color(255, 170, 0)
+                        color = MaterialTheme.colorScheme.primary
                     )
                     //                Spacer(modifier = Modifier.weight(1f))
                     Text(
@@ -426,7 +463,7 @@ fun ExamResultRow(result: ExamResult) {
                     .fillMaxHeight()
                     .weight(sideContent)
                     .drawBehind {
-                        if (showChroma) {
+                        if (showChroma) {3
                             // ai-powered, no idea how this works. also, cool palette gemini!
                             val brush = Brush.linearGradient(
                                 colors = listOf(
@@ -717,8 +754,8 @@ fun GradeWrapper(result: ExamResult) {
                     style = MaterialTheme.typography.headlineMedium,
                     color = when {
                         result.status == GradeStatus.NOT_TOUCHED -> Color.Transparent
-                        !result.gradeResult.passed -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.tertiary
+                        !result.gradeResult.passed -> LocalCustomColorsPalette.current.gradeNotPassed
+                        else -> LocalCustomColorsPalette.current.gradePassed
                     },
                     fontWeight = FontWeight.ExtraBold
                 )
@@ -833,7 +870,7 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
                 Text(
                     text = grade,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = LocalCustomColorsPalette.current.gradePassed,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -855,7 +892,7 @@ fun CreditsSection(state: DashboardData) {
         Surface(
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -877,6 +914,9 @@ fun CreditsSection(state: DashboardData) {
                             credits = stats.creditsGained.toInt(),
                             totalCredits = stats.totalCredits,
                             plannedCredits = stats.totalPlanCredits,
+                            progressColor = MaterialTheme.colorScheme.primary,
+                            plannedProgressColor = MaterialTheme.colorScheme.primary,
+                            backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
                         )
                     }
                 }
@@ -908,7 +948,7 @@ fun CreditsSection(state: DashboardData) {
             }
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (state.isLoading) {
@@ -924,7 +964,6 @@ fun CreditsSection(state: DashboardData) {
                         ),
                         modifier = Modifier.padding(12.dp),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -952,7 +991,7 @@ fun YearlyProgressCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp),
-            color = MaterialTheme.colorScheme.tertiary, // Use Tertiary for Year to distinguish from Primary Career
+            color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round
         )

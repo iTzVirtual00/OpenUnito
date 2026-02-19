@@ -66,7 +66,9 @@ import me.itzvirtual.myunitox.data.models.Coordinates
 import me.itzvirtual.myunitox.data.models.Floor
 import me.itzvirtual.myunitox.data.models.Professor
 import me.itzvirtual.myunitox.data.models.Room
-import me.itzvirtual.myunitox.ui.themes.main.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.themes.main.CustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -86,25 +88,15 @@ enum class AgendaFilter {
 }
 
 // Predefined colors for events based on activity code hash
-val eventColors = listOf(
-    Color(0xFF7E57C2), // Purple
-    Color(0xFFE91E63), // Pink
-    Color(0xFF4CAF50), // Green
-    Color(0xFF2196F3), // Blue
-    Color(0xFFFF9800), // Orange
-    Color(0xFF00BCD4), // Cyan
-    Color(0xFF795548), // Brown
-    Color(0xFF607D8B), // Blue Grey
-    Color(0xFFF44336), // Red
-    Color(0xFF8BC34A), // Light Green
-)
 
 /**
  * Get a consistent color for an event based on its activity code
  */
+@Composable
 fun AgendaEntry.getColor(): Color {
-    val index = kotlin.math.abs(activityCode.hashCode()) % eventColors.size
-    return eventColors[index]
+    val bucket = LocalCustomColorsPalette.current.calendarBucket
+    val index = kotlin.math.abs(activityCode.hashCode()) % bucket.size
+    return bucket[index]
 }
 
 /**
