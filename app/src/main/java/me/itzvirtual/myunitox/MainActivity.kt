@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material3.Icon
@@ -34,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import me.itzvirtual.myunitox.ui.LocaleHelper
+import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
 import me.itzvirtual.myunitox.ui.devtools.DevtoolsScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
@@ -161,6 +163,10 @@ fun MyUniTOXApp(onSessionExpired: () -> Unit = {}) {
                     modifier = Modifier.padding(innerPadding),
                 )
 
+                AppDestinations.CALENDAR -> AgendaScreen(
+                    modifier = Modifier.padding(innerPadding)
+                )
+
                 AppDestinations.PROFILE -> HomeScreen(
                     modifier = Modifier.padding(innerPadding)
                 )
@@ -179,5 +185,6 @@ enum class AppDestinations(
 ) {
     HOME("Home", Icons.Default.Home),
     PROFILE("Profile", Icons.Default.AccountBox),
+    CALENDAR("Calendar", Icons.Default.CalendarToday),
     DEVTOOLS("Dev", Icons.Default.LogoDev),
 }

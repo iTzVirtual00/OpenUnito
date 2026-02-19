@@ -1,10 +1,15 @@
 package me.itzvirtual.myunitox.data.remote
 
+import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.DashboardDataResponse
 import me.itzvirtual.myunitox.data.models.ExamDate
 import me.itzvirtual.myunitox.data.models.ExamGrade
 import me.itzvirtual.myunitox.data.models.ExamResult
+import me.itzvirtual.myunitox.data.models.PublicAgendaRequest
+import okhttp3.RequestBody
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -38,4 +43,7 @@ interface UnitoAPI {
         @Path("gradeId") gradeId: String,
         @Query("presaVisione") gradeStatus: String
     ): ExamResult
+
+    @POST("https://unito.prod.up.cineca.it/api/Impegni/getImpegniCalendarioPubblico")
+    suspend fun getPublicAgenda(@Body body: PublicAgendaRequest): List<AgendaEntry>
 }

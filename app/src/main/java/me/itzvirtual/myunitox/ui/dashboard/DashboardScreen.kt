@@ -119,15 +119,15 @@ fun DashboardScreenPreview() {
                                 "22/01/2026",
                                 9,
                                 "07/02/2026 23:59:59",
-                                "30L",
-                                GradeStatus.NOT_TOUCHED,
+                                "30",
+                                GradeStatus.VIEWED,
                                 GradeResult(
-                                    passed = true,
+                                    passed = false,
                                     grade = "30",
                                     isAbsent = false,
                                     isWithdrawn = false,
-                                    canAccept = true,
-                                    canReject = true,
+                                    canAccept = false,
+                                    canReject = false,
                                 ),
                             ),
                         ),
@@ -225,7 +225,7 @@ fun DashboardScreen(state: DashboardUiState, modifier: Modifier) {
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
+        item(key="test") {
             Text(
                 text = stringResource(R.string.credits_section_title),
                 modifier = Modifier.padding(16.dp),
@@ -707,19 +707,18 @@ fun GradeWrapper(result: ExamResult) {
 
             ) {
                 Text(
-                    text = result.gradeResult.grade.let {
-                        return@let when {
-//                            result.gradeResult.value == "0" -> grade.status
-                            result.gradeResult.laude -> "${it}L"
-                            else -> it
+                    text = result.gradeResult.run {
+                        when {
+                            !passed && grade=="0" -> "X"
+                            laude -> "${grade}L"
+                            else -> grade
                         }
                     },
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.tertiary.let {
-                        when (result.status) {
-                            GradeStatus.NOT_TOUCHED -> it.copy(alpha = 0f)
-                            else -> it
-                        }
+                    color = when {
+                        result.status == GradeStatus.NOT_TOUCHED -> Color.Transparent
+                        !result.gradeResult.passed -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.tertiary
                     },
                     fontWeight = FontWeight.ExtraBold
                 )

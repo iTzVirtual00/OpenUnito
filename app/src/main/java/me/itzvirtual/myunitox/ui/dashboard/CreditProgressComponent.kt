@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,35 +48,32 @@ fun CreditProgressIndicator(
     val creditProgress = credits.toFloat() / totalCredits
     val plannedCreditProgress = plannedCredits.toFloat() / totalCredits
 
-    var targetProgress by remember { mutableFloatStateOf(if (animate) 0f else creditProgress) }
-    var targetPlanned by remember { mutableFloatStateOf(if (animate) 0f else plannedCreditProgress) }
+    var animationPlayed by rememberSaveable { mutableStateOf(false) }
+    val playAnimation = animate && !animationPlayed
+
+    var targetProgress by remember { mutableFloatStateOf(if (playAnimation) 0f else creditProgress) }
+    var targetPlanned by remember { mutableFloatStateOf(if (playAnimation) 0f else plannedCreditProgress) }
+
 
     LaunchedEffect(Unit) {
-        if (animate) {
+        if (playAnimation) {
             targetProgress = creditProgress
             targetPlanned = plannedCreditProgress
+            animationPlayed = true
         }
     }
 
-    val currentCreditProgress = if (animate) {
-        animateFloatAsState(
-            targetValue = targetProgress,
-            animationSpec = tween(durationMillis = 1000, delayMillis = 300),
-            label = "cfu"
-        ).value
-    } else {
-        creditProgress
-    }
+    val currentCreditProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 1000, delayMillis = 300),
+        label = "cfu"
+    )
 
-    val currentPlannedCreditProgress = if (animate) {
-        animateFloatAsState(
-            targetValue = targetPlanned,
-            animationSpec = tween(durationMillis = 1000),
-            label = "plannedCfu"
-        ).value
-    } else {
-        plannedCreditProgress
-    }
+    val currentPlannedCreditProgress by animateFloatAsState(
+        targetValue = targetPlanned,
+        animationSpec = tween(durationMillis = 1000),
+        label = "plannedCfu"
+    )
 
     Box(
         modifier = modifier,
