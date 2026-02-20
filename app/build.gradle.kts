@@ -21,8 +21,8 @@ android {
         applicationId = "me.itzvirtual.myunitox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 4
+        versionName = "v0.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +35,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
+            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
         }
     }
     compileOptions {
@@ -44,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -91,4 +94,32 @@ dependencies {
 
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.compose.material.icons.extended)
+}
+
+// Generate version.json alongside the release APK
+tasks.register("generateVersionJson") {
+    doLast {
+        val versionCode = android.defaultConfig.versionCode
+        val versionName = android.defaultConfig.versionName
+        val outputDir = layout.buildDirectory.dir("../release").get().asFile
+
+        outputDir.mkdirs()
+
+        val versionJson = File(outputDir, "version.json")
+        versionJson.writeText("""
+            {
+                "versionCode": $versionCode,
+                "versionName": "v$versionName"
+            }
+        """.trimIndent())
+
+        println("Generated version.json: versionCode=$versionCode, versionName=$versionName")
+    }
+}
+
+// Hook the task to run after assembleRelease
+tasks.whenTaskAdded {
+    if (name == "assembleRelease") {
+        finalizedBy("generateVersionJson")
+    }
 }

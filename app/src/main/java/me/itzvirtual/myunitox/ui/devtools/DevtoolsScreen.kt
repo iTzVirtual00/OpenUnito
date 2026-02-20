@@ -1,5 +1,5 @@
 package me.itzvirtual.myunitox.ui.devtools
-
+import  me.itzvirtual.myunitox.BuildConfig
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,8 +32,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.util.restartApp
+import java.io.File
 
 
 data class DevtoolsActions(
@@ -86,8 +91,6 @@ fun DevtoolsPreview() {
 
 @Composable
 fun DevtoolsContent(modifier: Modifier = Modifier) {
-    var tokenInput by remember { mutableStateOf("") }
-    val actions = LocalDevtoolsActions.current
 
     Scaffold(modifier = modifier) { innerPadding ->
         Column(
@@ -97,56 +100,181 @@ fun DevtoolsContent(modifier: Modifier = Modifier) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+            AuthDebuggerCard()
+            UpdateCard()
+        }
+    }
+}
+@Composable
+fun AuthDebuggerCard() {
+    var tokenInput by remember { mutableStateOf("") }
+    val actions = LocalDevtoolsActions.current
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Authentication Debugger",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            OutlinedTextField(
+                value = tokenInput,
+                onValueChange = { input ->
+                    tokenInput = input.filter { it != '\n' && it != '\r' } // really Android?
+                },
+                label = { Text("setToken") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true, // UI only :(
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Secondary button for copying
+                TextButton(onClick = { actions.copyToken() }) {
+                    Text("Copy Current")
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Button(onClick = { actions.setToken(tokenInput) }) {
+                    Text("Set Token")
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    onClick = { actions.clearToken() }) {
+                    Text("Clear")
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun UpdateCard() {
+    val context = LocalContext.current
+    val updater = remember { HTTPUpdater(context) }
+    val currentVersionCode = BuildConfig.VERSION_CODE
+    val currentVersionName = BuildConfig.VERSION_NAME
+
+    var updateStatus by remember { mutableStateOf("No updates checked") }
+    var availableVersion by remember { mutableStateOf<VersionInfo?>(null) }
+    var downloadedFile by remember { mutableStateOf<File?>(null) }
+    var isChecking by remember { mutableStateOf(false) }
+    var isDownloading by remember { mutableStateOf(false) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
+
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Updater",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "Current: v$currentVersionName (Code: $currentVersionCode)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "Status: $updateStatus",
+                style = MaterialTheme.typography.bodySmall, // i feel smart
+                color = MaterialTheme.colorScheme.onSurfaceVariant // i fill smart pt2
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        isChecking = true
+                        updateStatus = "Checking for updates..."
+                        CoroutineScope(Dispatchers.Main).launch {
+                            when (val result = updater.checkForUpdates(currentVersionCode)) {
+                                is UpdateCheckResult.UpdateAvailable -> {
+                                    availableVersion = result.versionInfo
+                                    updateStatus = "Update available: ${result.versionInfo.versionName} (Code: ${result.versionInfo.versionCode})"
+                                }
+                                is UpdateCheckResult.NoUpdateAvailable -> {
+                                    availableVersion = null
+                                    updateStatus = "You're up to date!"
+                                }
+                                is UpdateCheckResult.Error -> {
+                                    availableVersion = null
+                                    updateStatus = "Error: ${result.message}"
+                                }
+                            }
+                            isChecking = false
+                        }
+                    },
+                    enabled = !isChecking && !isDownloading
                 ) {
-                    Text(
-                        text = "Authentication Debugger",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Text(if (isChecking) "Checking..." else "Check")
+                }
 
-                    OutlinedTextField(
-                        value = tokenInput,
-                        onValueChange = { input ->
-                            tokenInput = input.filter { it != '\n' && it != '\r' } // really Android?
+                // Download Button
+                if (availableVersion != null && downloadedFile == null) {
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            isDownloading = true
+                            downloadProgress = 0f
+                            updateStatus = "Downloading..."
+                            CoroutineScope(Dispatchers.Main).launch {
+                                downloadedFile = updater.downloadApk { progress ->
+                                    downloadProgress = progress
+                                }
+                                isDownloading = false
+                                updateStatus = if (downloadedFile != null) {
+                                    "Download complete! Ready to install"
+                                } else {
+                                    "Download failed"
+                                }
+                                updater.triggerInstallation(downloadedFile!!)
+                            }
                         },
-                        label = { Text("setToken") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true, // UI only :(
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
+                        enabled = !isDownloading
                     ) {
-                        // Secondary button for copying
-                        TextButton(onClick = { actions.copyToken() }) {
-                            Text("Copy Current")
-                        }
+                        Text(
+                            if (isDownloading) "Downloading ${(downloadProgress * 100).toInt()}%"
+                            else "Download"
+                        )
+                    }
+                }
 
-                        Spacer(Modifier.width(8.dp))
-
-                        Button(onClick = { actions.setToken(tokenInput) }) {
-                            Text("Set Token")
-                        }
-
-                        Spacer(Modifier.width(8.dp))
-
-                        Button(
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            onClick = { actions.clearToken() }) {
-                            Text("Clear")
-                        }
+                // Install Button
+                if (downloadedFile != null) {
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = { updater.triggerInstallation(downloadedFile!!) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text("Install")
                     }
                 }
             }
         }
     }
 }
+

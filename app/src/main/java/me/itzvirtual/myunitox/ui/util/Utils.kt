@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -49,8 +50,10 @@ import java.util.Locale
 @Composable
 fun LoadingIconItem(modifier: Modifier) {
     Box(contentAlignment = Alignment.Center) {
-        LoadingIndicator(modifier = Modifier
-            .fillMaxWidth().then(modifier),
+        LoadingIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(modifier),
         )
     }
 }
@@ -218,3 +221,4 @@ fun restartApp(context: Context) {
     context.startActivity(mainIntent)
     Runtime.getRuntime().exit(0)
 }
+
