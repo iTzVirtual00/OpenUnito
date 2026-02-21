@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

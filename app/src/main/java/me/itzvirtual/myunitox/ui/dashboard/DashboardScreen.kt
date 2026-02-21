@@ -87,6 +87,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.data.models.ActivityType
+import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.Building
 import me.itzvirtual.myunitox.data.models.ExamGrade
 import me.itzvirtual.myunitox.data.models.ExamResult
@@ -109,6 +110,7 @@ import me.itzvirtual.myunitox.ui.util.parseDate
 import me.itzvirtual.myunitox.ui.util.shimmerEffect
 import me.itzvirtual.myunitox.ui.util.toClipEntry
 import me.itzvirtual.myunitox.ui.util.toColor
+import java.time.Instant
 import java.util.Date
 
 
@@ -263,6 +265,88 @@ fun DashboardScreenPreview() {
                         isLoading = false,
                         errorMessage = null
                     ),
+                    nearestAgenda = NearestAgendaData(
+                        entry = AgendaEntry(
+                            id = "1",
+                            title = "Programmazione II",
+                            startDateTime = java.time.Instant.now().minusSeconds(1800), // Started 30 min ago
+                            endDateTime = java.time.Instant.now().plusSeconds(3600), // Ends in 1 hour
+                            activityCode = "INF0123",
+                            courseYear = 1,
+                            status = "P",
+                            rooms = listOf(
+                                Room(
+                                    id = "r1",
+                                    code = "AULA_A",
+                                    name = "Aula A",
+                                    building = Building(
+                                        id = "b1",
+                                        name = "Dip. Informatica"
+                                    )
+                                )
+                            ),
+                            professors = listOf(
+                                Professor("p1", "Mario", "Rossi")
+                            ),
+                            activityType = ActivityType("LEZ", "Lezione")
+                        ),
+                        isInProgress = true,
+                        isLoading = false
+                    ),
+                    nextDayPlan = NextDayPlanData(
+                        entries = listOf(
+                            AgendaEntry(
+                                id = "1",
+                                title = "Programmazione II",
+                                startDateTime = java.time.Instant.parse("2026-02-22T09:00:00Z"),
+                                endDateTime = java.time.Instant.parse("2026-02-22T11:00:00Z"),
+                                activityCode = "INF0123",
+                                courseYear = 1,
+                                status = "P",
+                                rooms = listOf(
+                                    Room(
+                                        id = "r1",
+                                        code = "AULA_A",
+                                        name = "Aula A",
+                                        building = Building(
+                                            id = "b1",
+                                            name = "Dip. Informatica"
+                                        )
+                                    )
+                                ),
+                                professors = listOf(
+                                    Professor("p1", "Mario", "Rossi")
+                                ),
+                                activityType = ActivityType("LEZ", "Lezione")
+                            ),
+                            AgendaEntry(
+                                id = "2",
+                                title = "Analisi Matematica",
+                                startDateTime = Instant.parse("2026-02-22T14:00:00Z"),
+                                endDateTime = Instant.parse("2026-02-22T16:00:00Z"),
+                                activityCode = "MAT0456",
+                                courseYear = 1,
+                                status = "P",
+                                rooms = listOf(
+                                    Room(
+                                        id = "r2",
+                                        code = "AULA_B",
+                                        name = "Aula B",
+                                        building = Building(
+                                            id = "b1",
+                                            name = "Dip. Matematica"
+                                        )
+                                    )
+                                ),
+                                professors = listOf(
+                                    Professor("p2", "Luigi", "Verdi")
+                                ),
+                                activityType = ActivityType("LEZ", "Lezione"),
+                                isRemote = true
+                            )
+                        ),
+                        isLoading = false
+                    ),
                     isLoading = false,
                 ),
                 modifier = Modifier.padding(innerPadding)
@@ -312,6 +396,26 @@ fun DashboardScreen(state: DashboardUiState, modifier: Modifier) {
         item(key = "student_info") {
             StudentInfoSection(state.studentInfo)
         }
+        item(key = "nearest_agenda") {
+            Text(
+                text = stringResource(R.string.nearest_agenda_title),
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            NearestAgendaSection(state.nearestAgenda)
+        }
+        item(key = "next_day_plan") {
+            Text(
+                text = stringResource(R.string.next_day_plan_title),
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            NextDayPlanSection(state.nextDayPlan)
+        }
         item {
             Text(
                 text = stringResource(R.string.credits_section_title),
@@ -345,6 +449,135 @@ fun DashboardScreen(state: DashboardUiState, modifier: Modifier) {
         }
     }
 }
+
+
+@Composable
+fun CreditsSection(state: DashboardData) {
+    val data = state.dashboardData
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .height(IntrinsicSize.Min), // grow based on content
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Surface(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (state.isLoading) {
+                    LoadingIconItem(Modifier.height(72.dp))
+                } else if (state.errorMessage != null) {
+                    ErrorItem(state.errorMessage)
+                } else {
+                    data!!
+                    val stats = state.dashboardData.stats
+                    Box(
+                        modifier = Modifier.padding(20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CreditProgressIndicator(
+                            modifier = Modifier.size(100.dp),
+                            credits = stats.creditsGained.toInt(),
+                            totalCredits = stats.totalCredits,
+                            plannedCredits = stats.totalPlanCredits,
+                            progressColor = MaterialTheme.colorScheme.primary,
+                            plannedProgressColor = MaterialTheme.colorScheme.primary,
+                            backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                    }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+            ) {
+                if (state.isLoading) {
+                    LoadingShimmerItem()
+                } else if (state.errorMessage != null) {
+                    ErrorItem(state.errorMessage)
+                } else {
+                    val stats = data!!.stats
+                    val yearlyProgress = stats.creditsGained.toFloat() / stats.totalPlanCredits
+                    YearlyProgressCard(
+                        title = stringResource(R.string.yearly_progress_title),
+                        current = stats.creditsGained.toInt(),
+                        total = stats.totalPlanCredits,
+                        progress = yearlyProgress
+                    )
+                }
+            }
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (state.isLoading) {
+                    LoadingShimmerItem()
+                } else if (state.errorMessage != null) {
+                    ErrorItem(state.errorMessage)
+                } else {
+                    val stats = data!!.stats
+                    Text(
+                        text = stringResource(
+                            R.string.remaining_cfu_title,
+                            stats.totalCredits - stats.creditsGained.toInt()
+                        ),
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun YearlyProgressCard(
+    title: String,
+    current: Int,
+    total: Int,
+    progress: Float
+) {
+    Column(modifier = Modifier.padding(12.dp)) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            strokeCap = StrokeCap.Round
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "$current / $total CFU",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+
+
 
 @Composable
 fun ExamResultsSection(state: ExamResultData) {
@@ -1140,92 +1373,236 @@ private fun CopyableText(
     }
 }
 
+
+
 @Composable
-fun CreditsSection(state: DashboardData) {
-    val data = state.dashboardData
-    Row(
+fun NearestAgendaSection(state: NearestAgendaData) {
+    val cornerRadius = 16.dp
+
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .height(IntrinsicSize.Min), // grow based on content
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(8.dp),
+        shape = RoundedCornerShape(cornerRadius),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Surface(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (state.isLoading) {
-                    LoadingIconItem(Modifier.height(72.dp))
-                } else if (state.errorMessage != null) {
-                    ErrorItem(state.errorMessage)
-                } else {
-                    data!!
-                    val stats = state.dashboardData.stats
-                    Box(
-                        modifier = Modifier.padding(20.dp),
-                        contentAlignment = Alignment.Center
+            if (state.isLoading) {
+                LoadingShimmerItem()
+            } else if (state.errorMessage != null) {
+                ErrorItem(state.errorMessage)
+            } else if (state.entry == null) {
+                Text(
+                    text = stringResource(R.string.no_upcoming_events),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                // Status indicator
+                if (state.isInProgress) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.errorContainer
                     ) {
-                        CreditProgressIndicator(
-                            modifier = Modifier.size(100.dp),
-                            credits = stats.creditsGained.toInt(),
-                            totalCredits = stats.totalCredits,
-                            plannedCredits = stats.totalPlanCredits,
-                            progressColor = MaterialTheme.colorScheme.primary,
-                            plannedProgressColor = MaterialTheme.colorScheme.primary,
-                            backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            // Pulsing dot
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.error,
+                                        shape = RoundedCornerShape(50)
+                                    )
+                            )
+                            Text(
+                                text = stringResource(R.string.in_progress),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                AgendaEntryCard(
+                    entry = state.entry,
+                    isHighlighted = true,
+                    isInProgress = state.isInProgress
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NextDayPlanSection(state: NextDayPlanData) {
+    val cornerRadius = 16.dp
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(cornerRadius),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (state.isLoading) {
+                LoadingShimmerItem()
+            } else if (state.errorMessage != null) {
+                ErrorItem(state.errorMessage)
+            } else if (state.entries.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_agenda_tomorrow),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                state.entries.forEach { entry ->
+                    AgendaEntryCard(entry = entry)
                 }
             }
         }
+    }
+}
 
+@Composable
+private fun AgendaEntryCard(
+    entry: AgendaEntry,
+    isHighlighted: Boolean = false,
+    isInProgress: Boolean = false
+) {
+    val backgroundColor = when {
+        isInProgress -> MaterialTheme.colorScheme.errorContainer
+        isHighlighted -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+    }
+
+    val contentColor = when {
+        isInProgress -> MaterialTheme.colorScheme.onErrorContainer
+        isHighlighted -> MaterialTheme.colorScheme.onPrimaryContainer
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = backgroundColor
+    ) {
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
         ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+            // Title and Activity Type
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                if (state.isLoading) {
-                    LoadingShimmerItem()
-                } else if (state.errorMessage != null) {
-                    ErrorItem(state.errorMessage)
-                } else {
-                    val stats = data!!.stats
-                    val yearlyProgress = stats.creditsGained.toFloat() / stats.totalPlanCredits
-                    YearlyProgressCard(
-                        title = stringResource(R.string.yearly_progress_title),
-                        current = stats.creditsGained.toInt(),
-                        total = stats.totalPlanCredits,
-                        progress = yearlyProgress
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = entry.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor
+                    )
+                    Text(
+                        text = entry.activityType.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.7f)
+                    )
+                }
+
+                // Time badge
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        isInProgress -> MaterialTheme.colorScheme.error
+                        isHighlighted -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.secondaryContainer
+                    }
+                ) {
+                    Text(
+                        text = formatTime(entry.startDateTime) + " - " + formatTime(entry.endDateTime),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            isInProgress -> MaterialTheme.colorScheme.onError
+                            isHighlighted -> MaterialTheme.colorScheme.onPrimary
+                            else -> MaterialTheme.colorScheme.onSecondaryContainer
+                        }
                     )
                 }
             }
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (state.isLoading) {
-                    LoadingShimmerItem()
-                } else if (state.errorMessage != null) {
-                    ErrorItem(state.errorMessage)
-                } else {
-                    val stats = data!!.stats
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Room info
+            if (entry.rooms.isNotEmpty()) {
+                val room = entry.rooms.first()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = stringResource(
-                            R.string.remaining_cfu_title,
-                            stats.totalCredits - stats.creditsGained.toInt()
-                        ),
-                        modifier = Modifier.padding(12.dp),
+                        text = "📍",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = room.name + (room.building?.let { " • ${it.name}" } ?: ""),
                         style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
+                        color = contentColor.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            // Professors
+            if (entry.professors.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "👤",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = entry.professors.joinToString(", ") { it.fullName },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColor.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
+            // Remote indicator
+            if (entry.isRemote) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer
+                ) {
+                    Text(
+                        text = stringResource(R.string.remote_class),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
             }
@@ -1234,35 +1611,8 @@ fun CreditsSection(state: DashboardData) {
 }
 
 @Composable
-fun YearlyProgressCard(
-    title: String,
-    current: Int,
-    total: Int,
-    progress: Float
-) {
-    Column(modifier = Modifier.padding(12.dp)) {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            strokeCap = StrokeCap.Round
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "$current / $total CFU",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-    }
+private fun formatTime(instant: java.time.Instant): String {
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+        .withZone(java.time.ZoneId.systemDefault())
+    return formatter.format(instant)
 }
-
-

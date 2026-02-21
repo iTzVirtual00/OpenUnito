@@ -6,10 +6,12 @@ import android.util.Base64
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.net.InetAddress
 import java.security.KeyStore
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -34,13 +36,10 @@ sealed class UpdateCheckResult {
 
 class HTTPUpdater(private val context: Context) {
     companion object {
-        // TODO: Replace with your webhook URL and credentials
         private const val WEBHOOK_BASE_URL = "REDACTED_WEBHOOK_URL"
         private const val USERNAME = "REDACTED_USERNAME"
         private const val PASSWORD = "REDACTED_PASSWORD"
 
-        // Custom CA certificate in PEM format
-        // TODO: Replace with your actual CA certificate
         private const val CUSTOM_CA_CERT = """
 REDACTED_CA_CERT
 """
@@ -50,36 +49,65 @@ REDACTED_CA_CERT
         createClientWithCustomCA()
     }
 
+    // system cas OR custom ca
     private fun createClientWithCustomCA(): OkHttpClient {
         return try {
             // Load the custom CA certificate
             val certificateFactory = CertificateFactory.getInstance("X.509")
             val caInputStream = ByteArrayInputStream(CUSTOM_CA_CERT.trimIndent().toByteArray())
-            val ca = certificateFactory.generateCertificate(caInputStream) as X509Certificate
+            val customCa = certificateFactory.generateCertificate(caInputStream) as X509Certificate
             caInputStream.close()
 
-            // Create a KeyStore containing the CA
-            val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-            keyStore.load(null, null)
-            keyStore.setCertificateEntry("custom-ca", ca)
+            val defaultTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            defaultTrustManagerFactory.init(null as KeyStore?) // null = use system default
+            val defaultTrustManager = defaultTrustManagerFactory.trustManagers
+                .filterIsInstance<X509TrustManager>()
+                .first()
 
-            // Create a TrustManager that trusts the CA
-            val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-            trustManagerFactory.init(keyStore)
+            // Create a KeyStore containing the custom CA
+            val customKeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+            customKeyStore.load(null, null)
+            customKeyStore.setCertificateEntry("custom-ca", customCa)
 
-            val trustManagers = trustManagerFactory.trustManagers
-            val x509TrustManager = trustManagers[0] as X509TrustManager
+            // Create a TrustManager for the custom CA
+            val customTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            customTrustManagerFactory.init(customKeyStore)
+            val customTrustManager = customTrustManagerFactory.trustManagers
+                .filterIsInstance<X509TrustManager>()
+                .first()
 
-            // Create an SSLContext with the TrustManager
+            // Create a composite TrustManager that trusts both system and custom CA
+            val compositeTrustManager = object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                    try {
+                        defaultTrustManager.checkClientTrusted(chain, authType)
+                    } catch (e: Exception) {
+                        customTrustManager.checkClientTrusted(chain, authType)
+                    }
+                }
+
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                    try {
+                        defaultTrustManager.checkServerTrusted(chain, authType)
+                    } catch (e: Exception) {
+                        customTrustManager.checkServerTrusted(chain, authType)
+                    }
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                    return defaultTrustManager.acceptedIssuers + customTrustManager.acceptedIssuers
+                }
+            }
+
+            // Create an SSLContext with the composite TrustManager
             val sslContext = SSLContext.getInstance("TLS")
-            sslContext.init(null, trustManagers, null)
+            sslContext.init(null, arrayOf(compositeTrustManager), null)
 
             OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+                .sslSocketFactory(sslContext.socketFactory, compositeTrustManager)
                 .build()
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback to default client if CA setup fails
             OkHttpClient()
         }
     }
@@ -94,6 +122,7 @@ REDACTED_CA_CERT
         val url = "$WEBHOOK_BASE_URL?file=$fileName"
         return Request.Builder()
             .url(url)
+
             .addHeader("Authorization", createBasicAuthHeader())
             .build()
     }

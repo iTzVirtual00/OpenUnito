@@ -4,6 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import me.itzvirtual.myunitox.data.remote.InstantIsoSerializer
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Serializable
 data class AgendaEntry(
@@ -29,7 +31,13 @@ data class AgendaEntry(
 
     @SerialName("teledidattica") val isRemote: Boolean = false,
     @SerialName("indisponibilita") val isUnavailable: Boolean = false
-)
+) {
+    fun isToday(): Boolean {
+        val today = LocalDate.now()
+        val entryDate = startDateTime.atZone(ZoneId.systemDefault()).toLocalDate()
+        return entryDate == today
+    }
+}
 
 @Serializable
 data class Room(

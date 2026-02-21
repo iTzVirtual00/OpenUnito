@@ -25,4 +25,18 @@
     <string name="normativa_label">Normativa</string>
     <string name="percorso_label">Percorso</string>
     <string name="copied_label">Copiato!</string>
+
+    <!-- Agenda Section -->
+    <string name="nearest_agenda_title">In Arrivo</string>
+    <string name="next_day_plan_title">Programma di Domani</string>
+    <string name="no_agenda_tomorrow">Nessuna lezione programmata per domani</string>
+    <string name="no_upcoming_events">Nessun evento in programma</string>
+    <string name="in_progress">In Corso</string>
+    <string name="remote_class">Online</string>
+    <string name="good_morning">Buongiorno</string>
+    <string name="good_afternoon">Buon pomeriggio</string>
+    <string name="good_evening">Buonasera</string>
+    <string name="todays_classes_title">Lezioni di oggi</string>
+    <string name="open_schedule">Calendario</string>
+    <string name="no_classes_today">Nessuna lezione oggi</string>
 </resources>

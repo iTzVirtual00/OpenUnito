@@ -1,7 +1,6 @@
 package me.itzvirtual.myunitox.ui.dashboard
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +16,8 @@ import me.itzvirtual.myunitox.data.models.ExamGrade
 import me.itzvirtual.myunitox.data.models.ExamResult
 import me.itzvirtual.myunitox.data.models.GradeResult
 import me.itzvirtual.myunitox.data.models.GradeStatus
+import me.itzvirtual.myunitox.data.models.AgendaEntry
+import me.itzvirtual.myunitox.data.repository.AgendaRepository
 import me.itzvirtual.myunitox.data.repository.DashboardDataRepository
 import me.itzvirtual.myunitox.data.repository.ExamResultRepository
 import me.itzvirtual.myunitox.data.repository.GradeRepository
@@ -48,11 +49,26 @@ data class ExamGradeData(
     val errorMessage: String? = null,
 )
 
+data class NearestAgendaData(
+    val entry: AgendaEntry? = null,
+    val isInProgress: Boolean = false,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+)
+
+data class NextDayPlanData(
+    val entries: List<AgendaEntry> = emptyList(),
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+)
+
 data class DashboardUiState(
     val studentInfo: StudentInfo = StudentInfo(),
     val dashboardData: DashboardData = DashboardData(),
     val examResultsData: ExamResultData = ExamResultData(),
     val examGradesData: ExamGradeData = ExamGradeData(),
+    val nearestAgenda: NearestAgendaData = NearestAgendaData(),
+    val nextDayPlan: NextDayPlanData = NextDayPlanData(),
     val isLoading: Boolean = true,
 )
 
@@ -63,6 +79,7 @@ class DashboardViewModel @Inject constructor(
     private val dashboardDataRepo: DashboardDataRepository,
     private val examResultRepo: ExamResultRepository,
     private val examGradeRepository: GradeRepository,
+    private val agendaRepository: AgendaRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -171,8 +188,58 @@ class DashboardViewModel @Inject constructor(
                 }
             }
 
+            // Agenda: fetch today + tomorrow, show in-progress or nearest event
+            val agendaJob = launch {
+                agendaRepository.fetchTodayAndTomorrowAgenda().onSuccess { entries ->
+                    val now = java.time.Instant.now()
+                    val currentOrNearest = agendaRepository.getCurrentOrNearestEntry(entries)
 
-            joinAll(examResultJob, dashboardDataJob, examGradesJob)
+                    // Check if the entry is currently in progress
+                    val isInProgress = currentOrNearest?.let { entry ->
+                        now >= entry.startDateTime && now <= entry.endDateTime
+                    } ?: false
+
+                    // Tomorrow's entries for the next day plan
+                    val tomorrow = java.time.LocalDate.now().plusDays(1)
+                    val tomorrowEntries = entries.filter { entry ->
+                        val entryDate = entry.startDateTime
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                        entryDate == tomorrow
+                    }
+
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            nearestAgenda = currentState.nearestAgenda.copy(
+                                entry = currentOrNearest,
+                                isInProgress = isInProgress,
+                                isLoading = false
+                            ),
+                            nextDayPlan = currentState.nextDayPlan.copy(
+                                entries = tomorrowEntries,
+                                isLoading = false
+                            )
+                        )
+                    }
+                }.onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            nearestAgenda = it.nearestAgenda.copy(
+                                isLoading = false,
+                                errorMessage = error.message
+                            ),
+                            nextDayPlan = it.nextDayPlan.copy(
+                                isLoading = false,
+                                errorMessage = error.message
+                            )
+                        )
+                    }
+                    Log.e("DashboardViewModel", "Error fetching agenda", error)
+                }
+            }
+
+
+            joinAll(examResultJob, dashboardDataJob, examGradesJob, agendaJob)
             _uiState.update { it.copy(isLoading = false) }
         }
     }

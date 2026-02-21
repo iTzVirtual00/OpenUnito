@@ -1,62 +1,100 @@
 package me.itzvirtual.myunitox.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import me.itzvirtual.myunitox.data.repository.ExamResultRepository
 import kotlinx.coroutines.flow.asStateFlow
-import me.itzvirtual.myunitox.data.models.ExamDate
-import me.itzvirtual.myunitox.data.models.ExamResult
-import me.itzvirtual.myunitox.data.repository.ExamDateRepository
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.models.AgendaEntry
+import me.itzvirtual.myunitox.data.models.StudentData
+import me.itzvirtual.myunitox.data.repository.AgendaRepository
+import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import javax.inject.Inject
 
-
-data class HomeUiState(
-    val examResults: List<ExamResult> = emptyList(),
-    val examDates: List<ExamDate> = emptyList(),
+data class TodaysClassesState(
+    val todaysClasses: List<AgendaEntry> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
+data class StudentDataState(
+    val studentData: StudentData? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+)
+
+data class UiState(
+    val studentDataState: StudentDataState = StudentDataState(),
+    val todaysClassesState: TodaysClassesState = TodaysClassesState(),
+)
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val examResultRepo: ExamResultRepository,
-    private val examDatesRepo: ExamDateRepository
+    private val studentDataRepo: StudentDataRepository,
+    private val agendaRepo: AgendaRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadDashboardData()
+        fetch()
     }
 
-    private fun loadDashboardData() {
+    private fun fetch() {
         viewModelScope.launch {
-            val examsResultsDeferred = async { examResultRepo.fetchExamResults() }
-            val examDatesDeferred = async { examDatesRepo.fetchExamDates() }
+            _uiState.update {
+                it.copy(
+                    studentDataState = it.studentDataState.copy(
+                        isLoading = true,
+                        errorMessage = null
+                    ),
+                    todaysClassesState = it.todaysClassesState.copy(
+                        isLoading = true,
+                        errorMessage = null
+                    )
+                )
+            }
+            val studentDataDeferred = async { studentDataRepo.getStudentData() }
+            val agendaDataDeferred = async { agendaRepo.fetchTodayAndTomorrowAgenda() }
 
-            val examsResult = examsResultsDeferred.await().apply {
-                onFailure { error ->
-                    Log.e("UnitoAPI", "Mapping failed for examResult: ${error.message}")
+            val studentData = studentDataDeferred.await() // TODO: handle errors
+
+            _uiState.update {
+                it.copy(
+                    studentDataState = it.studentDataState.copy(
+                        studentData = studentData,
+                        isLoading = false,
+                        errorMessage = null
+                    )
+                )
+            }
+
+            val agendaData = agendaDataDeferred.await()
+
+            agendaData.onSuccess { data ->
+                _uiState.update {
+                    it.copy(
+                        todaysClassesState = it.todaysClassesState.copy(
+                            todaysClasses = data.filter { entry -> entry.isToday() },
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    )
+                }
+            }.onFailure { err ->
+                _uiState.update {
+                    it.copy(
+                        todaysClassesState = it.todaysClassesState.copy(
+                            isLoading = false,
+                            errorMessage = "Failed to load today's classes: ${err.message}"
+                        )
+                    )
                 }
             }
-            val examDates = examDatesDeferred.await().apply {
-                onFailure { error ->
-                    Log.e("UnitoAPI", "Mapping failed for examDates" +
-                            ": ${error.message}")
-                }
-            }
-
-            _uiState.value = HomeUiState(
-                examResults = examsResult.getOrDefault(emptyList()),
-                examDates = examDates.getOrDefault(emptyList()),
-                isLoading = false
-            )
         }
     }
 }

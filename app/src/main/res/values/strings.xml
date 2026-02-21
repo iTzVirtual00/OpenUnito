@@ -27,4 +27,18 @@
     <string name="normativa_label">Framework</string>
     <string name="percorso_label">Track</string>
     <string name="copied_label">Copied!</string>
+
+    <!-- Agenda Section -->
+    <string name="nearest_agenda_title">Coming Up</string>
+    <string name="next_day_plan_title">Tomorrow\'s Schedule</string>
+    <string name="no_agenda_tomorrow">No classes scheduled for tomorrow</string>
+    <string name="no_upcoming_events">No upcoming events</string>
+    <string name="in_progress">In Progress</string>
+    <string name="remote_class">Remote</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="todays_classes_title">Today\'s classes</string>
+    <string name="open_schedule">Open schedule</string>
+    <string name="no_classes_today">No classes today</string>
 </resources>

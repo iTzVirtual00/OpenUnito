@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.agenda
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -30,7 +31,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,6 +66,7 @@ import me.itzvirtual.myunitox.data.models.Professor
 import me.itzvirtual.myunitox.data.models.Room
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
+import me.itzvirtual.myunitox.ui.util.LoadingIconItem
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -132,38 +133,46 @@ fun AgendaScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+        // Always render the Agenda grid
+        Agenda(
+            events = uiState.agendaEntries,
+            modifier = Modifier.fillMaxSize(),
+            initialDate = uiState.selectedStart ?: LocalDate.now(),
+            onWeekChange = { startDate, endDate ->
+                viewModel.loadAgendaForWeek(startDate, endDate)
             }
+        )
 
-            uiState.errorMessage != null -> {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = uiState.errorMessage ?: "Errore sconosciuto",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+        // Loading overlay
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIconItem(modifier = Modifier.size(64.dp))
+            }
+        }
+
+        // Error message overlay
+        if (uiState.errorMessage != null) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.errorContainer,
+                        RoundedCornerShape(12.dp)
                     )
-                }
-            }
-
-            else -> {
-                Agenda(
-                    events = uiState.agendaEntries,
-                    modifier = Modifier.fillMaxSize(),
-                    initialDate = uiState.selectedStart!!,
-                    onWeekChange = { startDate, endDate ->
-                        viewModel.loadAgendaForWeek(startDate, endDate)
-                    }
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = uiState.errorMessage ?: "Errore sconosciuto",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -247,12 +256,19 @@ fun Agenda(
         }
 
         // Event detail overlay
+        // Keep a reference to the event being displayed (for exit animation)
+        var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+        if (selectedEvent != null) {
+            displayedEvent = selectedEvent
+        }
+
         AnimatedVisibility(
             visible = selectedEvent != null,
             enter = slideInVertically(initialOffsetY = { it }),
             exit = slideOutVertically(targetOffsetY = { it })
         ) {
-            selectedEvent?.let { event ->
+            // Use displayedEvent which keeps the last non-null value during exit animation
+            displayedEvent?.let { event ->
                 EventDetailView(
                     event = event,
                     onDismiss = { selectedEvent = null }
@@ -576,10 +592,13 @@ private fun EventCard(
  * Detail view shown when an event is clicked
  */
 @Composable
-private fun EventDetailView(
+internal fun EventDetailView(
     event: AgendaEntry,
     onDismiss: () -> Unit
 ) {
+    // Handle back button press to dismiss the detail view
+    BackHandler(onBack = onDismiss)
+
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ITALIAN) }
 
@@ -785,7 +804,7 @@ private fun EventDetailView(
 }
 
 @Composable
-private fun DetailRow(
+internal fun DetailRow(
     label: String,
     value: String
 ) {

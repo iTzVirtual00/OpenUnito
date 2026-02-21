@@ -38,6 +38,7 @@ import me.itzvirtual.myunitox.ui.LocaleHelper
 import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
 import me.itzvirtual.myunitox.ui.devtools.DevtoolsScreen
+import me.itzvirtual.myunitox.ui.examdates.ExamDatesScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
 import me.itzvirtual.myunitox.ui.login.AuthViewModel
 import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
@@ -159,7 +160,12 @@ fun MyUniTOXApp(onSessionExpired: () -> Unit = {}) {
                 .safeDrawingPadding()
         ) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> DashboardScreen(
+                AppDestinations.HOME -> HomeScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onNavigateToSchedule = { currentDestination = AppDestinations.CALENDAR }
+                )
+
+                AppDestinations.DASHBOARD -> DashboardScreen(
                     modifier = Modifier.padding(innerPadding),
                 )
 
@@ -167,7 +173,7 @@ fun MyUniTOXApp(onSessionExpired: () -> Unit = {}) {
                     modifier = Modifier.padding(innerPadding)
                 )
 
-                AppDestinations.PROFILE -> HomeScreen(
+                AppDestinations.PROFILE -> ExamDatesScreen(
                     modifier = Modifier.padding(innerPadding)
                 )
 
@@ -184,6 +190,7 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
+    DASHBOARD("Old", Icons.Default.Home),
     PROFILE("Profile", Icons.Default.AccountBox),
     CALENDAR("Calendar", Icons.Default.CalendarToday),
     DEVTOOLS("Dev", Icons.Default.LogoDev),

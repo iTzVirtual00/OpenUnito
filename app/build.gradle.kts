@@ -94,6 +94,8 @@ dependencies {
 
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.compose.material.icons.extended)
+
+    implementation(libs.androidx.compose.ui.text.google.fonts)
 }
 
 // Generate version.json alongside the release APK
