@@ -16,4 +16,15 @@
     <string name="grades_section_title">Grades</string>
     <string name="yearly_progress_title">Yearly Progress</string>
     <string name="remaining_cfu_title">%1$d CFU remaining for degree</string>
+
+    <!-- Student Info Section TODO: annotate other strings -->
+    <string name="student_id_label">Student ID</string>
+    <string name="course_year_label">Year</string>
+    <string name="cohort_label">Cohort</string>
+    <string name="regulation_year_label">Regulation</string>
+    <string name="class_label">Class</string>
+    <string name="location_label">Location</string>
+    <string name="normativa_label">Framework</string>
+    <string name="percorso_label">Track</string>
+    <string name="copied_label">Copied!</string>
 </resources>

@@ -11,9 +11,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -51,6 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,8 +71,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,17 +82,24 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
+import me.itzvirtual.myunitox.data.models.ActivityType
+import me.itzvirtual.myunitox.data.models.Building
 import me.itzvirtual.myunitox.data.models.ExamGrade
 import me.itzvirtual.myunitox.data.models.ExamResult
 import me.itzvirtual.myunitox.data.models.GradeResult
 import me.itzvirtual.myunitox.data.models.GradeStatus
+import me.itzvirtual.myunitox.data.models.Professor
+import me.itzvirtual.myunitox.data.models.Room
 import me.itzvirtual.myunitox.data.models.Score
 import me.itzvirtual.myunitox.data.models.dashboardDataSample
-import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
+import me.itzvirtual.myunitox.data.models.StudentCareer
+import me.itzvirtual.myunitox.data.models.StudentData
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.util.AnimatedSymmetricalBorder
 import me.itzvirtual.myunitox.ui.util.ErrorItem
 import me.itzvirtual.myunitox.ui.util.LoadingIconItem
@@ -95,17 +107,52 @@ import me.itzvirtual.myunitox.ui.util.LoadingShimmerItem
 import me.itzvirtual.myunitox.ui.util.formatDate
 import me.itzvirtual.myunitox.ui.util.parseDate
 import me.itzvirtual.myunitox.ui.util.shimmerEffect
+import me.itzvirtual.myunitox.ui.util.toClipEntry
 import me.itzvirtual.myunitox.ui.util.toColor
+import java.util.Date
 
 
 @Composable
 @Preview(locale = "it", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Preview(showBackground = true)
 fun DashboardScreenPreview() {
+    val sampleStudentData = StudentData(
+        userId = 12345,
+        username = "mario.rossi",
+        firstname = "Mario",
+        lastname = "Rossi",
+        careers = listOf(
+            StudentCareer(
+                id = 1,
+                title = "Attivo in Informatica",
+                description = "Corso di Laurea - Informatica",
+                dateStart = Date(),
+                studentId = "1639205",
+                registrationId = 1926481,
+                notes = "Attivo per Trasf. in ingresso",
+                regulationYear = "2025",
+                normativa = "D.M. 270/2004",
+                className = "L-31 R",
+                cohort = "2025",
+                percorsoDes = "PERCORSO GENERICO",
+                sedeDes = "Torino",
+                iscrDes = "Anno corso: 1°",
+                staStuDes = "Attivo",
+                courseYear = 1
+            )
+        ),
+        type = 1
+    )
+
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             DashboardScreen(
                 state = DashboardUiState(
+                    studentInfo = StudentInfo(
+                        studentData = sampleStudentData,
+                        isLoading = false,
+                        errorMessage = null
+                    ),
                     dashboardData = DashboardData(
                         dashboardData = dashboardDataSample,
                         isLoading = false,
@@ -262,7 +309,10 @@ fun DashboardScreen(state: DashboardUiState, modifier: Modifier) {
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item(key="test") {
+        item(key = "student_info") {
+            StudentInfoSection(state.studentInfo)
+        }
+        item {
             Text(
                 text = stringResource(R.string.credits_section_title),
                 modifier = Modifier.padding(16.dp),
@@ -367,7 +417,8 @@ fun ExamResultRow(result: ExamResult) {
 
     var isGradeStatusLoading by remember { mutableStateOf(false) }
     val actions = LocalDashboardActions.current
-    val isGradeEditable = result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED
+    val isGradeEditable =
+        result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED
     val drawerEnabled = !isGradeStatusLoading && isGradeEditable
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -437,7 +488,8 @@ fun ExamResultRow(result: ExamResult) {
             }
 
 
-            val showChroma = (isGradeStatusLoading || result.status == GradeStatus.VIEWED || result.status == GradeStatus.NOT_TOUCHED) && isGradeEditable
+            val showChroma =
+                (isGradeStatusLoading || result.status == GradeStatus.VIEWED || result.status == GradeStatus.NOT_TOUCHED) && isGradeEditable
             // when showChroma
             val infiniteTransition = rememberInfiniteTransition(label = "ChromaMovement")
             val chromaOffset by infiniteTransition.animateFloat(
@@ -463,7 +515,7 @@ fun ExamResultRow(result: ExamResult) {
                     .fillMaxHeight()
                     .weight(sideContent)
                     .drawBehind {
-                        if (showChroma) {3
+                        if (showChroma) {
                             // ai-powered, no idea how this works. also, cool palette gemini!
                             val brush = Brush.linearGradient(
                                 colors = listOf(
@@ -488,7 +540,7 @@ fun ExamResultRow(result: ExamResult) {
         }
 
         var selection by remember(result.status) { mutableStateOf(result.status) }
-        if(selection == GradeStatus.UNKNOWN) selection = result.status
+        if (selection == GradeStatus.UNKNOWN) selection = result.status
         var showDialog by remember { mutableStateOf(false) }
         val haptics = LocalHapticFeedback.current
         val scope = rememberCoroutineScope()
@@ -510,7 +562,7 @@ fun ExamResultRow(result: ExamResult) {
                 text = { Text(selectionText) },
                 confirmButton = {
                     TextButton(onClick = {
-                        if(selection == GradeStatus.UNKNOWN) return@TextButton
+                        if (selection == GradeStatus.UNKNOWN) return@TextButton
                         showDialog = false
                         expanded = false // Close drawer
                         val selectionCopy = selection
@@ -559,7 +611,7 @@ fun ExamResultRow(result: ExamResult) {
             )
 
             val radiusProgress by animateFloatAsState(
-                targetValue = when(selection) {
+                targetValue = when (selection) {
                     GradeStatus.ACCEPTED, GradeStatus.REJECTED -> 1f
                     else -> 0f
                 },
@@ -585,78 +637,6 @@ fun ExamResultRow(result: ExamResult) {
                     .padding(16.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                    // Track the confirmed state (to handle the Apply button's enabled state)
-//                    var lastAppliedSelection by remember { mutableStateOf("ACCEPT") }
-//                    val options = listOf("Accept", "Wait", "Reject")
-//                    val unCheckedIcons = listOf(Icons.Outlined.Check, null, Icons.Filled.Clear)
-//                    val checkedIcons = listOf(Icons.Filled.Check, null, Icons.Filled.Clear)
-//                    var selectedIndex by remember { mutableIntStateOf(0) }
-//
-//
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .safeDrawingPadding()
-//                            .padding(horizontal = 8.dp),
-//                        verticalAlignment = Alignment.CenterVertically // Ensures they are perfectly in line
-//                    ) {
-//                        // 1. Your existing Segmented Group logic
-//                        Row(
-//                            modifier = Modifier.weight(1f), // Group takes available space but allows Spacer to push
-//                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
-//                        ) {
-//                            options.forEachIndexed { index, label ->
-//                                ToggleButton(
-//                                    modifier = Modifier
-//                                        .weight(1f)
-//                                        .semantics { role = Role.RadioButton },
-//                                    checked = selectedIndex == index,
-//                                    onCheckedChange = {
-//                                        selectedIndex = index
-//                                        selection = when (index) {
-//                                            0 -> "ACCEPT"
-//                                            1 -> "WAIT"
-//                                            2 -> "REJECT"
-//                                            else -> "ACCEPT"
-//                                        }
-//                                    },
-//                                    shapes = when (index) {
-//                                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-//                                        options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-//                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-//                                    },
-//                                ) {
-//                                    if (checkedIcons[index] != null || unCheckedIcons[index] != null) {
-//                                        Icon(
-//                                            imageVector = (if (selectedIndex == index) checkedIcons[index] else unCheckedIcons[index])!!,
-//                                            contentDescription = null
-//                                        )
-//                                        Spacer(Modifier.size(ToggleButtonDefaults.IconSpacing))
-//                                    }
-//                                    Text(label)
-//                                }
-//                            }
-//                        }
-//
-//                        // 2. The Spacer that pushes the next item to the right
-//                        // Note: We use a small static width if we want a gap, or weight if we want the right edge
-//                        Spacer(Modifier.width(16.dp))
-//
-//                        // 3. The Circular Apply Button
-//                        Button(
-//                            onClick = {
-//                                if (selection == null) return@Button
-//                                lastAppliedSelection = selection!!
-//                            },
-//                            // Disables if visual selection matches the last confirmed state
-//                            enabled = selection != lastAppliedSelection,
-//                            modifier = Modifier.size(56.dp), // Standard FAB-like size for a circle
-//                            shape = CircleShape,
-//                            contentPadding = PaddingValues(0.dp)
-//                        ) {
-//                            Icon(Icons.Default.Check, contentDescription = "Apply")
-//                        }
-//                    }
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                         val canAccept = result.gradeResult.canAccept
                         val canReject = result.gradeResult.canReject
@@ -666,8 +646,14 @@ fun ExamResultRow(result: ExamResult) {
                             val itemIndex = currentIndex++
                             SegmentedButton(
                                 selected = selection == GradeStatus.ACCEPTED,
-                                onClick = { selection = if(selection==GradeStatus.ACCEPTED) GradeStatus.NOT_TOUCHED else GradeStatus.ACCEPTED },
-                                shape = SegmentedButtonDefaults.itemShape(index = itemIndex, count = totalCount)
+                                onClick = {
+                                    selection =
+                                        if (selection == GradeStatus.ACCEPTED) GradeStatus.NOT_TOUCHED else GradeStatus.ACCEPTED
+                                },
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = itemIndex,
+                                    count = totalCount
+                                )
                             ) { Text("ACCEPT") }
                         }
 
@@ -675,8 +661,14 @@ fun ExamResultRow(result: ExamResult) {
                             val itemIndex = currentIndex++
                             SegmentedButton(
                                 selected = selection == GradeStatus.REJECTED,
-                                onClick = { selection = if(selection==GradeStatus.REJECTED) GradeStatus.NOT_TOUCHED else GradeStatus.REJECTED },
-                                shape = SegmentedButtonDefaults.itemShape(index = itemIndex, count = totalCount)
+                                onClick = {
+                                    selection =
+                                        if (selection == GradeStatus.REJECTED) GradeStatus.NOT_TOUCHED else GradeStatus.REJECTED
+                                },
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = itemIndex,
+                                    count = totalCount
+                                )
                             ) { Text("REJECT") }
                         }
                     }
@@ -746,7 +738,7 @@ fun GradeWrapper(result: ExamResult) {
                 Text(
                     text = result.gradeResult.run {
                         when {
-                            !passed && grade=="0" -> "X"
+                            !passed && grade == "0" -> "X"
                             laude -> "${grade}L"
                             else -> grade
                         }
@@ -880,6 +872,275 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
 
 
 @Composable
+fun StudentInfoSection(state: StudentInfo) {
+    val data = state.studentData
+    val cornerRadius = 16.dp
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        shape = RoundedCornerShape(cornerRadius),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            if (state.isLoading) {
+                LoadingShimmerItem()
+            } else if (state.errorMessage != null) {
+                ErrorItem(state.errorMessage)
+            } else if (data == null) {
+                ErrorItem(stringResource(R.string.no_data), Color.Gray)
+            } else {
+                // Student Name Header
+                Text(
+                    text = "${data.firstname} ${data.lastname}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+//
+//                Text(
+//                    text = "@${data.username}",
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Career Cards
+                data.careers.forEachIndexed { index, career ->
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    StudentCareerCard(career)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StudentCareerCard(career: StudentCareer) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            // Compact Header - Always Visible
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = career.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    CopyableText(
+                        text = career.studentId,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = career.staStuDes,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            // Expanded Details, im starting to love AnimatedVisibility so much
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Description
+                    Text(
+                        text = career.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    if (career.notes.isNotBlank()) {
+                        Text(
+                            text = career.notes,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Career Details Grid
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // Left Column
+                        Column(modifier = Modifier.weight(1f)) {
+                            CareerDetailItem(
+                                label = stringResource(R.string.student_id_label),
+                                value = career.studentId
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.course_year_label),
+                                value = career.courseYear.toString()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.cohort_label),
+                                value = career.cohort
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.normativa_label),
+                                value = career.normativa
+                            )
+                        }
+
+                        // Right Column
+                        Column(modifier = Modifier.weight(1f)) {
+                            CareerDetailItem(
+                                label = stringResource(R.string.regulation_year_label),
+                                value = career.regulationYear
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.class_label),
+                                value = career.className
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.location_label),
+                                value = career.sedeDes
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            CareerDetailItem(
+                                label = stringResource(R.string.percorso_label),
+                                value = career.percorsoDes
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CareerDetailItem(label: String, value: String) {
+    Column {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun CopyableText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    color: Color = MaterialTheme.colorScheme.onSurface
+) {
+    val clipboard = LocalClipboard.current
+    val haptics = LocalHapticFeedback.current
+    var showCopied by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable {
+                scope.launch { clipboard.setClipEntry(text.toClipEntry()) }
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                showCopied = true
+            }
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = text,
+            style = style,
+            color = color
+        )
+        // i love myself
+        AnimatedVisibility(
+            visible = showCopied,
+            enter = fadeIn() + expandHorizontally(),
+            exit = fadeOut() + shrinkHorizontally()
+        ) {
+            Text(
+                text = stringResource(R.string.copied_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+
+    if (showCopied) {
+        LaunchedEffect(Unit) {
+            delay(1500)
+            showCopied = false
+        }
+    }
+}
+
+@Composable
 fun CreditsSection(state: DashboardData) {
     val data = state.dashboardData
     Row(
@@ -892,7 +1153,7 @@ fun CreditsSection(state: DashboardData) {
         Surface(
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),

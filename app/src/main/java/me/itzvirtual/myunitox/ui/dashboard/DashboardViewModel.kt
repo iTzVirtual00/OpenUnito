@@ -20,7 +20,15 @@ import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.data.repository.DashboardDataRepository
 import me.itzvirtual.myunitox.data.repository.ExamResultRepository
 import me.itzvirtual.myunitox.data.repository.GradeRepository
+import me.itzvirtual.myunitox.data.repository.StudentDataRepository
+import me.itzvirtual.myunitox.data.models.StudentData
 import javax.inject.Inject
+
+data class StudentInfo(
+    val studentData: StudentData? = null,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+)
 
 data class DashboardData(
     val dashboardData: DashboardDataResponse? = null,
@@ -41,6 +49,7 @@ data class ExamGradeData(
 )
 
 data class DashboardUiState(
+    val studentInfo: StudentInfo = StudentInfo(),
     val dashboardData: DashboardData = DashboardData(),
     val examResultsData: ExamResultData = ExamResultData(),
     val examGradesData: ExamGradeData = ExamGradeData(),
@@ -50,6 +59,7 @@ data class DashboardUiState(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    private val studentDataRepository: StudentDataRepository,
     private val dashboardDataRepo: DashboardDataRepository,
     private val examResultRepo: ExamResultRepository,
     private val examGradeRepository: GradeRepository,
@@ -65,6 +75,31 @@ class DashboardViewModel @Inject constructor(
     private fun loadDashboardData() {
         viewModelScope.launch {
             // parallel loading!
+
+            // Load student info (name, surname, careers, etc.)
+            val studentDataJob = launch {
+                try {
+                    val data = studentDataRepository.getStudentData()
+                    _uiState.update {
+                        it.copy(
+                            studentInfo = it.studentInfo.copy(
+                                studentData = data,
+                                isLoading = false
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(
+                            studentInfo = it.studentInfo.copy(
+                                isLoading = false,
+                                errorMessage = e.message
+                            )
+                        )
+                    }
+                    Log.e("DashboardViewModel", "Error fetching student data", e)
+                }
+            }
 
             val examResultJob = launch {
                 examResultRepo.fetchExamResults().onSuccess { results ->
