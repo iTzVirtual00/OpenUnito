@@ -98,7 +98,7 @@ REDACTED_CA_CERT
             .build()
     }
 
-    suspend fun checkForUpdates(currentVersionCode: Long): UpdateCheckResult = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdates(currentVersionCode: Int): UpdateCheckResult = withContext(Dispatchers.IO) {
         try {
             val request = authenticatedRequest("version.json")
             val response = client.newCall(request).execute()

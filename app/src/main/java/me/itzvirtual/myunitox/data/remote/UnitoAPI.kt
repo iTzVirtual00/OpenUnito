@@ -25,20 +25,20 @@ interface UnitoAPI {
 //    @GET("inbox")
 //    suspend fun getInbox(): InboxResponse
 
-    @GET("students/{studentId}/careers/{careerId}/dashboard")
+    @GET("students/{careerId}/careers/{registrationId}/dashboard")
     suspend fun getDashboardData(): DashboardDataResponse
 
 
-    @GET("students/{careerId}/exams/board")
+    @GET("students/{registrationId}/exams/board")
     suspend fun getExamBoard(): List<ExamResult>
 
-    @GET("students/{studentId}/careers/{careerId}/exams")
+    @GET("students/{careerId}/careers/{registrationId}/exams")
     suspend fun getExamDates(): List<ExamDate>
 
-    @GET("students/{careerId}/transcript")
+    @GET("students/{registrationId}/transcript")
     suspend fun getTranscript(): List<ExamGrade>
 
-    @PUT("students/{careerId}/exams/board/{gradeId}/acknowledgement")
+    @PUT("students/{registrationId}/exams/board/{gradeId}/acknowledgement")
     suspend fun changeGradeStatus(
         @Path("gradeId") gradeId: String,
         @Query("presaVisione") gradeStatus: String

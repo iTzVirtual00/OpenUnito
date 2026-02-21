@@ -3,7 +3,7 @@ package me.itzvirtual.myunitox.data.models
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import me.itzvirtual.myunitox.data.remote.CFUStringSerializer
-import me.itzvirtual.myunitox.data.remote.CinecaDateSerializer
+import me.itzvirtual.myunitox.data.remote.MicrosoftDateSerializer
 import me.itzvirtual.myunitox.data.remote.SmartNumberSerializer
 import java.util.Date
 
@@ -47,7 +47,7 @@ data class ExamGrade(
 @Serializable
 data class Score(
     @SerialName("date")
-    @Serializable(with= CinecaDateSerializer::class)
+    @Serializable(with= MicrosoftDateSerializer::class)
     val date: Date,
 
     @SerialName("value")

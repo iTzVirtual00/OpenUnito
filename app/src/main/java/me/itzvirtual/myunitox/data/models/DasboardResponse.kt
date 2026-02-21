@@ -2,7 +2,7 @@ package me.itzvirtual.myunitox.data.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import me.itzvirtual.myunitox.data.remote.CinecaDateSerializer
+import me.itzvirtual.myunitox.data.remote.MicrosoftDateSerializer
 import me.itzvirtual.myunitox.data.remote.SmartNumberSerializer
 import java.util.Date
 
@@ -23,7 +23,7 @@ data class Grade(
     @SerialName("name") val name: String,
     @SerialName("description") val description: String,
 
-    @Serializable(with = CinecaDateSerializer::class)
+    @Serializable(with = MicrosoftDateSerializer::class)
     @SerialName("date") val date: Date,
 
 
@@ -92,7 +92,7 @@ val dashboardDataSample = DashboardDataResponse(
             id = null,
             name = "other activities",
             description = "29.000000",
-            date = CinecaDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
+            date = MicrosoftDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
             value = "29",
             average = "29",
             position = 1
@@ -103,7 +103,7 @@ val dashboardDataSample = DashboardDataResponse(
             id = null,
             name = "OTHER ACTIVITIES",
             description = "18.000000",
-            date = CinecaDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
+            date = MicrosoftDateSerializer.deserializeString("/Date(1749420000000+0200)/"),
             value = "18",
             average = "23.5",
             position = 2
@@ -114,7 +114,7 @@ val dashboardDataSample = DashboardDataResponse(
             id = null,
             name = "DISCRETE MATHEMATICS, ALGEBRA AND GEOMETRY",
             description = "25.000000",
-            date = CinecaDateSerializer.deserializeString("/Date(1768518000000+0100)/"),
+            date = MicrosoftDateSerializer.deserializeString("/Date(1768518000000+0100)/"),
             value = "25",
             average = "24",
             position = 3

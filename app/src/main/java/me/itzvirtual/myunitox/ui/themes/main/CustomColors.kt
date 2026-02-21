@@ -52,5 +52,3 @@ val DarkCustomColorsPalette = CustomColorsPalette(
     gradeNotPassed = GradeNotPassedDark,
     calendarBucket = CalendarBucket,
 )
-
-val LocalCustomColorsPalette = staticCompositionLocalOf { CustomColorsPalette() }

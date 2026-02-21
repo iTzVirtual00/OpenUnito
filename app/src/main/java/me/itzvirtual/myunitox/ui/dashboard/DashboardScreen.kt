@@ -87,7 +87,7 @@ import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.data.models.Score
 import me.itzvirtual.myunitox.data.models.dashboardDataSample
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
-import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.util.AnimatedSymmetricalBorder
 import me.itzvirtual.myunitox.ui.util.ErrorItem
 import me.itzvirtual.myunitox.ui.util.LoadingIconItem

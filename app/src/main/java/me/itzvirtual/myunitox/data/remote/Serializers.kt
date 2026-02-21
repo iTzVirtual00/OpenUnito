@@ -1,7 +1,6 @@
 package me.itzvirtual.myunitox.data.remote
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -19,7 +18,7 @@ import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
-object CinecaDateSerializer : KSerializer<Date> {
+object MicrosoftDateSerializer : KSerializer<Date> {
     override val descriptor = PrimitiveSerialDescriptor("CinecaDate", PrimitiveKind.STRING)
 
     private val regex = Regex("""/Date\((\d+)([+-]\d+)?\)/""")

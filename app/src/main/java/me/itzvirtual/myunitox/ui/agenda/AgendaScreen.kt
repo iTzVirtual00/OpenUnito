@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,8 +64,7 @@ import me.itzvirtual.myunitox.data.models.Coordinates
 import me.itzvirtual.myunitox.data.models.Floor
 import me.itzvirtual.myunitox.data.models.Professor
 import me.itzvirtual.myunitox.data.models.Room
-import me.itzvirtual.myunitox.ui.themes.main.CustomColorsPalette
-import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.DayOfWeek
 import java.time.Instant
@@ -141,6 +138,7 @@ fun AgendaScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             uiState.errorMessage != null -> {
                 Column(
                     modifier = Modifier
@@ -157,6 +155,7 @@ fun AgendaScreen(
                     )
                 }
             }
+
             else -> {
                 Agenda(
                     events = uiState.agendaEntries,
@@ -346,7 +345,11 @@ private fun AgendaHeader(
             }
 
             Text(
-                text = "${currentWeekStart.format(dateFormatter)} - ${currentWeekEnd.format(dateFormatter)}",
+                text = "${currentWeekStart.format(dateFormatter)} - ${
+                    currentWeekEnd.format(
+                        dateFormatter
+                    )
+                }",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -410,7 +413,9 @@ private fun AgendaGrid(
     ) {
         // Time column
         Column(
-            modifier = Modifier.width(48.dp).padding(vertical = 8.dp)
+            modifier = Modifier
+                .width(48.dp)
+                .padding(vertical = 8.dp)
         ) {
             for (hour in startHour until endHour) {
                 Box(
@@ -649,12 +654,15 @@ private fun EventDetailView(
                     )
                     Column {
                         Text(
-                            text = event.getLocalDate().format(dateFormatter).replaceFirstChar { it.uppercase() },
+                            text = event.getLocalDate().format(dateFormatter)
+                                .replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "${event.getStartTime().format(timeFormatter)} - ${event.getEndTime().format(timeFormatter)}",
+                            text = "${
+                                event.getStartTime().format(timeFormatter)
+                            } - ${event.getEndTime().format(timeFormatter)}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

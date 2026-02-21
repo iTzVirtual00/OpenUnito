@@ -252,7 +252,7 @@ val unspecified_scheme = ColorFamily(
 )
 
 @Composable
-fun MyUnitoXTheme1(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,

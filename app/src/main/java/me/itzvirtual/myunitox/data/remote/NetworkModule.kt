@@ -8,9 +8,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -18,79 +18,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
-@Serializable
-data class StudentCareer(
-    @SerialName("id")
-    val studentId: Int,
-//    @SerialName("title")
-//    val title: String,
-//    @SerialName("description")
-//    val description: String,
-//    @SerialName("date_start")
-//    val dateStart: String,
-//    @SerialName("date_end")
-//    val dateEnd: String?,
-//    @SerialName("registration_number")
-//    val registrationNumber: String,
-    @SerialName("registrationId")
-    val careerId: Int,
-//    @SerialName("notes")
-//    val notes: String,
-
-//    @SerialName("is_blocked")
-//    val isBlocked: Boolean,
-//    @SerialName("ordinamento")
-//    val ordinamento: String,
-//    @SerialName("normativa")
-//    val normativa: String,
-//    @SerialName("classe")
-//    val classe: String,
-//    @SerialName("coorte")
-//    val coorte: String,
-//    @SerialName("percorsoDes")
-//    val percorsoDes: String,
-//    @SerialName("sedeDes")
-//    val sedeDes: String,
-//    @SerialName("iscrDes")
-//    val iscrDes: String,
-//    @SerialName("staStuDes")
-//    val staStuDes: String,
-//    @SerialName("annoCorso")
-//    val annoCorso: Int
-
-)
-
-@Serializable
-data class AuthSession(
-    @SerialName("user_id")
-    val userId: Int,
-    @SerialName("username")
-    val username: String,
-    @SerialName("firstname")
-    val firstname: String,
-    @SerialName("lastname")
-    val lastname: String,
-
-    @SerialName("careers")
-    val careers: List<StudentCareer>,
-
-    @SerialName("type")
-    val type: Int,
-
-    )
-
-@Serializable
-data class AppInit(
-    @SerialName("auth_session")
-    val session: AuthSession,
-)
-
-@Serializable
-data class StudentData(
-    val studentId: String,
-    val careerId: String,
-)
-
+const val API_URL = "https://unito.app.cineca.it/"
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -146,31 +74,35 @@ object NetworkModule {
         coerceInputValues = true
     }
 
-    @Volatile
-    private var cachedStudentData: StudentData? = null
+    @Provides
+    @Singleton
+    fun provideStudentDataRepository(client: OkHttpClient, json: Json): StudentDataRepository {
+        return StudentDataRepository(client, json)
+    }
 
     @Provides
     @Singleton
-    fun provideUnitoAPI(client: OkHttpClient, json: Json): UnitoAPI {
+    fun provideUnitoAPI(
+        client: OkHttpClient,
+        json: Json,
+        studentDataRepository: StudentDataRepository
+    ): UnitoAPI {
         val unitoClient = client.newBuilder()
             .addInterceptor { chain ->
                 // inject studentId and careerId
                 val originalRequest = chain.request()
                 val originalUrl = originalRequest.url
 
-                val studentData = synchronized(this) {
-                    cachedStudentData ?: getStudentData(client, json).also {
-                        cachedStudentData = it
-                    }
-                }
+                // Use cached data from repository, or fetch synchronously if not available
+                val career = runBlocking {studentDataRepository.getCurrentCareer()}
 
                 val newUrl = originalUrl.newBuilder()
                     .apply {
                         val pathSegments = originalUrl.pathSegments
                         for (i in pathSegments.indices) {
                             when (pathSegments[i]) {
-                                "{studentId}" -> setPathSegment(i, studentData.studentId)
-                                "{careerId}" -> setPathSegment(i, studentData.careerId)
+                                "{careerId}" -> setPathSegment(i, career.id.toString())
+                                "{registrationId}" -> setPathSegment(i, career.registrationId.toString())
                             }
                         }
                     }
@@ -186,7 +118,7 @@ object NetworkModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://unito.app.cineca.it/")
+            .baseUrl(API_URL)
             .client(unitoClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -194,23 +126,6 @@ object NetworkModule {
     }
 }
 
-// 3. Updated helper function to accept json (don't call provideJson() repeatedly)
-fun getStudentData(client: OkHttpClient, json: Json): StudentData {
-    val request = okhttp3.Request.Builder()
-        .url("https://unito.app.cineca.it/app/init?os=android&os_version=16&app_version=25.7.0.0.17")
-        .build()
-
-    client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw Exception("AppInit failed")
-        val body = response.body.string()
-        val appInit = json.decodeFromString<AppInit>(body)
-        val career = appInit.session.careers.first()
-        return StudentData(
-            studentId = career.studentId.toString(),
-            careerId = career.careerId.toString()
-        )
-    }
-}
 
 fun OkHttpClient.Builder.ensureLoggingAtEnd(): OkHttpClient.Builder = apply {
     val currentInterceptors = interceptors()

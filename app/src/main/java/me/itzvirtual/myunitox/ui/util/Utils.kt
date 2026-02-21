@@ -36,11 +36,12 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.myunitox.data.models.GradeStatus
-import me.itzvirtual.myunitox.ui.themes.main.LocalCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -135,7 +136,7 @@ fun parseDate(dateStr: String): Date {
 
 @Composable
 fun GradeStatus.toColor(): Color = when (this) {
-    GradeStatus.VIEWED -> MaterialTheme.colorScheme.tertiaryContainer
+    GradeStatus.VIEWED -> MaterialTheme.colorScheme.surfaceContainerHighest
     GradeStatus.NOT_TOUCHED -> Color.Transparent
 
     GradeStatus.ACCEPTED -> LocalCustomColorsPalette.current.gradePassed
@@ -222,3 +223,5 @@ fun restartApp(context: Context) {
     Runtime.getRuntime().exit(0)
 }
 
+
+fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
