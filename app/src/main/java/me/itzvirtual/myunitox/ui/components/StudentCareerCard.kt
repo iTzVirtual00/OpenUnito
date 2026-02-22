@@ -106,7 +106,7 @@ fun StudentCareerCard(career: StudentCareer, defaultExpanded: Boolean = true) {
                     Text(
                         text = career.staStuDes,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = if(career.isActive()) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
                     )
