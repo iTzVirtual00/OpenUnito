@@ -99,6 +99,7 @@ import me.itzvirtual.myunitox.data.models.Score
 import me.itzvirtual.myunitox.data.models.dashboardDataSample
 import me.itzvirtual.myunitox.data.models.StudentCareer
 import me.itzvirtual.myunitox.data.models.StudentData
+import me.itzvirtual.myunitox.data.models.sampleStudentData
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.util.AnimatedSymmetricalBorder
@@ -118,34 +119,6 @@ import java.util.Date
 @Preview(locale = "it", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Preview(showBackground = true)
 fun DashboardScreenPreview() {
-    val sampleStudentData = StudentData(
-        userId = 12345,
-        username = "mario.rossi",
-        firstname = "Mario",
-        lastname = "Rossi",
-        careers = listOf(
-            StudentCareer(
-                id = 1,
-                title = "Attivo in Informatica",
-                description = "Corso di Laurea - Informatica",
-                dateStart = Date(),
-                studentId = "1639205",
-                registrationId = 1926481,
-                notes = "Attivo per Trasf. in ingresso",
-                regulationYear = "2025",
-                normativa = "D.M. 270/2004",
-                className = "L-31 R",
-                cohort = "2025",
-                percorsoDes = "PERCORSO GENERICO",
-                sedeDes = "Torino",
-                iscrDes = "Anno corso: 1°",
-                staStuDes = "Attivo",
-                courseYear = 1
-            )
-        ),
-        type = 1
-    )
-
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             DashboardScreen(
@@ -396,26 +369,26 @@ fun DashboardScreen(state: DashboardUiState, modifier: Modifier) {
         item(key = "student_info") {
             StudentInfoSection(state.studentInfo)
         }
-        item(key = "nearest_agenda") {
-            Text(
-                text = stringResource(R.string.nearest_agenda_title),
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            NearestAgendaSection(state.nearestAgenda)
-        }
-        item(key = "next_day_plan") {
-            Text(
-                text = stringResource(R.string.next_day_plan_title),
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            NextDayPlanSection(state.nextDayPlan)
-        }
+//        item(key = "nearest_agenda") {
+//            Text(
+//                text = stringResource(R.string.nearest_agenda_title),
+//                modifier = Modifier.padding(16.dp),
+//                style = MaterialTheme.typography.titleLarge,
+//                fontWeight = FontWeight.Bold,
+//                color = MaterialTheme.colorScheme.onBackground
+//            )
+//            NearestAgendaSection(state.nearestAgenda)
+//        }
+//        item(key = "next_day_plan") {
+//            Text(
+//                text = stringResource(R.string.next_day_plan_title),
+//                modifier = Modifier.padding(16.dp),
+//                style = MaterialTheme.typography.titleLarge,
+//                fontWeight = FontWeight.Bold,
+//                color = MaterialTheme.colorScheme.onBackground
+//            )
+//            NextDayPlanSection(state.nextDayPlan)
+//        }
         item {
             Text(
                 text = stringResource(R.string.credits_section_title),

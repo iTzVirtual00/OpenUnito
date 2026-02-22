@@ -14,8 +14,8 @@ import me.itzvirtual.myunitox.data.repository.AgendaRepository
 import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import javax.inject.Inject
 
-data class TodaysClassesState(
-    val todaysClasses: List<AgendaEntry> = emptyList(),
+data class DailyClassesState(
+    val classes: List<AgendaEntry> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
@@ -28,7 +28,8 @@ data class StudentDataState(
 
 data class UiState(
     val studentDataState: StudentDataState = StudentDataState(),
-    val todaysClassesState: TodaysClassesState = TodaysClassesState(),
+    val todaysClassesState: DailyClassesState = DailyClassesState(),
+    val tomorrowClassesState: DailyClassesState = DailyClassesState(),
 )
 
 @HiltViewModel
@@ -79,7 +80,12 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         todaysClassesState = it.todaysClassesState.copy(
-                            todaysClasses = data.filter { entry -> entry.isToday() },
+                            classes = data.filter { entry -> entry.isToday() },
+                            isLoading = false,
+                            errorMessage = null
+                        ),
+                        tomorrowClassesState = it.todaysClassesState.copy(
+                            classes = data.filter { entry -> entry.isTomorrow() },
                             isLoading = false,
                             errorMessage = null
                         )

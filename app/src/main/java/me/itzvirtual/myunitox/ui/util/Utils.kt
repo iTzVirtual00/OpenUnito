@@ -224,3 +224,4 @@ fun restartApp(context: Context) {
 
 
 fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
+

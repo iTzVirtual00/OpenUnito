@@ -41,4 +41,8 @@
     <string name="todays_classes_title">Today\'s classes</string>
     <string name="open_schedule">Open schedule</string>
     <string name="no_classes_today">No classes today</string>
+    <string name="tomorrow_classes_title">Tomorrow\'s classes</string>
+    <string name="no_classes_tomorrow">No classes tomorrow</string>
+    <string name="careers_title">Careers</string>
+    <string name="open_transcript">Go to transcript</string>
 </resources>

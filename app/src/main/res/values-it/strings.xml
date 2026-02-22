@@ -38,5 +38,9 @@
     <string name="good_evening">Buonasera</string>
     <string name="todays_classes_title">Lezioni di oggi</string>
     <string name="open_schedule">Calendario</string>
-    <string name="no_classes_today">Nessuna lezione oggi</string>
+    <string name="no_classes_today">Nessuna lezione programmata per oggi</string>
+    <string name="tomorrow_classes_title">Lezioni di domani</string>
+    <string name="no_classes_tomorrow">Nessuna lezione programmata domani</string>
+    <string name="careers_title">Carriere</string>
+    <string name="open_transcript">Vai al libretto</string>
 </resources>

@@ -42,6 +42,7 @@ import me.itzvirtual.myunitox.ui.examdates.ExamDatesScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
 import me.itzvirtual.myunitox.ui.login.AuthViewModel
 import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
+import me.itzvirtual.myunitox.ui.profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 
 @AndroidEntryPoint
@@ -173,7 +174,7 @@ fun MyUniTOXApp(onSessionExpired: () -> Unit = {}) {
                     modifier = Modifier.padding(innerPadding)
                 )
 
-                AppDestinations.PROFILE -> ExamDatesScreen(
+                AppDestinations.PROFILE -> ProfileScreen(
                     modifier = Modifier.padding(innerPadding)
                 )
 

@@ -17,8 +17,8 @@ data class StudentCareer(
     @Serializable(with = MicrosoftDateSerializer::class)
     @SerialName("date_start")
     val dateStart: Date,
-//    @SerialName("date_end")
-//    val dateEnd: String?,
+    @SerialName("date_end")
+    val dateEnd: String?,
     @SerialName("registration_number")
     val studentId: String, // matricola
     @SerialName("registrationId")
@@ -48,7 +48,11 @@ data class StudentCareer(
 
     @SerialName("annoCorso")
     val courseYear: Int
-)
+) {
+    fun isActive(): Boolean {
+        return dateEnd == null
+    }
+}
 
 @Serializable
 data class AuthSession(
@@ -68,6 +72,35 @@ data class AuthSession(
     val type: Int, // ?
 )
 typealias StudentData = AuthSession
+
+val sampleStudentData = StudentData(
+    userId = 12345,
+    username = "mario.rossi",
+    firstname = "Mario",
+    lastname = "Rossi",
+    careers = listOf(
+        StudentCareer(
+            id = 1,
+            title = "Attivo in Informatica",
+            description = "Corso di Laurea - Informatica",
+            dateStart = Date(),
+            dateEnd = null,
+            studentId = "1639205",
+            registrationId = 1926481,
+            notes = "Attivo per Trasf. in ingresso",
+            regulationYear = "2025",
+            normativa = "D.M. 270/2004",
+            className = "L-31 R",
+            cohort = "2025",
+            percorsoDes = "PERCORSO GENERICO",
+            sedeDes = "Torino",
+            iscrDes = "Anno corso: 1°",
+            staStuDes = "Attivo",
+            courseYear = 1
+        )
+    ),
+    type = 1
+)
 
 @Serializable
 data class AppInit(

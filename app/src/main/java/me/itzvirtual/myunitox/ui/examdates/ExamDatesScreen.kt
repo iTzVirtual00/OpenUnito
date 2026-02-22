@@ -42,7 +42,7 @@ fun ExamDatesScreen(viewModel: ExamDatesViewModel = hiltViewModel(), modifier: M
             }
 
             state.errorMessage != null -> {
-                Text(text = state.errorMessage!!, color = Color.Red)
+                Text(text = state.errorMessage!!, color = MaterialTheme.colorScheme.error)
             }
 
             else -> {

@@ -37,6 +37,11 @@ data class AgendaEntry(
         val entryDate = startDateTime.atZone(ZoneId.systemDefault()).toLocalDate()
         return entryDate == today
     }
+    fun isTomorrow(): Boolean {
+        val tomorrow = LocalDate.now().plusDays(1)
+        val entryDate = startDateTime.atZone(ZoneId.systemDefault()).toLocalDate()
+        return entryDate == tomorrow
+    }
 }
 
 @Serializable

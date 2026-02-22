@@ -28,6 +28,7 @@ class StudentDataRepository @Inject constructor(
 
     // Expose a read-only flow of student data, cached
     // not sure if this a correct pattern
+    // TODO: make this return a Unit and emit errors, as the other repositories dp
     suspend fun getStudentData(): StudentData {
         studentData?.let { return it }
 
