@@ -188,7 +188,7 @@ fun UpdateCard() {
             )
 
             Text(
-                text = "Current: v$currentVersionName (Code: $currentVersionCode)",
+                text = "Current: $currentVersionName (Code: $currentVersionCode)",
                 style = MaterialTheme.typography.bodyMedium
             )
 

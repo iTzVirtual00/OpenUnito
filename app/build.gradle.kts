@@ -21,8 +21,8 @@ android {
         applicationId = "me.itzvirtual.myunitox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 9
-        versionName = "v0.2.5s"
+        versionCode = 10
+        versionName = "v0.2.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -109,7 +109,7 @@ tasks.register("generateVersionJson") {
         versionJson.writeText("""
             {
                 "versionCode": $versionCode,
-                "versionName": "v$versionName"
+                "versionName": "$versionName"
             }
         """.trimIndent())
 
