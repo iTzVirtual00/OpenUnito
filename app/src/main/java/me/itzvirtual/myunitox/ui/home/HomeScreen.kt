@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccessTime
@@ -262,33 +263,41 @@ fun HomeScreen(
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .width(IntrinsicSize.Max) // should constrain the width to the longest text
-                    )
-                    {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val maxFontSize = 48.sp
+                        var syncedFontSize by remember { mutableStateOf(maxFontSize) }
                         Text(
                             text = greeting,
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 48.sp,
+                                fontSize = syncedFontSize,
                                 lineHeight = 52.sp
                             ),
                             fontWeight = FontWeight.ExtraBold,
                             maxLines = 1,
+                            softWrap = false,
+                            onTextLayout = { textLayoutResult ->
+                                if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
+                                    syncedFontSize *= 0.9f
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Text(
                             text = name,
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 48.sp,
+                                fontSize = syncedFontSize,
                                 lineHeight = 52.sp
                             ),
                             fontWeight = FontWeight.ExtraBold,
                             maxLines = 1,
+                            softWrap = false,
+                            onTextLayout = { textLayoutResult ->
+                                if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
+                                    syncedFontSize *= 0.9f
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
-
-
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     TodaysClassesSection(
