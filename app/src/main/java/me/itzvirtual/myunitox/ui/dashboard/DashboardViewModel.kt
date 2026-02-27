@@ -189,57 +189,57 @@ class DashboardViewModel @Inject constructor(
             }
 
             // Agenda: fetch today + tomorrow, show in-progress or nearest event
-            val agendaJob = launch {
-                agendaRepository.fetchTodayAndTomorrowAgenda().onSuccess { entries ->
-                    val now = java.time.Instant.now()
-                    val currentOrNearest = agendaRepository.getCurrentOrNearestEntry(entries)
+//            val agendaJob = launch {
+//                agendaRepository.fetchTodayAndTomorrowAgenda().onSuccess { entries ->
+//                    val now = java.time.Instant.now()
+//                    val currentOrNearest = agendaRepository.getCurrentOrNearestEntry(entries)
+//
+//                    // Check if the entry is currently in progress
+//                    val isInProgress = currentOrNearest?.let { entry ->
+//                        now >= entry.startDateTime && now <= entry.endDateTime
+//                    } ?: false
+//
+//                    // Tomorrow's entries for the next day plan
+//                    val tomorrow = java.time.LocalDate.now().plusDays(1)
+//                    val tomorrowEntries = entries.filter { entry ->
+//                        val entryDate = entry.startDateTime
+//                            .atZone(java.time.ZoneId.systemDefault())
+//                            .toLocalDate()
+//                        entryDate == tomorrow
+//                    }
+//
+//                    _uiState.update { currentState ->
+//                        currentState.copy(
+//                            nearestAgenda = currentState.nearestAgenda.copy(
+//                                entry = currentOrNearest,
+//                                isInProgress = isInProgress,
+//                                isLoading = false
+//                            ),
+//                            nextDayPlan = currentState.nextDayPlan.copy(
+//                                entries = tomorrowEntries,
+//                                isLoading = false
+//                            )
+//                        )
+//                    }
+//                }.onFailure { error ->
+//                    _uiState.update {
+//                        it.copy(
+//                            nearestAgenda = it.nearestAgenda.copy(
+//                                isLoading = false,
+//                                errorMessage = error.message
+//                            ),
+//                            nextDayPlan = it.nextDayPlan.copy(
+//                                isLoading = false,
+//                                errorMessage = error.message
+//                            )
+//                        )
+//                    }
+//                    Log.e("DashboardViewModel", "Error fetching agenda", error)
+//                }
+//            }
 
-                    // Check if the entry is currently in progress
-                    val isInProgress = currentOrNearest?.let { entry ->
-                        now >= entry.startDateTime && now <= entry.endDateTime
-                    } ?: false
 
-                    // Tomorrow's entries for the next day plan
-                    val tomorrow = java.time.LocalDate.now().plusDays(1)
-                    val tomorrowEntries = entries.filter { entry ->
-                        val entryDate = entry.startDateTime
-                            .atZone(java.time.ZoneId.systemDefault())
-                            .toLocalDate()
-                        entryDate == tomorrow
-                    }
-
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            nearestAgenda = currentState.nearestAgenda.copy(
-                                entry = currentOrNearest,
-                                isInProgress = isInProgress,
-                                isLoading = false
-                            ),
-                            nextDayPlan = currentState.nextDayPlan.copy(
-                                entries = tomorrowEntries,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }.onFailure { error ->
-                    _uiState.update {
-                        it.copy(
-                            nearestAgenda = it.nearestAgenda.copy(
-                                isLoading = false,
-                                errorMessage = error.message
-                            ),
-                            nextDayPlan = it.nextDayPlan.copy(
-                                isLoading = false,
-                                errorMessage = error.message
-                            )
-                        )
-                    }
-                    Log.e("DashboardViewModel", "Error fetching agenda", error)
-                }
-            }
-
-
-            joinAll(examResultJob, dashboardDataJob, examGradesJob, agendaJob)
+            joinAll(examResultJob, dashboardDataJob, examGradesJob)
             _uiState.update { it.copy(isLoading = false) }
         }
     }

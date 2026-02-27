@@ -1,13 +1,17 @@
 package me.itzvirtual.myunitox.ui.home
 
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.R
+import me.itzvirtual.myunitox.data.local.SharedPrefStorage
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.StudentData
 import me.itzvirtual.myunitox.data.repository.AgendaRepository
@@ -35,7 +39,9 @@ data class UiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val studentDataRepo: StudentDataRepository,
-    private val agendaRepo: AgendaRepository
+    private val agendaRepo: AgendaRepository,
+    private val sharedPrefStorage: SharedPrefStorage,
+    @ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -56,11 +62,24 @@ class HomeViewModel @Inject constructor(
                     todaysClassesState = it.todaysClassesState.copy(
                         isLoading = true,
                         errorMessage = null
+                    ),
+                    tomorrowClassesState = it.tomorrowClassesState.copy(
+                        isLoading = true,
+                        errorMessage = null
                     )
                 )
             }
             val studentDataDeferred = async { studentDataRepo.getStudentData() }
-            val agendaDataDeferred = async { agendaRepo.fetchTodayAndTomorrowAgenda() }
+            val agendaDataDeferred = async {
+                val calendarLinkId = sharedPrefStorage.getCalendarLinkId()
+                val calendarClientId = sharedPrefStorage.getCalendarClientId()
+                if (calendarLinkId == null) {
+                    return@async Result.failure(
+                        IllegalStateException("MISSING_ID")
+                    )
+                }
+                return@async agendaRepo.fetchTodayAndTomorrowAgenda(calendarLinkId, calendarClientId)
+            }
 
             val studentData = studentDataDeferred.await() // TODO: handle errors
 
@@ -96,7 +115,11 @@ class HomeViewModel @Inject constructor(
                     it.copy(
                         todaysClassesState = it.todaysClassesState.copy(
                             isLoading = false,
-                            errorMessage = "Failed to load today's classes: ${err.message}"
+                            errorMessage = err.message
+                        ),
+                        tomorrowClassesState = it.todaysClassesState.copy(
+                            isLoading = false,
+                            errorMessage = err.message
                         )
                     )
                 }

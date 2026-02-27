@@ -25,18 +25,33 @@ class StudentDataRepository @Inject constructor(
     private val mutex = Mutex()
 
     private var studentData: StudentData? = null
+    private var error = false
 
     // Expose a read-only flow of student data, cached
     // not sure if this a correct pattern
-    // TODO: make this return a Unit and emit errors, as the other repositories dp
+    // TODO: make this return a Result and emit errors, as the other repositories do
     suspend fun getStudentData(): StudentData {
         studentData?.let { return it }
 
         return mutex.withLock {
             // Double-check, did someone else fetch it while we waited?
-            studentData ?: fetchAppInit().also {
+            studentData ?: fetchAppInit()!!.also {
                 studentData = it
             }
+        }
+    }
+
+    suspend fun checkAuth(): Boolean {
+        return try {
+            val fetched = fetchAppInit()
+            if(studentData == null && fetched != null) {
+                mutex.withLock {
+                    studentData = fetched
+                }
+            }
+            fetched != null
+        } catch (e: Exception) {
+            false
         }
     }
 
@@ -45,7 +60,7 @@ class StudentDataRepository @Inject constructor(
             ?: throw IllegalStateException("No careers found for student")
     }
 
-    private suspend fun fetchAppInit(): StudentData = withContext(Dispatchers.IO) {
+    private suspend fun fetchAppInit(): StudentData? = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url("${API_URL}app/init?os=android&os_version=16&app_version=25.7.0.0.17")
             .build()

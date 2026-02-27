@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import me.itzvirtual.myunitox.data.local.SharedPrefStorage
 import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import okhttp3.MediaType.Companion.toMediaType
@@ -32,15 +33,15 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthStorage(@ApplicationContext context: Context): AuthStorage {
-        return AuthStorage(context)
+    fun provideAuthStorage(@ApplicationContext context: Context): SharedPrefStorage {
+        return SharedPrefStorage(context)
     }
 
     @Provides
     @Singleton
     fun provideOkHttpClient(
         currentLanguage: String,
-        authStorage: AuthStorage,
+        sharedPrefStorage: SharedPrefStorage,
         @ApplicationContext context: Context
     ): OkHttpClient {
         val logger = HttpLoggingInterceptor.Logger { message ->
@@ -55,7 +56,7 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val token = authStorage.getToken()
+                val token = sharedPrefStorage.getToken()
                 val request = chain.request().newBuilder()
                     .addHeader("ResultLang", currentLanguage)
                     .addHeader("Authorization", token ?: "")

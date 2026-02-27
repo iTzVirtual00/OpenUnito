@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.local.SharedPrefStorage
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.repository.AgendaRepository
 import java.time.LocalDate
@@ -23,7 +24,8 @@ data class AgendaUiState(
 
 @HiltViewModel
 class AgendaViewModel @Inject constructor(
-    private val agendaRepository: AgendaRepository
+    private val agendaRepository: AgendaRepository,
+    private val sharedPrefStorage: SharedPrefStorage
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AgendaUiState())
     val uiState = _uiState.asStateFlow()
@@ -50,13 +52,19 @@ class AgendaViewModel @Inject constructor(
                     isLoading = true, errorMessage = null
                 )
             }
-
             val startInstant = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
             val endInstant = endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-
+            val calendarLinkId = sharedPrefStorage.getCalendarLinkId()
+            val calendarClientId = sharedPrefStorage.getCalendarClientId()
+            if (calendarLinkId == null) {
+                _uiState.update { state ->
+                    state.copy(errorMessage = "No calendar link ID found. Please set it in dev options.", isLoading = false)
+                }
+                return@launch
+            }
             val result = agendaRepository.fetchPublicAgenda(
-                calendarLinkId = "613b9237d969e100173d4110",
-                clientId = "5852fd1ab7305612a8354d51",
+                calendarLinkId = calendarLinkId,
+                clientId = calendarClientId,
                 startDate = startInstant,
                 endDate = endInstant
             )

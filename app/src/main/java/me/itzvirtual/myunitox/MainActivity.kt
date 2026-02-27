@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,6 +35,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
@@ -94,7 +97,11 @@ fun RootNavigation(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val startDestination = if (viewModel.isUserLoggedIn()) "main" else "login"
+    val scope = rememberCoroutineScope()
+    val logged = runBlocking {
+        viewModel.isUserLoggedIn()
+    }
+    val startDestination = if (logged) "main" else "login"
 
     NavHost(navController = navController, startDestination = startDestination) {
 

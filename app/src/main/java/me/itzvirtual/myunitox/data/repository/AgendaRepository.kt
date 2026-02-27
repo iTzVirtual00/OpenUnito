@@ -69,57 +69,12 @@ class AgendaRepository @Inject constructor(private val api: UnitoAPI) {
     }
 
     /**
-     * Fetches tomorrow's agenda. Cached and exposed via StateFlow.
-     * Multiple ViewModels can observe tomorrowAgenda without triggering multiple API calls.
-     */
-    suspend fun fetchTomorrowAgenda(
-        calendarLinkId: String = "613b9237d969e100173d4110",
-        clientId: String = "5852fd1ab7305612a8354d51",
-        forceRefresh: Boolean = false
-    ): Result<List<AgendaEntry>> {
-        // Fast path: already loaded
-        if (tomorrowLoaded && !forceRefresh) {
-            return Result.success(_tomorrowAgenda.value)
-        }
-
-        return mutex.withLock {
-            // Double-check after acquiring lock
-            if (tomorrowLoaded && !forceRefresh) {
-                return Result.success(_tomorrowAgenda.value)
-            }
-
-            val tomorrow = LocalDate.now().plusDays(1)
-            val startOfTomorrow = tomorrow.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            val endOfTomorrow = tomorrow.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-
-            val result = fetchPublicAgenda(
-                calendarLinkId = calendarLinkId,
-                clientId = clientId,
-                startDate = startOfTomorrow,
-                endDate = endOfTomorrow,
-                forceRefresh = forceRefresh
-            )
-
-            result.onSuccess { entries ->
-                _tomorrowAgenda.value = entries.sortedBy { it.startDateTime }
-                tomorrowLoaded = true
-            }
-
-            result
-        }
-    }
-
-    fun getNearestTomorrowEntry(): AgendaEntry? {
-        return _tomorrowAgenda.value.firstOrNull()
-    }
-
-    /**
      * Fetches today's and tomorrow's agenda combined.
      * Returns entries sorted by start time.
      */
     suspend fun fetchTodayAndTomorrowAgenda(
-        calendarLinkId: String = "613b9237d969e100173d4110",
-        clientId: String = "5852fd1ab7305612a8354d51",
+        calendarLinkId: String,
+        clientId: String,
         forceRefresh: Boolean = false
     ): Result<List<AgendaEntry>> {
         val today = LocalDate.now()

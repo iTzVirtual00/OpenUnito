@@ -49,6 +49,9 @@ data class DevtoolsActions(
     },
     val clearToken: () -> Unit = {
         Log.d("DevtoolsActions", "clearToken triggered")
+    },
+    val setCalendarId: (String) -> Unit = { _ ->
+        Log.d("DevtoolsActions", "setCalendarId triggered")
     }
 )
 
@@ -66,7 +69,8 @@ fun DevtoolsScreen(
         DevtoolsActions(
             setToken = { token -> viewModel.login(token); restartApp(context) },
             copyToken = { viewModel.copyTokenToClipboard(context) },
-            clearToken = { viewModel.clearToken(); restartApp(context) }
+            clearToken = { viewModel.clearToken(); restartApp(context) },
+            setCalendarId = { calendarId -> viewModel.setCalendarLinkId(calendarId); restartApp(context) }
         )
     }
 
@@ -100,14 +104,16 @@ fun DevtoolsContent(modifier: Modifier = Modifier) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AuthDebuggerCard()
             UpdateCard()
+            SetCalendarIdCard()
+            AuthDebuggerCard()
         }
     }
 }
+
 @Composable
-fun AuthDebuggerCard() {
-    var tokenInput by remember { mutableStateOf("") }
+fun SetCalendarIdCard() {
+    var calendarIdInput by remember { mutableStateOf("") }
     val actions = LocalDevtoolsActions.current
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -115,19 +121,19 @@ fun AuthDebuggerCard() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Authentication Debugger",
+                text = "Set Calendar Link ID",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
 
             OutlinedTextField(
-                value = tokenInput,
+                value = calendarIdInput,
                 onValueChange = { input ->
-                    tokenInput = input.filter { it != '\n' && it != '\r' } // really Android?
+                    calendarIdInput = input.filter { it != '\n' && it != '\r' }
                 },
-                label = { Text("setToken") },
+                label = { Text("Calendar Link ID") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true, // UI only :(
+                singleLine = true,
             )
 
             Row(
@@ -135,31 +141,12 @@ fun AuthDebuggerCard() {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Secondary button for copying
-                TextButton(onClick = { actions.copyToken() }) {
-                    Text("Copy Current")
-                }
-
-                Spacer(Modifier.width(8.dp))
-
-                Button(onClick = { actions.setToken(tokenInput) }) {
-                    Text("Set Token")
-                }
-
-                Spacer(Modifier.width(8.dp))
-
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    ),
-                    onClick = { actions.clearToken() }) {
-                    Text("Clear")
+                Button(onClick = { actions.setCalendarId(calendarIdInput) }) {
+                    Text("Set Calendar ID")
                 }
             }
         }
     }
-
 }
 
 @Composable
@@ -276,5 +263,62 @@ fun UpdateCard() {
             }
         }
     }
+}
+
+@Composable
+fun AuthDebuggerCard() {
+    var tokenInput by remember { mutableStateOf("") }
+    val actions = LocalDevtoolsActions.current
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Authentication Debugger",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            OutlinedTextField(
+                value = tokenInput,
+                onValueChange = { input ->
+                    tokenInput = input.filter { it != '\n' && it != '\r' } // really Android?
+                },
+                label = { Text("setToken") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true, // UI only :(
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Secondary button for copying
+                TextButton(onClick = { actions.copyToken() }) {
+                    Text("Copy Current")
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Button(onClick = { actions.setToken(tokenInput) }) {
+                    Text("Set Token")
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    onClick = { actions.clearToken() }) {
+                    Text("Clear")
+                }
+            }
+        }
+    }
+
 }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccessTime
@@ -53,8 +51,6 @@ import me.itzvirtual.myunitox.data.models.ActivityType
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.Professor
 import me.itzvirtual.myunitox.data.models.Room
-import me.itzvirtual.myunitox.data.models.StudentCareer
-import me.itzvirtual.myunitox.data.models.StudentData
 import me.itzvirtual.myunitox.data.models.sampleStudentData
 import me.itzvirtual.myunitox.ui.agenda.EventDetailView
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
@@ -62,7 +58,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
@@ -402,9 +397,14 @@ fun TodaysClassesSection(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                         ) {
+                            val errMsg = if (state.errorMessage == "MISSING_ID") {
+                                stringResource(R.string.error_no_calendar_id_found)
+                            } else {
+                                state.errorMessage
+                            }
                             Row(modifier.padding(12.dp)) {
                                 Text(
-                                    text = state.errorMessage,
+                                    text = errMsg,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.error
                                 )
@@ -511,8 +511,13 @@ fun TomorrowClassesSection(
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                         ) {
                             Row(modifier.padding(12.dp)) {
+                                val errMsg = if (state.errorMessage == "MISSING_ID") {
+                                    stringResource(R.string.error_no_calendar_id_found)
+                                } else {
+                                    state.errorMessage
+                                }
                                 Text(
-                                    text = state.errorMessage,
+                                    text = errMsg,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.error
                                 )

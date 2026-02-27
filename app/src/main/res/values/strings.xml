@@ -45,4 +45,5 @@
     <string name="no_classes_tomorrow">No classes tomorrow</string>
     <string name="careers_title">Careers</string>
     <string name="open_transcript">Go to transcript</string>
+    <string name="error_no_calendar_id_found">No calendar link ID found. Please set it in dev options.</string>
 </resources>

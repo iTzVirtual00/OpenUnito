@@ -105,5 +105,5 @@ val sampleStudentData = StudentData(
 @Serializable
 data class AppInit(
     @SerialName("auth_session")
-    val session: AuthSession,
+    val session: AuthSession?,
 )

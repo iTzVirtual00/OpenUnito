@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox.data.remote
+package me.itzvirtual.myunitox.data.local
 
 import android.content.Context
 import android.util.Log
@@ -10,12 +10,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthStorage @Inject constructor(
+class SharedPrefStorage @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     companion object {
         private const val PREF_NAME = "secure_auth_prefs"
         private const val KEY_BASIC_AUTH = "basic_auth_token"
+
+        private const val KEY_CALENDAR_LINK_ID = "calendar_link_id"
     }
 
     // We initialize this lazily so it doesn't slow down app startup
@@ -32,7 +34,9 @@ class AuthStorage @Inject constructor(
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
-
+    /*
+    * BASIC AUTH
+    * */
     fun saveToken(token: String) {
         Log.i("AuthStorage", "Saving token")
         sharedPreferences.edit(commit = true) { putString(KEY_BASIC_AUTH, token.trim()) }
@@ -46,4 +50,21 @@ class AuthStorage @Inject constructor(
         Log.i("AuthStorage", "Clearing stored token")
         sharedPreferences.edit(commit = true) { remove(KEY_BASIC_AUTH) }
     }
+
+
+    /*
+    * CALENDAR
+    * */
+    fun setCalendarLinkId(linkId: String) {
+        sharedPreferences.edit(commit = true) { putString(KEY_CALENDAR_LINK_ID, linkId.trim()) }
+    }
+
+    fun getCalendarLinkId(): String? {
+        return sharedPreferences.getString(KEY_CALENDAR_LINK_ID, null)
+    }
+
+    fun getCalendarClientId(): String {
+        return "5852fd1ab7305612a8354d51" // hardcoded for now, seems to work with any calendar...
+    }
+
 }
