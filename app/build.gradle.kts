@@ -34,8 +34,8 @@ android {
         applicationId = "me.itzvirtual.myunitox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 12
-        versionName = "v0.2.8"
+        versionCode = 13
+        versionName = "v0.2.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -155,7 +155,7 @@ tasks.register("deployAPK") {
         if (!apk.exists()) throw GradleException("File not found: ${apk.path}")
         if (!json.exists()) throw GradleException("File not found: ${json.path}")
 
-        val auth = System.getenv("DEPLOY_AUTH") ?: throw GradleException("Environment variable DEPLOY_AUTH not set")
+        val auth = env.fetchOrNull("DEPLOY_AUTH") ?: throw GradleException("Environment variable DEPLOY_AUTH not set")
         val encodedAuth = Base64.getEncoder().encodeToString(auth.toByteArray())
         val trustAllCerts: Array<TrustManager?> =
             listOf(object : X509TrustManager {
