@@ -8,6 +8,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -181,27 +188,44 @@ fun MyUniTOXApp(
                 .fillMaxSize()
                 .safeDrawingPadding()
         ) { innerPadding ->
-            when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    onNavigateToSchedule = { currentDestination = AppDestinations.CALENDAR }
-                )
+            // why is this so fucking easy
+            AnimatedContent(
+                targetState = currentDestination,
+                transitionSpec = {
+                    if (targetState.ordinal > initialState.ordinal) {
+                        (slideInHorizontally { it } + fadeIn())
+                            .togetherWith(slideOutHorizontally { -it } + fadeOut())
+                    } else {
+                        (slideInHorizontally { -it } + fadeIn())
+                            .togetherWith(slideOutHorizontally { it } + fadeOut())
+                    }
+                },
+                label = "ScreenTransition"
+            ) { targetDestination ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    when (targetDestination) {
+                        AppDestinations.HOME -> HomeScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onNavigateToSchedule = { currentDestination = AppDestinations.CALENDAR }
+                        )
 
-                AppDestinations.DASHBOARD -> DashboardScreen(
-                    modifier = Modifier.padding(innerPadding),
-                )
+                        AppDestinations.DASHBOARD -> DashboardScreen(
+                            modifier = Modifier.padding(innerPadding),
+                        )
 
-                AppDestinations.CALENDAR -> AgendaScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                        AppDestinations.CALENDAR -> AgendaScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
 
-                AppDestinations.PROFILE -> ProfileScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                        AppDestinations.PROFILE -> ProfileScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
 
-                AppDestinations.DEVTOOLS -> DevtoolsScreen(
-                    modifier = Modifier.padding(innerPadding)
-                )
+                        AppDestinations.DEVTOOLS -> DevtoolsScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
             }
         }
     }
