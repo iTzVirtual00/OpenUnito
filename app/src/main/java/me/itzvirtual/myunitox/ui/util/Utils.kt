@@ -2,7 +2,7 @@ package me.itzvirtual.myunitox.ui.util
 
 import android.content.Context
 import android.content.Intent
-import androidx.annotation.StringRes
+import android.util.Log
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
@@ -38,10 +38,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.toClipEntry
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import java.text.SimpleDateFormat
@@ -226,3 +228,60 @@ fun restartApp(context: Context) {
 
 
 fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
+
+class MemoizedFetcher<K, V>(
+    private val ttlMillis: Long = 5 * 60 * 1000,
+    private val provider: suspend (K) -> V
+) {
+    private val cache = mutableMapOf<K, CacheEntry<V>>()
+    private val cacheLock = Mutex()
+
+    // Key-specific locks to allow parallel fetching of different data
+    private val argumentLocks = mutableMapOf<K, Mutex>()
+
+    private data class CacheEntry<V>(val data: V, val timestamp: Long)
+
+    suspend fun execute(key: K, skipCache: Boolean = false): V {
+        // fast path
+        val now = System.currentTimeMillis()
+        if (!skipCache) {
+            cacheLock.withLock { cache[key] }?.let { entry ->
+                if (now - entry.timestamp <= ttlMillis) return entry.data
+            }
+        }
+
+        // fetch path
+        val keyMutex = cacheLock.withLock {
+            argumentLocks.getOrPut(key) { Mutex() }
+        }
+
+        return keyMutex.withLock {
+            // Double-check, did someone else fetch it while we waited?
+            if (!skipCache) {
+                cacheLock.withLock { cache[key] }?.let { entry ->
+                    if (System.currentTimeMillis() - entry.timestamp <= ttlMillis) {
+                        Log.i("MemoizedFetcher", "Cache hit for key: $key")
+                        return entry.data
+                    }
+                }
+                Log.i("MemoizedFetcher", "Cache miss [${provider}] for key: $key")
+            }
+
+            // fetch
+            val newData = provider(key)
+
+            // save
+            val isFailure = (newData as? Result<*>)?.isFailure ?: false
+            if (!isFailure) {
+                cacheLock.withLock {
+                    cache[key] = CacheEntry(newData, System.currentTimeMillis())
+                }
+            }
+            newData
+        }
+    }
+
+    suspend fun clear() {
+        cacheLock.withLock { cache.clear(); argumentLocks.clear() }
+    }
+}

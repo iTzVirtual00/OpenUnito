@@ -31,22 +31,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
+import me.itzvirtual.myunitox.data.repository.Prefetcher
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
 import me.itzvirtual.myunitox.ui.devtools.DevtoolsScreen
-import me.itzvirtual.myunitox.ui.examdates.ExamDatesScreen
 import me.itzvirtual.myunitox.ui.home.HomeScreen
 import me.itzvirtual.myunitox.ui.login.AuthViewModel
 import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
 import me.itzvirtual.myunitox.ui.profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -92,14 +95,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val prefetcher: Prefetcher
+) : ViewModel() {
+    fun prefetchData(scope: CoroutineScope) = prefetcher.prefetchData(scope)
+}
+
 @Composable
 fun RootNavigation(
-    viewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val scope = rememberCoroutineScope()
     val logged = runBlocking {
-        viewModel.isUserLoggedIn()
+        authViewModel.isUserLoggedIn()
     }
     val startDestination = if (logged) "main" else "login"
 
@@ -115,7 +124,7 @@ fun RootNavigation(
             UniToLoginScreen(
                 onAuthSuccess = { token ->
                     Log.d("MyUnitoX", "Received token: $token")
-                    viewModel.login(token)
+                    authViewModel.login(token)
                     navController.navigate("main") {
                         popUpTo("login") { inclusive = true } // it destroys
                     }
@@ -127,10 +136,13 @@ fun RootNavigation(
 
         // --- MAIN APP VIEW ---
         composable("main") { backStackEntry ->
+            val scope = rememberCoroutineScope()
+            val model: MainViewModel = hiltViewModel()
+            model.prefetchData(scope)
             MyUnitoXTheme {
                 MyUniTOXApp(
                     onSessionExpired = {
-                        viewModel.clearToken()
+                        authViewModel.clearToken()
                         navController.navigate("login") {
                             popUpTo("main") { inclusive = true }
                         }
@@ -142,7 +154,9 @@ fun RootNavigation(
 }
 
 @Composable
-fun MyUniTOXApp(onSessionExpired: () -> Unit = {}) {
+fun MyUniTOXApp(
+    onSessionExpired: () -> Unit = {},
+) {
     Log.d("MyUnitoX", "Current locale: ${LocalConfiguration.current.locales[0].language}")
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     NavigationSuiteScaffold(

@@ -29,7 +29,6 @@ private data class AgendaCacheKey(
 @Singleton
 class AgendaRepository @Inject constructor(private val api: UnitoAPI) {
 
-    private val mutex = Mutex()
     private val cache = mutableMapOf<AgendaCacheKey, List<AgendaEntry>>()
 
     // StateFlow for tomorrow's agenda - shared across ViewModels

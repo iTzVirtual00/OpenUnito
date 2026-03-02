@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -229,87 +230,94 @@ fun HomeScreen(
 
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-
     Box(modifier = modifier) {
-        when {
-            studentState.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            item {
+                when {
+                    studentState.isLoading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
 
-            studentState.errorMessage != null -> {
-                Text(text = studentState.errorMessage, color = MaterialTheme.colorScheme.error)
-            }
-
-            studentState.studentData != null -> {
-                val now = LocalDateTime.now()
-                var greeting = if (now.hour < 12) {
-                    stringResource(R.string.good_morning)
-                } else if (now.hour < 18) {
-                    stringResource(R.string.good_afternoon)
-                } else {
-                    stringResource(R.string.good_evening)
-                }
-                greeting += ","
-
-                val name = studentState.studentData.firstname
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        val maxFontSize = 48.sp
-                        var syncedFontSize by remember { mutableStateOf(maxFontSize) }
+                    studentState.errorMessage != null -> {
                         Text(
-                            text = greeting,
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = syncedFontSize,
-                                lineHeight = 52.sp
-                            ),
-                            fontWeight = FontWeight.ExtraBold,
-                            maxLines = 1,
-                            softWrap = false,
-                            onTextLayout = { textLayoutResult ->
-                                if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                    syncedFontSize *= 0.9f
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = syncedFontSize,
-                                lineHeight = 52.sp
-                            ),
-                            fontWeight = FontWeight.ExtraBold,
-                            maxLines = 1,
-                            softWrap = false,
-                            onTextLayout = { textLayoutResult ->
-                                if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                    syncedFontSize *= 0.9f
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                            text = studentState.errorMessage,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TodaysClassesSection(
-                        state = todaysClassesState,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    TomorrowClassesSection(
-                        state = tomorrowClassesState,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                    )
+
+                    studentState.studentData != null -> {
+                        val now = LocalDateTime.now()
+                        var greeting = if (now.hour < 12) {
+                            stringResource(R.string.good_morning)
+                        } else if (now.hour < 18) {
+                            stringResource(R.string.good_afternoon)
+                        } else {
+                            stringResource(R.string.good_evening)
+                        }
+                        greeting += ","
+
+                        val name = studentState.studentData.firstname
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                val maxFontSize = 48.sp
+                                var syncedFontSize by remember { mutableStateOf(maxFontSize) }
+                                Text(
+                                    text = greeting,
+                                    style = MaterialTheme.typography.displayLarge.copy(
+                                        fontSize = syncedFontSize,
+                                        lineHeight = 52.sp
+                                    ),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    onTextLayout = { textLayoutResult ->
+                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
+                                            syncedFontSize *= 0.9f
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.displayLarge.copy(
+                                        fontSize = syncedFontSize,
+                                        lineHeight = 52.sp
+                                    ),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    onTextLayout = { textLayoutResult ->
+                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
+                                            syncedFontSize *= 0.9f
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TodaysClassesSection(
+                                state = todaysClassesState,
+                                onOpenScheduleClick = onNavigateToSchedule,
+                                onEventClick = { event -> selectedEvent = event },
+                            )
+                            Spacer(modifier = Modifier.height(32.dp))
+                            TomorrowClassesSection(
+                                state = tomorrowClassesState,
+                                onOpenScheduleClick = onNavigateToSchedule,
+                                onEventClick = { event -> selectedEvent = event },
+                            )
+                        }
+                    }
                 }
             }
         }
-
         // Event detail overlay
         // Keep a reference to the event being displayed (for exit animation)
         var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
@@ -333,7 +341,7 @@ fun HomeScreen(
     }
 }
 
-// TODO: generalize classes sections since today and future are almost identical
+// TODO: generalize classes sections since today and tomorrow classes are almost identical
 @Composable
 fun TodaysClassesSection(
     state: DailyClassesState,
