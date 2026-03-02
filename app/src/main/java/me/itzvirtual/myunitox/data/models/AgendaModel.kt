@@ -21,7 +21,7 @@ data class AgendaEntry(
     @Serializable(with = InstantIsoSerializer::class)
     val endDateTime: Instant,
 
-    @SerialName("codiceAttivita") val activityCode: String,
+    @SerialName("codiceAttivita") val activityCode: String = "",
     @SerialName("annoCorso") val courseYear: Int,
     @SerialName("stato") val status: String, // E.g., "P"
 
