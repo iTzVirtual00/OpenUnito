@@ -3,6 +3,7 @@ package me.itzvirtual.myunitox.ui.agenda
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -44,8 +45,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.models.ActivityType
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.Building
@@ -613,10 +617,10 @@ internal fun EventDetailView(
 
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ITALIAN) }
-
+    val scope = rememberCoroutineScope()
     // tack vertical offset
     val scrollState = rememberScrollState() // internal scroll state for the content
-    var offsetY by remember { mutableStateOf(0f) } // current vertical offset for drag gesture
+    var offsetY by remember { mutableFloatStateOf(0f) } // current vertical offset for drag gesture
 
     // Smoothly animate the snap-back
     val animatedOffset by animateFloatAsState(targetValue = offsetY, label = "offset")
@@ -656,20 +660,26 @@ internal fun EventDetailView(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
-                // If we've dragged the view down significantly
                 if (offsetY > 300f) {
-                    onDismiss()
-                    // Consume all velocity so it doesn't "slide" further while closing
-                    return available
-                } else {
-                    // If it was just a small wiggle, snap back to top
+                    // Dismiss case
                     offsetY = 0f
-
-                    // If the swipe was downward (available.y > 0),
-                    // consume the velocity so the text inside doesn't suddenly
-                    // start scrolling when the offset hits zero.
-                    return if (available.y > 0) available else Velocity.Zero
+                    onDismiss()
+                    return available
+                } else if (offsetY > 0f) {
+                    // Snap back case: User dragged it a bit, but not enough to dismiss.
+                    // We launch the animation back to 0.
+                    scope.launch {
+                        // Animatable or simply updating the state in a loop/animateTo
+                        // Assuming offsetY is a MutableState<Float>
+                        animate(initialValue = offsetY, targetValue = 0f) { value, _ ->
+                            offsetY = value
+                        }
+                    }
+                    // Consume the velocity so the inner list doesn't scroll
+                    // while the whole component is snapping back.
+                    return available
                 }
+                return Velocity.Zero
             }
         }
     }
