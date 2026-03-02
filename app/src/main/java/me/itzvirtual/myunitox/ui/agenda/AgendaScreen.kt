@@ -3,11 +3,14 @@ package me.itzvirtual.myunitox.ui.agenda
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,12 +50,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -75,6 +86,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Filter options for the agenda
@@ -602,14 +614,75 @@ internal fun EventDetailView(
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ITALIAN) }
 
+    // tack vertical offset
+    val scrollState = rememberScrollState() // internal scroll state for the content
+    var offsetY by remember { mutableStateOf(0f) } // current vertical offset for drag gesture
+
+    // Smoothly animate the snap-back
+    val animatedOffset by animateFloatAsState(targetValue = offsetY, label = "offset")
+
+    val nestedScrollConnection = remember {
+        // WARNING: AI SLOP
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+
+                // CASE: User is swiping UP (delta < 0)
+                // If the view is currently offset (slid down), we must move it
+                // back up to 0 BEFORE letting the internal column scroll.
+                return if (delta < 0 && offsetY > 0) {
+                    val oldOffset = offsetY
+                    // Don't let it go above 0
+                    offsetY = (offsetY + delta).coerceAtLeast(0f)
+                    val consumed = offsetY - oldOffset
+                    Offset(0f, consumed)
+                } else {
+                    Offset.Zero
+                }
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // CASE: User is swiping DOWN (available.y > 0)
+                // If the column has finished scrolling to the top, start sliding the view down.
+                if (available.y > 0 && scrollState.value == 0) {
+                    offsetY += available.y
+                    return Offset(0f, available.y)
+                }
+                return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                // If we've dragged the view down significantly
+                if (offsetY > 300f) {
+                    onDismiss()
+                    // Consume all velocity so it doesn't "slide" further while closing
+                    return available
+                } else {
+                    // If it was just a small wiggle, snap back to top
+                    offsetY = 0f
+
+                    // If the swipe was downward (available.y > 0),
+                    // consume the velocity so the text inside doesn't suddenly
+                    // start scrolling when the offset hits zero.
+                    return if (available.y > 0) available else Velocity.Zero
+                }
+            }
+        }
+    }
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        modifier = Modifier
+            .fillMaxSize()
+            .offset { IntOffset(0, animatedOffset.roundToInt()) }
+            .nestedScroll(nestedScrollConnection)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             // Header with color bar
             Box(
