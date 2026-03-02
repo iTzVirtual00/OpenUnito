@@ -14,7 +14,6 @@ import javax.net.ssl.X509TrustManager
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("co.uzzu.dotenv.gradle") version "4.0.0"
 
     // hilt stuff
     id("com.google.devtools.ksp")
