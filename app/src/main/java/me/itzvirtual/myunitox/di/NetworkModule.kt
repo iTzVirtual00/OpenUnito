@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox.data.remote
+package me.itzvirtual.myunitox.di
 
 import android.content.Context
 import android.util.Log
@@ -10,7 +10,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import me.itzvirtual.myunitox.data.local.SharedPrefStorage
+import me.itzvirtual.myunitox.data.local.dao.AppConfigDao
+import me.itzvirtual.myunitox.data.remote.UnitoAPI
 import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import okhttp3.MediaType.Companion.toMediaType
@@ -33,15 +34,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideAuthStorage(@ApplicationContext context: Context): SharedPrefStorage {
-        return SharedPrefStorage(context)
-    }
-
-    @Provides
-    @Singleton
     fun provideOkHttpClient(
         currentLanguage: String,
-        sharedPrefStorage: SharedPrefStorage,
+        appConfigDao: AppConfigDao,
         @ApplicationContext context: Context
     ): OkHttpClient {
         val logger = HttpLoggingInterceptor.Logger { message ->
@@ -53,10 +48,9 @@ object NetworkModule {
             redactHeader("Authorization")
             redactHeader("Cookie")
         }
-
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
-                val token = sharedPrefStorage.getToken()
+                val token = appConfigDao.getTokenBlocking() // good idea?
                 val request = chain.request().newBuilder()
                     .addHeader("ResultLang", currentLanguage)
                     .addHeader("Authorization", token ?: "")

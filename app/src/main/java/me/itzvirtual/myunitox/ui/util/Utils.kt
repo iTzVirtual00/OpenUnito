@@ -41,9 +41,12 @@ import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import me.itzvirtual.myunitox.data.local.dao.AppConfigDao
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import java.text.SimpleDateFormat
@@ -284,4 +287,46 @@ class MemoizedFetcher<K, V>(
     suspend fun clear() {
         cacheLock.withLock { cache.clear(); argumentLocks.clear() }
     }
+}
+fun cleanupLegacyStorage(@ApplicationContext context: Context, appConfigDao: AppConfigDao) {
+    val prefsFile = java.io.File(context.filesDir.parent, "shared_prefs/secure_auth_prefs.xml")
+    if (!prefsFile.exists()) return
+
+    try {
+        val masterKey = androidx.security.crypto.MasterKey.Builder(context)
+            .setKeyScheme(androidx.security.crypto.MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        val encryptedPrefs = androidx.security.crypto.EncryptedSharedPreferences.create(
+            context,
+            "secure_auth_prefs",
+            masterKey,
+            androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+        val token = encryptedPrefs.getString("basic_auth_token", null)
+        val calendarLinkId = encryptedPrefs.getString("calendar_link_id", null)
+
+        // migrate data
+        runBlocking {
+            if (token != null) {
+                appConfigDao.updateToken(token.trim())
+                Log.i("Migration", "Migrated auth token to Room database.")
+            }
+            if (calendarLinkId != null) {
+                appConfigDao.updateCalendarLink(calendarLinkId.trim())
+                Log.i("Migration", "Migrated calendar link ID to Room database.")
+            }
+        }
+
+        // delete
+        encryptedPrefs.edit { clear() }
+        context.deleteSharedPreferences("secure_auth_prefs")
+        Log.i("Migration", "Legacy EncryptedSharedPreferences deleted successfully.")
+    } catch (e: Exception) {
+        // delete
+        Log.e("Migration", "Failed to migrate legacy SharedPreferences", e)
+        context.deleteSharedPreferences("secure_auth_prefs")
+    }
+    prefsFile.delete() // deleteSharedPreferences isn't removing the file...
 }

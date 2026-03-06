@@ -67,10 +67,10 @@ fun DevtoolsScreen(
     // Bind ViewModel logic to the Actions data class
     val actions = remember(viewModel, context) {
         DevtoolsActions(
-            setToken = { token -> viewModel.login(token); restartApp(context) },
+            setToken = { token -> viewModel.login(token) { restartApp(context) } },
             copyToken = { viewModel.copyTokenToClipboard(context) },
-            clearToken = { viewModel.clearToken(); restartApp(context) },
-            setCalendarId = { calendarId -> viewModel.setCalendarLinkId(calendarId); restartApp(context) }
+            clearToken = { viewModel.clearToken { restartApp(context) } },
+            setCalendarId = { calendarId -> viewModel.setCalendarLinkId(calendarId) { restartApp(context) } }
         )
     }
 

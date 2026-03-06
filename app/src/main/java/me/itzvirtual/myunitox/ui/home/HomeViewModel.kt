@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
-import me.itzvirtual.myunitox.data.local.SharedPrefStorage
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.StudentData
 import me.itzvirtual.myunitox.data.repository.AgendaRepository
+import me.itzvirtual.myunitox.data.repository.AppConfigRepository
 import me.itzvirtual.myunitox.data.repository.StudentDataRepository
 import javax.inject.Inject
 
@@ -40,7 +40,7 @@ data class UiState(
 class HomeViewModel @Inject constructor(
     private val studentDataRepo: StudentDataRepository,
     private val agendaRepo: AgendaRepository,
-    private val sharedPrefStorage: SharedPrefStorage,
+    private val appConfigRepo: AppConfigRepository,
     @ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
@@ -71,8 +71,8 @@ class HomeViewModel @Inject constructor(
             }
             val studentDataDeferred = async { studentDataRepo.getStudentData() }
             val agendaDataDeferred = async {
-                val calendarLinkId = sharedPrefStorage.getCalendarLinkId()
-                val calendarClientId = sharedPrefStorage.getCalendarClientId()
+                val calendarLinkId = appConfigRepo.getCalendarLinkId()
+                val calendarClientId = appConfigRepo.getCalendarClientId()
                 if (calendarLinkId == null) {
                     return@async Result.failure(
                         IllegalStateException("MISSING_ID")

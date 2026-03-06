@@ -21,6 +21,8 @@ plugins {
 
     // Json
     kotlin("plugin.serialization") version "2.3.10"
+
+    id("androidx.room")
 }
 
 
@@ -58,6 +60,12 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+kotlin {
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 }
 
@@ -107,6 +115,12 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.androidx.compose.ui.text.google.fonts)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 }
 
 // Generate version.json alongside the release APK

@@ -10,7 +10,7 @@ import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import me.itzvirtual.myunitox.data.remote.API_URL
+import me.itzvirtual.myunitox.di.API_URL
 import javax.inject.Inject
 import javax.inject.Singleton
 

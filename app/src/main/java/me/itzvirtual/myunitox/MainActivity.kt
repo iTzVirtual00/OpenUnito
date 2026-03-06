@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,6 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
 import me.itzvirtual.myunitox.data.repository.Prefetcher
 import me.itzvirtual.myunitox.ui.LocaleHelper
 import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
@@ -56,10 +56,14 @@ import me.itzvirtual.myunitox.ui.login.AuthViewModel
 import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
 import me.itzvirtual.myunitox.ui.profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
+import me.itzvirtual.myunitox.data.local.dao.AppConfigDao
+import me.itzvirtual.myunitox.ui.util.cleanupLegacyStorage
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var appConfigDao: AppConfigDao
 
     override fun attachBaseContext(newBase: Context) {
         // This forces the saved language into the Activity's context
@@ -96,6 +100,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         updateAppLanguage("it")
+        cleanupLegacyStorage(context = this, appConfigDao = appConfigDao)
         setContent {
             RootNavigation()
         }
@@ -114,13 +119,14 @@ fun RootNavigation(
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val logged = runBlocking {
-        authViewModel.isUserLoggedIn()
-    }
-    val startDestination = if (logged) "main" else "login"
+
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    // null means still loading from DB wait before deciding
+    if (isAuthenticated == null) return
+
+    val startDestination = if (isAuthenticated == true) "main" else "login"
 
     NavHost(navController = navController, startDestination = startDestination) {
-
         // --- LOGIN VIEW ---
         composable("login") {
             val startUrl = remember {
@@ -131,9 +137,10 @@ fun RootNavigation(
             UniToLoginScreen(
                 onAuthSuccess = { token ->
                     Log.d("MyUnitoX", "Received token: $token")
-                    authViewModel.login(token)
-                    navController.navigate("main") {
-                        popUpTo("login") { inclusive = true } // it destroys
+                    authViewModel.login(token) {
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true } // it destroys
+                        }
                     }
                 },
                 startUrl = startUrl,
@@ -149,9 +156,10 @@ fun RootNavigation(
             MyUnitoXTheme {
                 MyUniTOXApp(
                     onSessionExpired = {
-                        authViewModel.clearToken()
-                        navController.navigate("login") {
-                            popUpTo("main") { inclusive = true }
+                        authViewModel.clearToken {
+                            navController.navigate("login") {
+                                popUpTo("main") { inclusive = true }
+                            }
                         }
                     }
                 )

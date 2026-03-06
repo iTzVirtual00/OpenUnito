@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import me.itzvirtual.myunitox.data.local.SharedPrefStorage
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
@@ -20,7 +19,7 @@ class Prefetcher @Inject constructor(
     private val examResultRepo: ExamResultRepository,
     private val gradeRepository: GradeRepository,
 
-    private val sharedPrefStorage: SharedPrefStorage,
+    private val appConfigRepo: AppConfigRepository,
 ) {
     fun prefetchData(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
@@ -31,8 +30,8 @@ class Prefetcher @Inject constructor(
                     val startDate = now.with(java.time.DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()
                     val endDate = now.with(java.time.DayOfWeek.SUNDAY).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
 
-                    val calendarLinkId = sharedPrefStorage.getCalendarLinkId()
-                    val calendarClientId = sharedPrefStorage.getCalendarClientId()
+                    val calendarLinkId = appConfigRepo.getCalendarLinkId()
+                    val calendarClientId = appConfigRepo.getCalendarClientId()
 
                     if (calendarLinkId != null) {
                         agendaRepo.fetchPublicAgenda(
