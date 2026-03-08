@@ -94,11 +94,10 @@ import me.itzvirtual.myunitox.data.models.ExamResult
 import me.itzvirtual.myunitox.data.models.GradeResult
 import me.itzvirtual.myunitox.data.models.GradeStatus
 import me.itzvirtual.myunitox.data.models.Professor
-import me.itzvirtual.myunitox.data.models.Room
+import me.itzvirtual.myunitox.data.models.RoomLocation
 import me.itzvirtual.myunitox.data.models.Score
 import me.itzvirtual.myunitox.data.models.dashboardDataSample
 import me.itzvirtual.myunitox.data.models.StudentCareer
-import me.itzvirtual.myunitox.data.models.StudentData
 import me.itzvirtual.myunitox.data.models.sampleStudentData
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
@@ -112,7 +111,6 @@ import me.itzvirtual.myunitox.ui.util.shimmerEffect
 import me.itzvirtual.myunitox.ui.util.toClipEntry
 import me.itzvirtual.myunitox.ui.util.toColor
 import java.time.Instant
-import java.util.Date
 
 
 @Composable
@@ -248,7 +246,7 @@ fun DashboardScreenPreview() {
                             courseYear = 1,
                             status = "P",
                             rooms = listOf(
-                                Room(
+                                RoomLocation(
                                     id = "r1",
                                     code = "AULA_A",
                                     name = "Aula A",
@@ -277,7 +275,7 @@ fun DashboardScreenPreview() {
                                 courseYear = 1,
                                 status = "P",
                                 rooms = listOf(
-                                    Room(
+                                    RoomLocation(
                                         id = "r1",
                                         code = "AULA_A",
                                         name = "Aula A",
@@ -301,7 +299,7 @@ fun DashboardScreenPreview() {
                                 courseYear = 1,
                                 status = "P",
                                 rooms = listOf(
-                                    Room(
+                                    RoomLocation(
                                         id = "r2",
                                         code = "AULA_B",
                                         name = "Aula B",

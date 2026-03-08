@@ -51,7 +51,7 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.data.models.ActivityType
 import me.itzvirtual.myunitox.data.models.AgendaEntry
 import me.itzvirtual.myunitox.data.models.Professor
-import me.itzvirtual.myunitox.data.models.Room
+import me.itzvirtual.myunitox.data.models.RoomLocation
 import me.itzvirtual.myunitox.data.models.sampleStudentData
 import me.itzvirtual.myunitox.ui.agenda.EventDetailView
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
@@ -73,7 +73,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room1", code = "MA", name = "Main auditorium")
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
             ),
             professors = listOf(
                 Professor("prof1", "Elena", "Galli")
@@ -89,7 +89,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room1", code = "MA", name = "Main auditorium")
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
             ),
             professors = listOf(
                 Professor("prof1", "Elena", "Galli")
@@ -105,7 +105,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room2", code = "A2", name = "Aula 2")
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
             ),
             professors = listOf(
                 Professor("prof2", "Marco", "Rossi")
@@ -121,7 +121,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room2", code = "A2", name = "Aula 2")
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
             ),
             professors = listOf(
                 Professor("prof2", "Marco", "Rossi")
@@ -137,7 +137,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room2", code = "A2", name = "Aula 2")
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
             ),
             professors = listOf(
                 Professor("prof2", "Marco", "Rossi")
@@ -155,7 +155,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room3", code = "B1", name = "Aula B1")
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
             ),
             professors = listOf(
                 Professor("prof3", "Luca", "Bianchi")
@@ -171,7 +171,7 @@ fun HomeScreenPreview() {
             courseYear = 1,
             status = "P",
             rooms = listOf(
-                Room(id = "room3", code = "B1", name = "Aula B1")
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
             ),
             professors = listOf(
                 Professor("prof3", "Luca", "Bianchi")

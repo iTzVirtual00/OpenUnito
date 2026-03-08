@@ -10,8 +10,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,8 +56,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,7 +74,7 @@ import me.itzvirtual.myunitox.data.models.Building
 import me.itzvirtual.myunitox.data.models.Coordinates
 import me.itzvirtual.myunitox.data.models.Floor
 import me.itzvirtual.myunitox.data.models.Professor
-import me.itzvirtual.myunitox.data.models.Room
+import me.itzvirtual.myunitox.data.models.RoomLocation
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.util.LoadingIconItem
@@ -916,7 +912,7 @@ private val sampleEvents = listOf(
         courseYear = 1,
         status = "P",
         rooms = listOf(
-            Room(
+            RoomLocation(
                 id = "room1",
                 code = "AULA_A_INFO",
                 name = "Aula A",
@@ -947,7 +943,7 @@ private val sampleEvents = listOf(
         courseYear = 2,
         status = "P",
         rooms = listOf(
-            Room(
+            RoomLocation(
                 id = "room2",
                 code = "LABINF",
                 name = "Laboratorio Informatica",
@@ -968,7 +964,7 @@ private val sampleEvents = listOf(
         courseYear = 1,
         status = "P",
         rooms = listOf(
-            Room(id = "room3", code = "5S", name = "Aula 5S")
+            RoomLocation(id = "room3", code = "5S", name = "Aula 5S")
         ),
         professors = listOf(
             Professor("prof3", "Luigi", "VERDI")
@@ -984,7 +980,7 @@ private val sampleEvents = listOf(
         courseYear = 1,
         status = "P",
         rooms = listOf(
-            Room(id = "room4", code = "2", name = "Aula 2")
+            RoomLocation(id = "room4", code = "2", name = "Aula 2")
         ),
         professors = listOf(
             Professor("prof4", "Anna", "BIANCHI")

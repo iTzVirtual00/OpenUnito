@@ -1,8 +1,7 @@
-package me.itzvirtual.myunitox.data.models
+package me.itzvirtual.myunitox.data.models.tables
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.serialization.SerialName
 
 @Entity(tableName = "app_config")
 data class AppConfig(

@@ -25,7 +25,7 @@ data class AgendaEntry(
     @SerialName("annoCorso") val courseYear: Int,
     @SerialName("stato") val status: String, // E.g., "P"
 
-    @SerialName("aule") val rooms: List<Room> = emptyList(),
+    @SerialName("aule") val rooms: List<RoomLocation> = emptyList(),
     @SerialName("docenti") val professors: List<Professor> = emptyList(),
     @SerialName("tipoAttivita") val activityType: ActivityType,
 
@@ -45,7 +45,7 @@ data class AgendaEntry(
 }
 
 @Serializable
-data class Room(
+data class RoomLocation(
     @SerialName("id") val id: String,
     @SerialName("codice") val code: String,
     @SerialName("descrizione") val name: String,

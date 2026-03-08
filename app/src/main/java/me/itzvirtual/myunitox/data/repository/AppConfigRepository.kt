@@ -6,7 +6,7 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import me.itzvirtual.myunitox.data.local.dao.AppConfigDao
-import me.itzvirtual.myunitox.data.models.AppConfig
+import me.itzvirtual.myunitox.data.models.tables.AppConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.content.edit
