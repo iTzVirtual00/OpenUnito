@@ -46,18 +46,18 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import me.itzvirtual.myunitox.data.repository.Prefetcher
-import me.itzvirtual.myunitox.ui.LocaleHelper
-import me.itzvirtual.myunitox.ui.agenda.AgendaScreen
-import me.itzvirtual.myunitox.ui.dashboard.DashboardScreen
-import me.itzvirtual.myunitox.ui.devtools.DevtoolsScreen
-import me.itzvirtual.myunitox.ui.home.HomeScreen
-import me.itzvirtual.myunitox.ui.login.AuthViewModel
-import me.itzvirtual.myunitox.ui.login.UniToLoginScreen
-import me.itzvirtual.myunitox.ui.profile.ProfileScreen
+import me.itzvirtual.myunitox.data.Prefetcher
+import me.itzvirtual.myunitox.data.config.local.AppConfigDao
+import me.itzvirtual.myunitox.ui.feature_agenda.AgendaScreen
+import me.itzvirtual.myunitox.ui.feature_dashboard.DashboardScreen
+import me.itzvirtual.myunitox.ui.feature_devtools.DevtoolsScreen
+import me.itzvirtual.myunitox.ui.feature_home.HomeScreen
+import me.itzvirtual.myunitox.ui.feature_login.AuthViewModel
+import me.itzvirtual.myunitox.ui.feature_login.UniToLoginScreen
+import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
+import me.itzvirtual.myunitox.ui.shared.LocaleHelper
+import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
-import me.itzvirtual.myunitox.data.local.dao.AppConfigDao
-import me.itzvirtual.myunitox.ui.util.cleanupLegacyStorage
 import javax.inject.Inject
 
 @AndroidEntryPoint
