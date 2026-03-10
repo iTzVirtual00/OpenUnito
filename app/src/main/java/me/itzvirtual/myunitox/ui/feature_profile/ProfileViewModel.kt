@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -70,7 +71,7 @@ class ProfileViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             dashboardState = s.dashboardState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.dashboardState.data != null) null else e.message,
                                 isLoading = false
                             )
                         )

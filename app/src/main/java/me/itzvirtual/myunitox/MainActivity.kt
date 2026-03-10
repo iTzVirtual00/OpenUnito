@@ -15,6 +15,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -46,7 +47,9 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import me.itzvirtual.myunitox.core.network.NetworkMonitor
 import me.itzvirtual.myunitox.data.Prefetcher
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.ui.feature_agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.feature_dashboard.DashboardScreen
@@ -56,6 +59,7 @@ import me.itzvirtual.myunitox.ui.feature_login.AuthViewModel
 import me.itzvirtual.myunitox.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.shared.LocaleHelper
+import me.itzvirtual.myunitox.ui.shared.OfflineBanner
 import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import javax.inject.Inject
@@ -64,6 +68,9 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var appConfigDao: AppConfigDao
+
+    @Inject
+    lateinit var calendarConfigDao: CalendarConfigDao
 
     override fun attachBaseContext(newBase: Context) {
         // This forces the saved language into the Activity's context
@@ -100,7 +107,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         updateAppLanguage("it")
-        cleanupLegacyStorage(context = this, appConfigDao = appConfigDao)
+        cleanupLegacyStorage(
+            context = this,
+            appConfigDao = appConfigDao,
+            calendarConfigDao = calendarConfigDao
+        )
         setContent {
             RootNavigation()
         }
@@ -109,8 +120,10 @@ class MainActivity : ComponentActivity() {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val prefetcher: Prefetcher
+    private val prefetcher: Prefetcher,
+    networkMonitor: NetworkMonitor,
 ) : ViewModel() {
+    val isOnline = networkMonitor.isOnline
     fun prefetchData(scope: CoroutineScope) = prefetcher.prefetchData(scope)
 }
 
@@ -153,8 +166,10 @@ fun RootNavigation(
             val scope = rememberCoroutineScope()
             val model: MainViewModel = hiltViewModel()
             model.prefetchData(scope)
+            val isOnline by model.isOnline.collectAsState(initial = true)
             MyUnitoXTheme {
                 MyUniTOXApp(
+                    isOnline = isOnline,
                     onSessionExpired = {
                         authViewModel.clearToken {
                             navController.navigate("login") {
@@ -170,6 +185,7 @@ fun RootNavigation(
 
 @Composable
 fun MyUniTOXApp(
+    isOnline: Boolean = true,
     onSessionExpired: () -> Unit = {},
 ) {
     Log.d("MyUnitoX", "Current locale: ${LocalConfiguration.current.locales[0].language}")
@@ -196,44 +212,51 @@ fun MyUniTOXApp(
                 .fillMaxSize()
                 .safeDrawingPadding()
         ) { innerPadding ->
-            // why is this so fucking easy
-            AnimatedContent(
-                targetState = currentDestination,
-                transitionSpec = {
-                    if (targetState.ordinal > initialState.ordinal) {
-                        (slideInHorizontally { it } + fadeIn())
-                            .togetherWith(slideOutHorizontally { -it } + fadeOut())
-                    } else {
-                        (slideInHorizontally { -it } + fadeIn())
-                            .togetherWith(slideOutHorizontally { it } + fadeOut())
-                    }
-                },
-                label = "ScreenTransition"
-            ) { targetDestination ->
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    when (targetDestination) {
-                        AppDestinations.HOME -> HomeScreen(
-                            modifier = Modifier.padding(innerPadding),
-                            onNavigateToSchedule = { currentDestination = AppDestinations.CALENDAR }
-                        )
+            Column(modifier = Modifier.fillMaxSize()) {
+                // why is this so fucking easy
+                AnimatedContent(
+                    targetState = currentDestination,
+                    modifier = Modifier.weight(1f),
+                    transitionSpec = {
+                        if (targetState.ordinal > initialState.ordinal) {
+                            (slideInHorizontally { it } + fadeIn())
+                                .togetherWith(slideOutHorizontally { -it } + fadeOut())
+                        } else {
+                            (slideInHorizontally { -it } + fadeIn())
+                                .togetherWith(slideOutHorizontally { it } + fadeOut())
+                        }
+                    },
+                    label = "ScreenTransition"
+                ) { targetDestination ->
+                    Box(modifier = Modifier.padding(innerPadding)) {
+                        when (targetDestination) {
+                            AppDestinations.HOME -> HomeScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                onNavigateToSchedule = {
+                                    currentDestination = AppDestinations.CALENDAR
+                                }
+                            )
 
-                        AppDestinations.DASHBOARD -> DashboardScreen(
-                            modifier = Modifier.padding(innerPadding),
-                        )
+//                            AppDestinations.DASHBOARD -> DashboardScreen(
+//                                modifier = Modifier.padding(innerPadding),
+//                            )
 
-                        AppDestinations.CALENDAR -> AgendaScreen(
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                            AppDestinations.CALENDAR -> AgendaScreen(
+                                modifier = Modifier.padding(innerPadding)
+                            )
 
-                        AppDestinations.PROFILE -> ProfileScreen(
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                            AppDestinations.PROFILE -> ProfileScreen(
+                                modifier = Modifier.padding(innerPadding),
+                            )
 
-                        AppDestinations.DEVTOOLS -> DevtoolsScreen(
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                            AppDestinations.DEVTOOLS -> DevtoolsScreen(
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
                     }
                 }
+
+                OfflineBanner(isOnline = isOnline)
             }
         }
     }
@@ -244,7 +267,7 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
-    DASHBOARD("Old", Icons.Default.Home),
+//    DASHBOARD("Old", Icons.Default.Home),
     PROFILE("Profile", Icons.Default.AccountBox),
     CALENDAR("Calendar", Icons.Default.CalendarToday),
     DEVTOOLS("Dev", Icons.Default.LogoDev),

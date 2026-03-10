@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.feature_agenda
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
@@ -10,6 +11,10 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,17 +34,27 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -56,6 +71,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,6 +85,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.R
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.domain.agenda.ActivityType
 import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import me.itzvirtual.myunitox.domain.agenda.Building
@@ -149,10 +168,23 @@ fun AgendaScreen(
         Agenda(
             events = screenState.agendaState.agendaEntries,
             modifier = Modifier.fillMaxSize(),
-            initialDate = screenState.selectedStart ?: LocalDate.now(),
+            currentWeekStart = (screenState.selectedStart ?: LocalDate.now())
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
             onWeekChange = { startDate, endDate ->
                 viewModel.loadAgendaForWeek(startDate, endDate)
-            }
+            },
+            calendars = screenState.calendars,
+            selectedCalendar = screenState.selectedCalendar,
+            onCalendarSelected = { viewModel.selectCalendar(it) },
+            onCalendarAdd = { name, linkId, onResult ->
+                viewModel.addCalendar(
+                    name,
+                    linkId,
+                    onResult
+                )
+            },
+            onCalendarRename = { id, newName -> viewModel.renameCalendar(id, newName) },
+            onCalendarDelete = { viewModel.deleteCalendar(it) },
         )
 
         // Loading overlay
@@ -180,8 +212,12 @@ fun AgendaScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                var errMsg = screenState.agendaState.error!!
+                if (errMsg == "NO_CALENDAR") {
+                    errMsg = stringResource(R.string.error_no_calendar_configured)
+                }
                 Text(
-                    text = screenState.agendaState.error ?: "Errore sconosciuto",
+                    text = errMsg,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
@@ -198,12 +234,16 @@ fun AgendaScreen(
 fun Agenda(
     events: List<AgendaEntry>,
     modifier: Modifier = Modifier,
-    initialDate: LocalDate = LocalDate.now(),
-    onWeekChange: (LocalDate, LocalDate) -> Unit = { _, _ -> }
+    currentWeekStart: LocalDate = LocalDate.now()
+        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+    onWeekChange: (LocalDate, LocalDate) -> Unit = { _, _ -> },
+    calendars: List<CalendarConfig> = emptyList(),
+    selectedCalendar: CalendarConfig? = null,
+    onCalendarSelected: (CalendarConfig) -> Unit = {},
+    onCalendarAdd: (String, String, (Boolean, String) -> Unit) -> Unit = { _, _, _ -> },
+    onCalendarRename: (Int, String) -> Unit = { _, _ -> },
+    onCalendarDelete: (Int) -> Unit = {},
 ) {
-    var currentWeekStart by remember {
-        mutableStateOf(initialDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)))
-    }
 
     var selectedFilter by remember { mutableStateOf(AgendaFilter.EVENTS) }
     var showFilterDropdown by remember { mutableStateOf(false) }
@@ -231,7 +271,10 @@ fun Agenda(
 //    }
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
             // Header with filter and date navigation
             AgendaHeader(
                 currentWeekStart = currentWeekStart,
@@ -245,13 +288,19 @@ fun Agenda(
 //                    showFilterDropdown = false
 //                },
                 onPreviousWeek = {
-                    currentWeekStart = currentWeekStart.minusWeeks(1)
-                    onWeekChange(currentWeekStart, currentWeekStart.plusDays(6))
+                    val newStart = currentWeekStart.minusWeeks(1)
+                    onWeekChange(newStart, newStart.plusDays(6))
                 },
                 onNextWeek = {
-                    currentWeekStart = currentWeekStart.plusWeeks(1)
-                    onWeekChange(currentWeekStart, currentWeekStart.plusDays(6))
-                }
+                    val newStart = currentWeekStart.plusWeeks(1)
+                    onWeekChange(newStart, newStart.plusDays(6))
+                },
+                calendars = calendars,
+                selectedCalendar = selectedCalendar,
+                onCalendarSelected = onCalendarSelected,
+                onCalendarAdd = onCalendarAdd,
+                onCalendarRename = onCalendarRename,
+                onCalendarDelete = onCalendarDelete,
             )
 
             // Week days header
@@ -263,7 +312,15 @@ fun Agenda(
                 startHour = startHour,
 //                endHour = endHour,
                 weekStartDate = currentWeekStart,
-                onEventClick = { event -> selectedEvent = event }
+                onEventClick = { event -> selectedEvent = event },
+                onPreviousWeek = {
+                    val newStart = currentWeekStart.minusWeeks(1)
+                    onWeekChange(newStart, newStart.plusDays(6))
+                },
+                onNextWeek = {
+                    val newStart = currentWeekStart.plusWeeks(1)
+                    onWeekChange(newStart, newStart.plusDays(6))
+                },
             )
         }
 
@@ -300,9 +357,19 @@ private fun AgendaHeader(
 //    onFilterDismiss: () -> Unit,
 //    onFilterSelect: (AgendaFilter) -> Unit,
     onPreviousWeek: () -> Unit,
-    onNextWeek: () -> Unit
+    onNextWeek: () -> Unit,
+    calendars: List<CalendarConfig>,
+    selectedCalendar: CalendarConfig?,
+    onCalendarSelected: (CalendarConfig) -> Unit,
+    onCalendarAdd: (String, String, (Boolean, String) -> Unit) -> Unit,
+    onCalendarRename: (Int, String) -> Unit,
+    onCalendarDelete: (Int) -> Unit,
 ) {
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMM", Locale.ITALIAN) }
+    var showCalendarDropdown by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var renameTarget by remember { mutableStateOf<CalendarConfig?>(null) }
+    var deleteTarget by remember { mutableStateOf<CalendarConfig?>(null) }
 
     Row(
         modifier = Modifier
@@ -311,54 +378,101 @@ private fun AgendaHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-        // Filter dropdown
-//        Box {
-//            Surface(
-//                shape = RoundedCornerShape(8.dp),
-//                color = MaterialTheme.colorScheme.surfaceVariant,
-//                modifier = Modifier.clickable { onFilterClick() }
-//            ) {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-//                ) {
-//                    Text(
-//                        text = when (selectedFilter) {
-//                            AgendaFilter.EVENTS -> "Eventi"
-//                            AgendaFilter.LESSONS -> "Lezioni"
-//                            AgendaFilter.EXAMS -> "Esami"
-//                        },
-//                        style = MaterialTheme.typography.bodyMedium
-//                    )
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-//                        contentDescription = null,
-//                        modifier = Modifier.size(20.dp)
-//                    )
-//                }
-//            }
-//
-//            DropdownMenu(
-//                expanded = showFilterDropdown,
-//                onDismissRequest = onFilterDismiss
-//            ) {
-//                AgendaFilter.entries.forEach { filter ->
-//                    DropdownMenuItem(
-//                        text = {
-//                            Text(
-//                                when (filter) {
-//                                    AgendaFilter.EVENTS -> "Eventi"
-//                                    AgendaFilter.LESSONS -> "Lezioni"
-//                                    AgendaFilter.EXAMS -> "Esami"
-//                                }
-//                            )
-//                        },
-//                        onClick = { onFilterSelect(filter) }
-//                    )
-//                }
-//            }
-//        }
+        // Calendar selector (left side)
+        Box {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.clickable { showCalendarDropdown = true }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = selectedCalendar?.name ?: "No calendar",
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            DropdownMenu(
+                expanded = showCalendarDropdown,
+                onDismissRequest = { showCalendarDropdown = false }
+            ) {
+                calendars.forEach { cal ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = cal.name,
+                                    modifier = Modifier.weight(1f),
+                                    fontWeight = if (cal.id == selectedCalendar?.id) FontWeight.Bold else FontWeight.Normal,
+                                )
+                                IconButton(
+                                    onClick = {
+                                        showCalendarDropdown = false
+                                        renameTarget = cal
+                                    },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = "Rename",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        showCalendarDropdown = false
+                                        deleteTarget = cal
+                                    },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            onCalendarSelected(cal)
+                            showCalendarDropdown = false
+                        }
+                    )
+                }
+                HorizontalDivider()
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Add Calendar")
+                        }
+                    },
+                    onClick = {
+                        showCalendarDropdown = false
+                        showAddDialog = true
+                    }
+                )
+            }
+        }
 
         // Date navigation
         Row(
@@ -390,6 +504,179 @@ private fun AgendaHeader(
             }
         }
     }
+
+    // Add Calendar Dialog
+    if (showAddDialog) {
+        AddCalendarDialog(
+            onDismiss = { showAddDialog = false },
+            onAdd = { name, linkId, onResult ->
+                onCalendarAdd(name, linkId) { success, msg ->
+                    onResult(success, msg)
+                    if (success) showAddDialog = false
+                }
+            }
+        )
+    }
+
+    // Rename Dialog
+    renameTarget?.let { cal ->
+        RenameCalendarDialog(
+            currentName = cal.name,
+            onDismiss = { renameTarget = null },
+            onRename = { newName ->
+                onCalendarRename(cal.id, newName)
+                renameTarget = null
+            }
+        )
+    }
+
+    // Delete Confirmation Dialog
+    deleteTarget?.let { cal ->
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text("Delete Calendar") },
+            text = { Text("Are you sure you want to delete \"${cal.name}\"?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onCalendarDelete(cal.id)
+                    deleteTarget = null
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun AddCalendarDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String, String, (Boolean, String) -> Unit) -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var linkInput by remember { mutableStateOf("") }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    var isValidating by remember { mutableStateOf(false) }
+
+    val hexRegex = remember { Regex("^[a-fA-F0-9]{24}$") }
+    val urlParamRegex = remember { Regex("linkCalendarioId=([a-fA-F0-9]+)") }
+
+    fun extractCalendarLinkId(input: String): String? {
+        val trimmed = input.trim()
+        if (hexRegex.matches(trimmed)) return trimmed
+        urlParamRegex.find(trimmed)?.let { return it.groupValues[1] }
+        return null
+    }
+
+    AlertDialog(
+        onDismissRequest = { if (!isValidating) onDismiss() },
+        title = { Text("Add Calendar") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = linkInput,
+                    onValueChange = {
+                        linkInput = it
+                        errorMsg = null
+                    },
+                    label = { Text("Calendar Link ID or URL") },
+                    singleLine = true,
+                    isError = errorMsg != null,
+                    supportingText = errorMsg?.let { { Text(it) } },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (isValidating) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Text("Validating...", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val extracted = extractCalendarLinkId(linkInput)
+                    if (name.isBlank()) {
+                        errorMsg = "Name cannot be empty."
+                        return@TextButton
+                    }
+                    if (extracted == null) {
+                        errorMsg =
+                            "Invalid format. Enter a 24-char hex ID or a URL containing linkCalendarioId."
+                        return@TextButton
+                    }
+                    isValidating = true
+                    onAdd(name.trim(), extracted) { success, msg ->
+                        isValidating = false
+                        if (!success) errorMsg = msg
+                    }
+                },
+                enabled = !isValidating,
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isValidating) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun RenameCalendarDialog(
+    currentName: String,
+    onDismiss: () -> Unit,
+    onRename: (String) -> Unit,
+) {
+    var name by remember { mutableStateOf(currentName) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Rename Calendar") },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (name.isNotBlank()) onRename(name.trim()) },
+                enabled = name.isNotBlank(),
+            ) {
+                Text("Rename")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -426,14 +713,15 @@ private fun WeekDaysHeader(weekStartDate: LocalDate) {
 private fun AgendaGrid(
     events: List<AgendaEntry>,
     weekStartDate: LocalDate,
-    onEventClick: (AgendaEntry) -> Unit,
     startHour: Int = 8,
     endHour: Int = 20,
-    hourHeight: Dp = 60.dp
+    hourHeight: Dp = 60.dp,
+    onEventClick: (AgendaEntry) -> Unit,
+    onPreviousWeek: () -> Unit,
+    onNextWeek: () -> Unit,
 ) {
-    val horizontalScrollState = rememberScrollState()
     val verticalScrollState = rememberScrollState()
-
+    var totalDrag = 0f
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -468,7 +756,25 @@ private fun AgendaGrid(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .horizontalScroll(horizontalScrollState)
+                .draggable(
+                    state = rememberDraggableState { delta ->
+                        totalDrag += delta
+                    },
+                    orientation = Orientation.Horizontal,
+                    onDragStarted = {
+                        totalDrag = 0f
+                    },
+                    onDragStopped = {
+                        Log.d("AgendaGrid", "Total drag: $totalDrag")
+                        val threshold = 200f
+                        if (totalDrag < -threshold) {
+                            onNextWeek()
+                        } else if (totalDrag > threshold) {
+                            onPreviousWeek()
+                        }
+                        totalDrag = 0f
+                    }
+                )
         ) {
             for (dayOffset in 0..4) { // Monday to Friday
                 val currentDate = weekStartDate.plusDays(dayOffset.toLong())
@@ -997,7 +1303,8 @@ fun AgendaPreview() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Agenda(
                 events = sampleEvents,
-                initialDate = LocalDate.of(2026, 2, 16),
+                currentWeekStart = LocalDate.of(2026, 2, 16)
+                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
                 modifier = Modifier.padding(innerPadding)
             )
         }

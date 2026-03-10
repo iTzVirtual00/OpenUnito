@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
+import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
 import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
@@ -20,6 +21,7 @@ class HomeViewModel @Inject constructor(
     private val studentRepo: StudentRepository,
     private val agendaRepo: AgendaRepository,
     private val appConfigRepo: AppConfigRepository,
+    private val calendarConfigRepo: CalendarConfigRepository,
     @ApplicationContext private val context: android.content.Context,
 ) : ViewModel() {
 
@@ -43,14 +45,14 @@ class HomeViewModel @Inject constructor(
             }
 
             val agendaDeferred = async {
-                val calendarLinkId = appConfigRepo.getCalendarLinkId()
+                val selectedCalendar = calendarConfigRepo.getSelectedCalendar()
                 val calendarClientId = appConfigRepo.getCalendarClientId()
-                if (calendarLinkId == null) {
+                if (selectedCalendar == null) {
                     return@async Result.failure<AgendaEntry>(
-                        IllegalStateException("MISSING_ID")
-                    ).let { Result.failure(IllegalStateException("MISSING_ID")) }
+                        IllegalStateException("NO_CALENDAR")
+                    ).let { Result.failure(IllegalStateException("NO_CALENDAR")) }
                 }
-                agendaRepo.fetchTodayAndTomorrow(calendarLinkId, calendarClientId)
+                agendaRepo.fetchTodayAndTomorrow(selectedCalendar.calendarLinkId, calendarClientId)
             }
 
             val studentResult = studentDeferred.await()

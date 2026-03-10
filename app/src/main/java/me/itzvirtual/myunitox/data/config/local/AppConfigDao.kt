@@ -15,10 +15,6 @@ interface AppConfigDao {
 
     @Query("UPDATE app_config SET authToken = :token WHERE id = 0")
     suspend fun updateToken(token: String?)
-
-    @Query("UPDATE app_config SET calendarLinkId = :linkId WHERE id = 0")
-    suspend fun updateCalendarLink(linkId: String?)
-
     @Query("DELETE FROM app_config")
     suspend fun clearAll()
 
@@ -29,9 +25,9 @@ interface AppConfigDao {
     @Query("SELECT authToken FROM app_config WHERE id = 0")
     suspend fun getToken(): String?
 
-    @Query("SELECT calendarLinkId FROM app_config WHERE id = 0")
-    suspend fun getCalendarLinkId(): String?
+    @Query("UPDATE app_config SET selectedCalendarId = :calendarId WHERE id = 0")
+    suspend fun updateSelectedCalendarId(calendarId: Int?)
 
-    @Query("SELECT calendarClientId FROM app_config WHERE id = 0")
-    suspend fun getCalendarClientId(): String?
+    @Query("SELECT selectedCalendarId FROM app_config WHERE id = 0")
+    suspend fun getSelectedCalendarId(): Int?
 }

@@ -3,6 +3,7 @@ package me.itzvirtual.myunitox.data.agenda
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import me.itzvirtual.myunitox.core.cache.CacheConfig
 import me.itzvirtual.myunitox.core.network.UnitoApi
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.agenda.mapper.toDomain
@@ -15,22 +16,21 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val STALE_THRESHOLD_MS = 15 * 60 * 1000L
-
 @Singleton
 class AgendaRepository @Inject constructor(
     private val api: UnitoApi,
     private val dao: AgendaDao,
     private val json: Json,
 ) {
-    fun buildKey(startDate: Instant, endDate: Instant) = "${startDate}_${endDate}"
+    fun buildKey(calendarLinkId: String, startDate: Instant, endDate: Instant) =
+        "${calendarLinkId}_${startDate}_${endDate}"
 
-    fun getAgendaFlow(startDate: Instant, endDate: Instant): Flow<List<AgendaEntry>?> =
-        dao.getByKeyFlow(buildKey(startDate, endDate)).map { it?.toDomain(json) }
+    fun getAgendaFlow(calendarLinkId: String, startDate: Instant, endDate: Instant): Flow<List<AgendaEntry>?> =
+        dao.getByKeyFlow(buildKey(calendarLinkId, startDate, endDate)).map { it?.toDomain(json) }
 
-    fun isStaleFlow(startDate: Instant, endDate: Instant): Flow<Boolean> =
-        dao.getByKeyFlow(buildKey(startDate, endDate)).map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > STALE_THRESHOLD_MS
+    fun isStaleFlow(calendarLinkId: String, startDate: Instant, endDate: Instant): Flow<Boolean> =
+        dao.getByKeyFlow(buildKey(calendarLinkId, startDate, endDate)).map { entity ->
+            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
         }
 
     /** Returns cached data if available, then fires a network refresh. Returns the fresh or cached list. */
@@ -40,7 +40,7 @@ class AgendaRepository @Inject constructor(
         startDate: Instant,
         endDate: Instant,
     ): Pair<List<AgendaEntry>?, Result<List<AgendaEntry>>> {
-        val key = buildKey(startDate, endDate)
+        val key = buildKey(calendarLinkId, startDate, endDate)
         val cached = try {
             dao.getByKey(key)?.toDomain(json)
         } catch (_: Exception) {
@@ -57,20 +57,31 @@ class AgendaRepository @Inject constructor(
         return cached to (fresh?.let { Result.success(it) } ?: refreshResult.map { emptyList() })
     }
 
-    suspend fun getCached(startDate: Instant, endDate: Instant): List<AgendaEntry>? =
-        try {
-            dao.getByKey(buildKey(startDate, endDate))?.toDomain(json)
+    suspend fun getCached(calendarLinkId: String, startDate: Instant, endDate: Instant): List<AgendaEntry>? {
+        dao.deleteOlderThan(System.currentTimeMillis() - CacheConfig.AGENDA_MAX_AGE_MS)
+        return try {
+            dao.getByKey(buildKey(calendarLinkId, startDate, endDate))?.toDomain(json)
         } catch (_: Exception) {
             null
         }
+    }
 
-    suspend fun isCacheStale(startDate: Instant, endDate: Instant): Boolean {
+    suspend fun isCacheStale(calendarLinkId: String, startDate: Instant, endDate: Instant): Boolean {
         val entity = try {
-            dao.getByKey(buildKey(startDate, endDate))
+            dao.getByKey(buildKey(calendarLinkId, startDate, endDate))
         } catch (_: Exception) {
             null
         }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > STALE_THRESHOLD_MS
+        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
+    }
+
+    suspend fun isCacheRecent(calendarLinkId: String, startDate: Instant, endDate: Instant): Boolean {
+        val entity = try {
+            dao.getByKey(buildKey(calendarLinkId, startDate, endDate))
+        } catch (_: Exception) {
+            null
+        }
+        return entity != null && System.currentTimeMillis() - entity.cachedAt < CacheConfig.AGENDA_RECENT_MS
     }
 
     suspend fun refresh(
@@ -82,11 +93,24 @@ class AgendaRepository @Inject constructor(
         val response = api.getPublicAgenda(
             PublicAgendaRequest(calendarLinkId, clientId, startDate.toString(), endDate.toString())
         )
-        dao.upsert(response.toEntity(buildKey(startDate, endDate), json))
+        dao.upsert(response.toEntity(buildKey(calendarLinkId, startDate, endDate), json))
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    suspend fun validateCalendarLinkId(calendarLinkId: String, clientId: String): Boolean =
+        try {
+            val now = LocalDate.now()
+            val start = now.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            val end = now.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+            api.getPublicAgenda(
+                PublicAgendaRequest(calendarLinkId, clientId, start.toString(), end.toString())
+            )
+            true
+        } catch (_: Exception) {
+            false
+        }
 
     suspend fun fetchTodayAndTomorrow(
         calendarLinkId: String,
@@ -95,7 +119,7 @@ class AgendaRepository @Inject constructor(
         val today = LocalDate.now()
         val startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant()
         val endOfTomorrow = today.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
-        val cached = getCached(startOfToday, endOfTomorrow)
+        val cached = getCached(calendarLinkId, startOfToday, endOfTomorrow)
         if (cached != null) return Result.success(cached.sortedBy { it.startDateTime })
         return try {
             val response = api.getPublicAgenda(
@@ -106,7 +130,7 @@ class AgendaRepository @Inject constructor(
                     endOfTomorrow.toString()
                 )
             )
-            dao.upsert(response.toEntity(buildKey(startOfToday, endOfTomorrow), json))
+            dao.upsert(response.toEntity(buildKey(calendarLinkId, startOfToday, endOfTomorrow), json))
             Result.success(response.map { it.toDomain() }.sortedBy { it.startDateTime })
         } catch (e: Exception) {
             Result.failure(e)

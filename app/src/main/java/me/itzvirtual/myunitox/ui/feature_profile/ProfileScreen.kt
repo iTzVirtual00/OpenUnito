@@ -26,6 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -75,13 +79,20 @@ fun ProfileScreenPreview() {
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(), modifier: Modifier) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    ProfileScreenContent(state, modifier)
+    var showTranscript by remember { mutableStateOf(false) }
+
+    ProfileScreenContent(state, modifier, onNavigateToTranscript = { showTranscript = true })
+
+    if (showTranscript) {
+        TranscriptSheet(onDismiss = { showTranscript = false })
+    }
 }
 
 @Composable
 fun ProfileScreenContent(
     state: ProfileScreenState,
     modifier: Modifier = Modifier,
+    onNavigateToTranscript: () -> Unit = {},
 ) {
     // column??
     Column(modifier = modifier) {
@@ -90,7 +101,7 @@ fun ProfileScreenContent(
         )
         Column(
             modifier = Modifier.clickable {
-                // TODO
+                onNavigateToTranscript()
             }) {
             Spacer(modifier = Modifier.height(4.dp))
             CreditsSection(

@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
+import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
@@ -24,6 +25,7 @@ class Prefetcher @Inject constructor(
     private val examResultRepo: ExamResultRepository,
     private val gradeRepository: GradeRepository,
     private val appConfigRepo: AppConfigRepository,
+    private val calendarConfigRepo: CalendarConfigRepository,
 ) {
     fun prefetchData(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
@@ -34,10 +36,10 @@ class Prefetcher @Inject constructor(
                         .atStartOfDay(ZoneId.systemDefault()).toInstant()
                     val endDate = now.with(DayOfWeek.SUNDAY).plusDays(1)
                         .atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    val calendarLinkId = appConfigRepo.getCalendarLinkId()
+                    val selectedCalendar = calendarConfigRepo.getSelectedCalendar()
                     val calendarClientId = appConfigRepo.getCalendarClientId()
-                    if (calendarLinkId != null) {
-                        agendaRepo.refresh(calendarLinkId, calendarClientId, startDate, endDate)
+                    if (selectedCalendar != null) {
+                        agendaRepo.refresh(selectedCalendar.calendarLinkId, calendarClientId, startDate, endDate)
                     }
                 },
                 launch { dashboardRepo.refresh() },

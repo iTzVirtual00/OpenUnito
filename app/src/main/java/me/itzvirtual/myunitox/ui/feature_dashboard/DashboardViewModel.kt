@@ -14,6 +14,7 @@ import me.itzvirtual.myunitox.data.grade.GradeRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.ui.feature_home.StudentDataUiState
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -107,7 +108,7 @@ class DashboardViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             dashboardState = s.dashboardState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.dashboardState.data != null) null else e.message,
                                 isLoading = false
                             )
                         )
@@ -130,7 +131,7 @@ class DashboardViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             examResultsState = s.examResultsState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
                         )
@@ -153,7 +154,7 @@ class DashboardViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             gradesState = s.gradesState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.gradesState.grades.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
                         )

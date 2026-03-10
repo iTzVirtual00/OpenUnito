@@ -1,5 +1,6 @@
 package me.itzvirtual.myunitox.ui.feature_agenda
 
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import java.time.LocalDate
 
@@ -14,4 +15,6 @@ data class AgendaScreenState(
     val selectedStart: LocalDate? = null,
     val selectedEnd: LocalDate? = null,
     val isLoading: Boolean = true,
+    val calendars: List<CalendarConfig> = emptyList(),
+    val selectedCalendar: CalendarConfig? = null,
 )

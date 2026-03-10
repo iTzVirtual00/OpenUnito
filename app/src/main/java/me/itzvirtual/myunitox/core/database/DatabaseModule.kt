@@ -11,6 +11,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.data.dashboard.local.DashboardDao
 import me.itzvirtual.myunitox.data.examdate.local.ExamDateDao
@@ -20,7 +21,7 @@ import me.itzvirtual.myunitox.data.student.local.StudentDao
 import javax.inject.Singleton
 
 private fun dbInitialize(db: SupportSQLiteDatabase) {
-    db.execSQL("INSERT OR IGNORE INTO app_config (id, calendarClientId) VALUES (0, '5852fd1ab7305612a8354d51')")
+    db.execSQL("INSERT OR IGNORE INTO app_config (id) VALUES (0)")
 }
 
 @Module
@@ -37,13 +38,15 @@ object DatabaseModule {
                     dbInitialize(db)
                 }
             })
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
     fun provideConfigDao(db: AppDatabase): AppConfigDao = db.configDao()
     @Provides
     fun provideAgendaDao(db: AppDatabase): AgendaDao = db.agendaDao()
+    @Provides
+    fun provideCalendarConfigDao(db: AppDatabase): CalendarConfigDao = db.calendarConfigDao()
     @Provides
     fun provideDashboardDao(db: AppDatabase): DashboardDao = db.dashboardDao()
     @Provides

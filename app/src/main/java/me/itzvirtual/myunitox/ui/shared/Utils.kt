@@ -45,6 +45,8 @@ import androidx.core.content.edit
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
@@ -230,7 +232,7 @@ class MemoizedFetcher<K, V>(
     suspend fun clear() = cacheLock.withLock { cache.clear(); argumentLocks.clear() }
 }
 
-fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao) {
+fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarConfigDao: CalendarConfigDao) {
     val prefsFile = java.io.File(context.filesDir.parent, "shared_prefs/secure_auth_prefs.xml")
     if (!prefsFile.exists()) return
     try {
@@ -249,7 +251,8 @@ fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao) {
                 Log.i("Migration", "Migrated auth token to Room database.")
             }
             if (calendarLinkId != null) {
-                appConfigDao.updateCalendarLink(calendarLinkId.trim())
+                val config = CalendarConfig(name = "1", calendarLinkId = calendarLinkId)
+                calendarConfigDao.upsert(config)
                 Log.i("Migration", "Migrated calendar link ID to Room database.")
             }
         }

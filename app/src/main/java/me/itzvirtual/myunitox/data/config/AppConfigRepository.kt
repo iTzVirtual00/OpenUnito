@@ -16,14 +16,10 @@ class AppConfigRepository @Inject constructor(
 
     suspend fun getToken(): String? = configDao.getToken()
 
-    fun getTokenBlocking(): String? = configDao.getTokenBlocking()
+    fun getCalendarClientId(): String = "5852fd1ab7305612a8354d51"
 
-    suspend fun getCalendarLinkId(): String? = configDao.getCalendarLinkId()
-
-    suspend fun getCalendarClientId(): String =
-        configDao.getCalendarClientId() ?: "5852fd1ab7305612a8354d51"
-
-    suspend fun setCalendarLinkId(linkId: String) = configDao.updateCalendarLink(linkId.trim())
+    suspend fun getSelectedCalendarId(): Int? = configDao.getSelectedCalendarId()
+    suspend fun setSelectedCalendarId(calendarId: Int?) = configDao.updateSelectedCalendarId(calendarId)
 
     suspend fun clearAuth() = configDao.updateToken(null)
 }

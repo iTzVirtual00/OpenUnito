@@ -393,8 +393,8 @@ fun TodaysClassesSection(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                         ) {
-                            val errMsg = if (state.error == "MISSING_ID") {
-                                stringResource(R.string.error_no_calendar_id_found)
+                            val errMsg = if (state.error == "NO_CALENDAR") {
+                                stringResource(R.string.error_no_calendar_configured)
                             } else {
                                 state.error
                             }
@@ -507,8 +507,8 @@ fun TomorrowClassesSection(
                             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
                         ) {
                             Row(modifier.padding(12.dp)) {
-                                val errMsg = if (state.error == "MISSING_ID") {
-                                    stringResource(R.string.error_no_calendar_id_found)
+                                val errMsg = if (state.error == "NO_CALENDAR") {
+                                    stringResource(R.string.error_no_calendar_configured)
                                 } else {
                                     state.error
                                 }

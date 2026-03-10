@@ -18,4 +18,7 @@ interface AgendaDao {
 
     @Query("DELETE FROM agenda_cache")
     suspend fun clearAll()
+
+    @Query("DELETE FROM agenda_cache WHERE cachedAt < :cutoff")
+    suspend fun deleteOlderThan(cutoff: Long)
 }

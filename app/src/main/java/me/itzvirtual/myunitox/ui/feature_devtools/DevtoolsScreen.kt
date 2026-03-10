@@ -50,8 +50,8 @@ data class DevtoolsActions(
     val clearToken: () -> Unit = {
         Log.d("DevtoolsActions", "clearToken triggered")
     },
-    val setCalendarId: (String) -> Unit = { _ ->
-        Log.d("DevtoolsActions", "setCalendarId triggered")
+    val purgeAllCaches: () -> Unit = {
+        Log.d("DevtoolsActions", "purgeAllCaches triggered")
     }
 )
 
@@ -70,7 +70,7 @@ fun DevtoolsScreen(
             setToken = { token -> viewModel.login(token) { restartApp(context) } },
             copyToken = { viewModel.copyTokenToClipboard(context) },
             clearToken = { viewModel.clearToken { restartApp(context) } },
-            setCalendarId = { calendarId -> viewModel.setCalendarLinkId(calendarId) { restartApp(context) } }
+            purgeAllCaches = { viewModel.purgeAllCaches { restartApp(context) } }
         )
     }
 
@@ -105,15 +105,14 @@ fun DevtoolsContent(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             UpdateCard()
-            SetCalendarIdCard()
+            PurgeCachesCard()
             AuthDebuggerCard()
         }
     }
 }
 
 @Composable
-fun SetCalendarIdCard() {
-    var calendarIdInput by remember { mutableStateOf("") }
+fun PurgeCachesCard() {
     val actions = LocalDevtoolsActions.current
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -121,28 +120,27 @@ fun SetCalendarIdCard() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Set Calendar Link ID",
+                text = "Cache Management",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
-
-            OutlinedTextField(
-                value = calendarIdInput,
-                onValueChange = { input ->
-                    calendarIdInput = input.filter { it != '\n' && it != '\r' }
-                },
-                label = { Text("Calendar Link ID") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+            Text(
+                text = "Purge all cached data (agenda, dashboard, grades, exams, student). The app will restart.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { actions.setCalendarId(calendarIdInput) }) {
-                    Text("Set Calendar ID")
+                Button(
+                    onClick = { actions.purgeAllCaches() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text("Purge All Caches")
                 }
             }
         }

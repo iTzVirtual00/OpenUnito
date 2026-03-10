@@ -3,6 +3,7 @@ package me.itzvirtual.myunitox.data.dashboard
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import me.itzvirtual.myunitox.core.cache.CacheConfig
 import me.itzvirtual.myunitox.core.network.GradeStatusSerializer
 import me.itzvirtual.myunitox.core.network.UnitoApi
 import me.itzvirtual.myunitox.data.dashboard.local.DashboardDao
@@ -15,8 +16,6 @@ import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val STALE_THRESHOLD_MS = 15 * 60 * 1000L // 15 minutes
-
 @Singleton
 class DashboardRepository @Inject constructor(
     private val api: UnitoApi,
@@ -28,7 +27,7 @@ class DashboardRepository @Inject constructor(
 
     val isStaleFlow: Flow<Boolean> =
         dao.get().map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > STALE_THRESHOLD_MS
+            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS
         }
 
     suspend fun refresh(): Result<Unit> = try {
@@ -39,12 +38,18 @@ class DashboardRepository @Inject constructor(
         Result.failure(e)
     }
 
-    suspend fun getCached(): DashboardData? =
-        try {
-            dao.getOnce()?.toDomain(json)
+    suspend fun getCached(): DashboardData? {
+        return try {
+            val entity = dao.getOnce()
+            if (entity != null && System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS) {
+                dao.clearAll()
+                return null
+            }
+            entity?.toDomain(json)
         } catch (_: Exception) {
             null
         }
+    }
 
     suspend fun isCacheStale(): Boolean {
         val entity = try {
@@ -52,7 +57,7 @@ class DashboardRepository @Inject constructor(
         } catch (_: Exception) {
             null
         }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > STALE_THRESHOLD_MS
+        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS
     }
 
     suspend fun changeGradeStatus(gradeId: String, gradeStatus: GradeStatus): Result<ExamResult> =

@@ -6,6 +6,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.agenda.local.AgendaEntity
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
+import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfig
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.data.dashboard.local.DashboardDao
@@ -23,18 +25,20 @@ import me.itzvirtual.myunitox.data.student.local.StudentEntity
     entities = [
         AppConfig::class,
         AgendaEntity::class,
+        CalendarConfig::class,
         DashboardEntity::class,
         StudentEntity::class,
         ExamResultEntity::class,
         ExamDateEntity::class,
         ExamGradeEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun configDao(): AppConfigDao
     abstract fun agendaDao(): AgendaDao
+    abstract fun calendarConfigDao(): CalendarConfigDao
     abstract fun dashboardDao(): DashboardDao
     abstract fun studentDao(): StudentDao
     abstract fun examResultDao(): ExamResultDao
@@ -81,5 +85,17 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""CREATE TABLE IF NOT EXISTS `calendar_config` (
+            `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            `name` TEXT NOT NULL,
+            `calendarLinkId` TEXT NOT NULL)""")
+        database.execSQL("ALTER TABLE `app_config` ADD COLUMN `selectedCalendarId` INTEGER")
+        database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarClientId` INTEGER")
+        database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarLinkId` INTEGER")
     }
 }

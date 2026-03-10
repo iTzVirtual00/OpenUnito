@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -67,7 +68,7 @@ class ExamDatesViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             examDatesState = s.examDatesState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.examDatesState.dates.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
                         )
@@ -90,7 +91,7 @@ class ExamDatesViewModel @Inject constructor(
                     _screenState.update { s ->
                         s.copy(
                             examResultsState = s.examResultsState.copy(
-                                error = e.message,
+                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
                         )
