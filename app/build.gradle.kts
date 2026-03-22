@@ -36,8 +36,8 @@ android {
         applicationId = "me.itzvirtual.myunitox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 13
-        versionName = "v0.2.9"
+        versionCode = 15
+        versionName = "v0.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

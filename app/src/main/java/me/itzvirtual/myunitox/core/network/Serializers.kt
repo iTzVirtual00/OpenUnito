@@ -8,7 +8,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -89,8 +91,17 @@ object GradeStatusSerializer : KSerializer<GradeStatus> {
         return fromSerialName(stringValue)
     }
 
-    override fun serialize(encoder: Encoder, value: GradeStatus) =
-        encoder.encodeString(serializeToString(value))
+    override fun serialize(encoder: Encoder, value: GradeStatus) {
+        val jsonEncoder = encoder as? JsonEncoder
+            ?: throw SerializationException("GradeStatusSerializer expects JSON")
+
+        val jsonObject = buildJsonObject {
+            // Option A: Use the put(key, string) extension
+            put("value", JsonPrimitive(serializeToString(value)))
+        }
+
+        jsonEncoder.encodeJsonElement(jsonObject)
+    }
 
     fun serializeToString(value: GradeStatus): String = when (value) {
         GradeStatus.VIEWED -> "V"

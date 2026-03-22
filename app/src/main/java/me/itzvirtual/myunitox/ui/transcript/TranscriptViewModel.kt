@@ -13,15 +13,8 @@ import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import me.itzvirtual.myunitox.data.grade.GradeRepository
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
-import me.itzvirtual.myunitox.ui.feature_dashboard.ExamResultsUiState
-import me.itzvirtual.myunitox.ui.feature_dashboard.GradesUiState
 import java.io.IOException
 import javax.inject.Inject
-
-data class TranscriptScreenState(
-    val examResultsState: ExamResultsUiState = ExamResultsUiState(isLoading = true),
-    val gradesState: GradesUiState = GradesUiState(isLoading = true),
-)
 
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(

@@ -52,7 +52,6 @@ import me.itzvirtual.myunitox.data.Prefetcher
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.ui.feature_agenda.AgendaScreen
-import me.itzvirtual.myunitox.ui.feature_dashboard.DashboardScreen
 import me.itzvirtual.myunitox.ui.feature_devtools.DevtoolsScreen
 import me.itzvirtual.myunitox.ui.feature_home.HomeScreen
 import me.itzvirtual.myunitox.ui.feature_login.AuthViewModel
@@ -267,7 +266,6 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
-//    DASHBOARD("Old", Icons.Default.Home),
     PROFILE("Profile", Icons.Default.AccountBox),
     CALENDAR("Calendar", Icons.Default.CalendarToday),
     DEVTOOLS("Dev", Icons.Default.LogoDev),

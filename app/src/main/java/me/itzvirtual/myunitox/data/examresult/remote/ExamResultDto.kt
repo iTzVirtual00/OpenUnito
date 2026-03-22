@@ -2,6 +2,7 @@ package me.itzvirtual.myunitox.data.examresult.remote
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import me.itzvirtual.myunitox.core.network.GradeStatusSerializer
 import me.itzvirtual.myunitox.core.network.IntToBooleanSerializer
 import me.itzvirtual.myunitox.core.network.SmartNumberSerializer
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
@@ -15,7 +16,7 @@ data class ExamResultDto(
     @SerialName("pesoAd") val weight: Int = 0,
     @SerialName("dataRifEsitoStu") val editableUntil: String = "",
     @SerialName("gruppoVotoMaxPunti") @Serializable(with = SmartNumberSerializer::class) val maxGrade: String = "",
-    @SerialName("presaVisione") val status: GradeStatus,
+    @SerialName("presaVisione") @Serializable(with = GradeStatusSerializer::class) val status: GradeStatus,
     @SerialName("esito") val gradeResult: GradeResultDto?,
 )
 
