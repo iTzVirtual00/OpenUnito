@@ -190,12 +190,6 @@ tasks.register("deployAPK") {
                 }
             }).toTypedArray()
 
-        var connection = URL(serverUrl).openConnection() as HttpURLConnection
-        connection.doOutput = true
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Authorization", "Basic $encodedAuth")
-        connection.setRequestProperty("Content-Type", "application/octet-stream")
-        connection.setRequestProperty("Content-Disposition", "attachment; filename=\"${apk.name}\"")
         try {
             val sc = SSLContext.getInstance("SSL")
             sc.init(null, trustAllCerts, SecureRandom())
@@ -205,6 +199,12 @@ tasks.register("deployAPK") {
             e.printStackTrace()
         }
 
+        var connection = URL(serverUrl).openConnection() as HttpURLConnection
+        connection.doOutput = true
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Authorization", "Basic $encodedAuth")
+        connection.setRequestProperty("Content-Type", "application/octet-stream")
+        connection.setRequestProperty("Content-Disposition", "attachment; filename=\"${apk.name}\"")
         println("Uploading ${apk.name} to $serverUrl...")
         apk.inputStream().use { input ->
             connection.outputStream.use { output ->
@@ -225,14 +225,6 @@ tasks.register("deployAPK") {
         connection.setRequestProperty("Authorization", "Basic $encodedAuth")
         connection.setRequestProperty("Content-Type", "application/octet-stream")
         connection.setRequestProperty("Content-Disposition", "attachment; filename=\"${json.name}\"")
-        try {
-            val sc = SSLContext.getInstance("SSL")
-            sc.init(null, trustAllCerts, SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-            HttpsURLConnection.setDefaultHostnameVerifier(HostnameVerifier { hostname: String?, session: SSLSession? -> true })
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
 
         println("Uploading ${json.name} to $serverUrl...")
         json.inputStream().use { input ->
