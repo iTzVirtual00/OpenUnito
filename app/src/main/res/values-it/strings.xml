@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MyUniTOX</string>
+    <string name="app_name">OpenUnito</string>
     <string name="no_data">Nessun dato disponibile</string>
     <string name="exam_results_title">Esito Esami</string>
     <string name="date">%1$s</string>
