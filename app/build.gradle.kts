@@ -121,6 +121,8 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+
+    implementation(libs.androidx.core.splashscreen)
 }
 
 // Generate version.json alongside the release APK
