@@ -12,10 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,7 +69,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -95,7 +92,6 @@ import me.itzvirtual.myunitox.domain.agenda.Floor
 import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
-import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.DayOfWeek
 import java.time.Instant
@@ -106,6 +102,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 /**
  * Filter options for the agenda
@@ -123,9 +120,12 @@ enum class AgendaFilter {
  */
 @Composable
 fun AgendaEntry.getColor(): Color {
-    val bucket = LocalCustomColorsPalette.current.calendarBucket
-    val index = kotlin.math.abs(activityCode.hashCode()) % bucket.size
-    return bucket[index]
+    val rand = Random(activityCode.hashCode())
+
+    val hue = rand.nextInt(0, 360/5) * 5f
+    val sat = rand.nextDouble(0.65, 0.85).toFloat()
+
+    return Color.hsv(hue,sat,0.65f)
 }
 
 /**
@@ -176,14 +176,14 @@ fun AgendaScreen(
             calendars = screenState.calendars,
             selectedCalendar = screenState.selectedCalendar,
             onCalendarSelected = { viewModel.selectCalendar(it) },
-            onCalendarAdd = { name, linkId, onResult ->
-                viewModel.addCalendar(
+            onCalendarAdd = { name, linkId, calendarId, onResult ->
+                viewModel.upsertCalendar(
                     name,
                     linkId,
+                    calendarId,
                     onResult
                 )
             },
-            onCalendarRename = { id, newName -> viewModel.renameCalendar(id, newName) },
             onCalendarDelete = { viewModel.deleteCalendar(it) },
         )
 
@@ -240,8 +240,7 @@ fun Agenda(
     calendars: List<CalendarConfig> = emptyList(),
     selectedCalendar: CalendarConfig? = null,
     onCalendarSelected: (CalendarConfig) -> Unit = {},
-    onCalendarAdd: (String, String, (Boolean, String) -> Unit) -> Unit = { _, _, _ -> },
-    onCalendarRename: (Int, String) -> Unit = { _, _ -> },
+    onCalendarAdd: (String, String, Int?, (Boolean, String) -> Unit) -> Unit = { _, _, _, _ -> },
     onCalendarDelete: (Int) -> Unit = {},
 ) {
 
@@ -299,7 +298,6 @@ fun Agenda(
                 selectedCalendar = selectedCalendar,
                 onCalendarSelected = onCalendarSelected,
                 onCalendarAdd = onCalendarAdd,
-                onCalendarRename = onCalendarRename,
                 onCalendarDelete = onCalendarDelete,
             )
 
@@ -361,8 +359,7 @@ private fun AgendaHeader(
     calendars: List<CalendarConfig>,
     selectedCalendar: CalendarConfig?,
     onCalendarSelected: (CalendarConfig) -> Unit,
-    onCalendarAdd: (String, String, (Boolean, String) -> Unit) -> Unit,
-    onCalendarRename: (Int, String) -> Unit,
+    onCalendarAdd: (String, String, Int?, (Boolean, String) -> Unit) -> Unit,
     onCalendarDelete: (Int) -> Unit,
 ) {
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMM", Locale.ITALIAN) }
@@ -507,10 +504,10 @@ private fun AgendaHeader(
 
     // Add Calendar Dialog
     if (showAddDialog) {
-        AddCalendarDialog(
+        UpsertCalendarDialog(
             onDismiss = { showAddDialog = false },
-            onAdd = { name, linkId, onResult ->
-                onCalendarAdd(name, linkId) { success, msg ->
+            onAdd = { name, linkId, calendarId, onResult ->
+                onCalendarAdd(name, linkId, calendarId) { success, msg ->
                     onResult(success, msg)
                     if (success) showAddDialog = false
                 }
@@ -520,12 +517,16 @@ private fun AgendaHeader(
 
     // Rename Dialog
     renameTarget?.let { cal ->
-        RenameCalendarDialog(
-            currentName = cal.name,
+        UpsertCalendarDialog(
+            calendarEntryId = cal.id,
+            initialName = cal.name,
+            initialLinkId = cal.calendarLinkId,
             onDismiss = { renameTarget = null },
-            onRename = { newName ->
-                onCalendarRename(cal.id, newName)
-                renameTarget = null
+            onAdd = { name, linkId, calendarId, onResult ->
+                onCalendarAdd(name, linkId, calendarId) { success, msg ->
+                    onResult(success, msg)
+                    if (success) renameTarget = null
+                }
             }
         )
     }
@@ -554,12 +555,15 @@ private fun AgendaHeader(
 }
 
 @Composable
-private fun AddCalendarDialog(
+private fun UpsertCalendarDialog(
+    calendarEntryId: Int? = null,
+    initialName: String = "",
+    initialLinkId: String = "",
     onDismiss: () -> Unit,
-    onAdd: (String, String, (Boolean, String) -> Unit) -> Unit,
+    onAdd: (String, String, Int?, (Boolean, String) -> Unit) -> Unit,
 ) {
-    var name by remember { mutableStateOf("") }
-    var linkInput by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(initialName) }
+    var linkInput by remember { mutableStateOf(initialLinkId) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var isValidating by remember { mutableStateOf(false) }
 
@@ -575,7 +579,7 @@ private fun AddCalendarDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isValidating) onDismiss() },
-        title = { Text("Add Calendar") },
+        title = { Text(if(calendarEntryId==null) "Add Calendar" else "Edit Calendar") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -625,54 +629,18 @@ private fun AddCalendarDialog(
                         return@TextButton
                     }
                     isValidating = true
-                    onAdd(name.trim(), extracted) { success, msg ->
+                    onAdd(name.trim(), extracted, calendarEntryId) { success, msg ->
                         isValidating = false
                         if (!success) errorMsg = msg
                     }
                 },
                 enabled = !isValidating,
             ) {
-                Text("Add")
+                Text(if(calendarEntryId==null) "Add" else "Edit")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isValidating) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-private fun RenameCalendarDialog(
-    currentName: String,
-    onDismiss: () -> Unit,
-    onRename: (String) -> Unit,
-) {
-    var name by remember { mutableStateOf(currentName) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Rename Calendar") },
-        text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { if (name.isNotBlank()) onRename(name.trim()) },
-                enabled = name.isNotBlank(),
-            ) {
-                Text("Rename")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }
@@ -872,7 +840,7 @@ private fun EventCard(
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Medium,
-                maxLines = 2,
+                maxLines = 5,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 12.sp
             )
@@ -1042,7 +1010,7 @@ internal fun EventDetailView(
                 // Activity code
                 DetailRow(
                     label = "Codice Attività",
-                    value = event.activityCode
+                    value = event.activityCode.hashCode().toString()
                 )
 
                 // Date and time
@@ -1241,7 +1209,7 @@ private val sampleEvents = listOf(
     ),
     AgendaEntry(
         id = "2",
-        title = "BASI DI DATI",
+        title = "EPS A - ELEMENTI DI PROBABILITÀ E STATISTICA",
         titleEn = "DATABASES",
         startDateTime = Instant.parse("2026-02-16T10:00:00.000Z"),
         endDateTime = Instant.parse("2026-02-16T12:00:00.000Z"),

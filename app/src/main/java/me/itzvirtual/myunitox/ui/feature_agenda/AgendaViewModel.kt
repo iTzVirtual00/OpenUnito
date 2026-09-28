@@ -59,7 +59,7 @@ class AgendaViewModel @Inject constructor(
         }
     }
 
-    fun addCalendar(name: String, calendarLinkId: String, onResult: (Boolean, String) -> Unit) {
+    fun upsertCalendar(name: String, calendarLinkId: String, existingId: Int?, onResult: (Boolean, String) -> Unit) {
         viewModelScope.launch {
             val clientId = appConfigRepo.getCalendarClientId()
             val isValid = agendaRepository.validateCalendarLinkId(calendarLinkId, clientId)
@@ -67,7 +67,13 @@ class AgendaViewModel @Inject constructor(
                 onResult(false, "Invalid calendar ID — could not fetch data.")
                 return@launch
             }
-            val newCal = calendarConfigRepo.add(name, calendarLinkId)
+
+            var newCal: CalendarConfig
+            if(existingId!=null){
+                newCal = calendarConfigRepo.edit(existingId, name, calendarLinkId)
+            } else {
+                newCal = calendarConfigRepo.add(name, calendarLinkId)
+            }
             val calendars = calendarConfigRepo.getAll()
             calendarConfigRepo.setSelectedCalendarId(newCal.id)
             _screenState.update {
@@ -79,20 +85,6 @@ class AgendaViewModel @Inject constructor(
             val start = state.selectedStart ?: LocalDate.now().with(java.time.DayOfWeek.MONDAY)
             val end = state.selectedEnd ?: start.with(java.time.DayOfWeek.SUNDAY)
             loadAgendaForWeek(start, end)
-        }
-    }
-
-    fun renameCalendar(id: Int, newName: String) {
-        viewModelScope.launch {
-            calendarConfigRepo.rename(id, newName)
-            val calendars = calendarConfigRepo.getAll()
-            val selected = _screenState.value.selectedCalendar
-            _screenState.update {
-                it.copy(
-                    calendars = calendars,
-                    selectedCalendar = if (selected?.id == id) selected.copy(name = newName) else selected,
-                )
-            }
         }
     }
 

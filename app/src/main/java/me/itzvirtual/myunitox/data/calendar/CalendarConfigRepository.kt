@@ -24,9 +24,12 @@ class CalendarConfigRepository @Inject constructor(
         return config.copy(id = id.toInt())
     }
 
-    suspend fun rename(id: Int, newName: String) {
-        val existing = dao.getById(id) ?: return
-        dao.upsert(existing.copy(name = newName))
+    suspend fun edit(id: Int, newName: String, newLink: String): CalendarConfig {
+        val existing = dao.getById(id) ?: CalendarConfig(name = newName, calendarLinkId = newLink)
+        val newConf = existing.copy(name = newName, calendarLinkId = newLink)
+        dao.upsert(newConf)
+        //TODO: Invalidate calendar cache if newLink is different
+        return newConf
     }
 
     suspend fun delete(id: Int) {
