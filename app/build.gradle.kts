@@ -127,24 +127,29 @@ dependencies {
 
 // Generate version.json alongside the release APK
 tasks.register("generateVersionJson") {
-    doLast {
-        val versionCode = android.defaultConfig.versionCode
-        val versionName = android.defaultConfig.versionName
-        val outputDir = layout.buildDirectory.dir("../release").get().asFile
+    val vCode = android.defaultConfig.versionCode ?: 1
+    val vName = android.defaultConfig.versionName ?: "1.0"
+    val targetDir = layout.projectDirectory.dir("release")
 
+    inputs.property("versionCode", vCode)
+    inputs.property("versionName", vName)
+    outputs.dir(targetDir)
+
+    doLast {
+        val outputDir = targetDir.asFile
         outputDir.mkdirs()
 
         val versionJson = File(outputDir, "version.json")
         versionJson.writeText(
             """
             {
-                "versionCode": $versionCode,
-                "versionName": "$versionName"
+                "versionCode": $vCode,
+                "versionName": "$vName"
             }
-        """.trimIndent()
+            """.trimIndent()
         )
 
-        println("Generated version.json: versionCode=$versionCode, versionName=$versionName")
+        println("Generated version.json: versionCode=$vCode, versionName=$vName")
     }
 }
 
