@@ -41,6 +41,6 @@ jobs:
           UPLOAD_AUTH: ${{ secrets.UPLOAD_AUTH }}
         run: |
           chmod +x .github/deploy.sh
-          echo ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_TOKEN" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
-          ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_TOKEN" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
+          echo ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_AUTH" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
+          ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_AUTH" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
           rm -f /tmp/upload.sh
