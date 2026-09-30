@@ -1,0 +1,62 @@
+----------------
+--- PRIORITA ---
+----------------
+
+    lezioni VERY HIGH:                          home + tasto approfondito
+    calendario VERY HIGH:                       feature
+    attendance tracking VERY HIGH (opt):        home
+
+    libretto HIGH:                              home
+    appelli HIGH:                               home
+
+    profile MID                                 button on home
+        smartcard MID
+    notification MID                            ?
+    payments MID                                ?
+
+--------------
+--- LAYOUT ---
+--------------
+
+Home:
+    name (very top):
+        tap -> profile
+
+    next lesson (top):
+        tap -> today and tomorrow lessons
+
+    profile (top left):
+        tap -> profile screen
+
+Career:
+    simple dashboard (top):
+        onclick = statiscscc
+
+    esiti (mid):
+        accetta/rifiuta
+
+    libretto (bottom left):
+        onclick voti
+
+    appelli (btm right):
+        onclick appelli
+
+--------------
+--- TO ADD ---
+--------------
+
+    appelli
+    notification
+    payments
+    smartcard
+    attendance tracking (opt)
+
+------------
+--- TODO ---
+------------
+
+    add new votes in CareerScreen
+    add transcript and invoke in CareerScreen
+    add statiscscc on dashboard click
+    add settings + move dev settings
+    invert grade order
