@@ -1,7 +1,6 @@
 package me.itzvirtual.myunitox.ui.feature_career
 
 import me.itzvirtual.myunitox.domain.dashboard.DashboardData
-import me.itzvirtual.myunitox.domain.student.StudentData
 
 data class CareerDashboardUiState(
     val data: DashboardData? = null,

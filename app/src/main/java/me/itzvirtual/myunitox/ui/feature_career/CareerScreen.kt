@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -42,12 +41,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
-import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
 import me.itzvirtual.myunitox.ui.shared.LoadingShimmerItem
-import me.itzvirtual.myunitox.ui.shared.StudentCareerCard
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 
 @Composable
