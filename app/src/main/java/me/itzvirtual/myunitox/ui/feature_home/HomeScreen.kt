@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,7 +56,6 @@ import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
-import me.itzvirtual.myunitox.ui.feature_career.UserInitialsIcon
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -204,6 +205,28 @@ fun HomeScreen(
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     HomeScreen(state = state, modifier = modifier, onNavigateToSchedule = onNavigateToSchedule)
+}
+
+@Composable
+fun UserInitialsIcon(
+    initials: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
+) {
+    Surface(
+        modifier = modifier.size(size),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 }
 
 @Composable
