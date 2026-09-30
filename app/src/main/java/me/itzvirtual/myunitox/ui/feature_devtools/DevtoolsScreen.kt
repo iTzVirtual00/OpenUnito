@@ -39,7 +39,7 @@ import me.itzvirtual.myunitox.BuildConfig
 import me.itzvirtual.myunitox.ui.shared.restartApp
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.io.File
-
+//TODO: move it somewhere else
 data class DevtoolsActions(
     val setToken: (String) -> Unit = { _ ->
         Log.d("DevtoolsActions", "setToken triggered")

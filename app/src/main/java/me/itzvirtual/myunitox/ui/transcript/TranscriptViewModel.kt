@@ -32,21 +32,6 @@ class TranscriptViewModel @Inject constructor(
 
     fun load() {
         viewModelScope.launch {
-            val examResultDeferred = async {
-                val cached = examResultRepo.getCached()
-                val isStale = examResultRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = cached,
-                                isStale = isStale
-                            )
-                        )
-                    }
-                }
-                examResultRepo.refresh()
-            }
             val gradeDeferred = async {
                 val cached = gradeRepo.getCached()
                 val isStale = gradeRepo.isCacheStale()
@@ -63,28 +48,6 @@ class TranscriptViewModel @Inject constructor(
                 gradeRepo.refresh()
             }
 
-            examResultDeferred.await().fold(
-                onSuccess = {
-                    val fresh = examResultRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = fresh ?: emptyList()
-                            )
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = s.examResultsState.copy(
-                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
 
             gradeDeferred.await().fold(
                 onSuccess = {

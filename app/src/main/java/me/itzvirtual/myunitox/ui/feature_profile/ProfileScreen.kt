@@ -48,7 +48,7 @@ fun ProfileScreenPreview() {
     }
 
 }
-
+//TODO: needs to be called from home profile button
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(), modifier: Modifier) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
