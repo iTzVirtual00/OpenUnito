@@ -57,7 +57,7 @@ import me.itzvirtual.myunitox.ui.feature_devtools.DevtoolsScreen
 import me.itzvirtual.myunitox.ui.feature_home.HomeScreen
 import me.itzvirtual.myunitox.ui.feature_login.AuthViewModel
 import me.itzvirtual.myunitox.ui.feature_login.UniToLoginScreen
-import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
+import me.itzvirtual.myunitox.ui.feature_career.CareerScreen
 import me.itzvirtual.myunitox.ui.shared.LocaleHelper
 import me.itzvirtual.myunitox.ui.shared.OfflineBanner
 import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
@@ -247,7 +247,7 @@ fun MyUniTOXApp(
                                 modifier = Modifier.padding(innerPadding)
                             )
 
-                            AppDestinations.PROFILE -> ProfileScreen(
+                            AppDestinations.PROFILE -> CareerScreen(
                                 modifier = Modifier.padding(innerPadding),
                             )
 

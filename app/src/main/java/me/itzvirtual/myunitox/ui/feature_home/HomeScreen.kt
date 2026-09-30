@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +45,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
@@ -54,9 +54,9 @@ import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
+import me.itzvirtual.myunitox.ui.feature_career.UserInitialsIcon
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -207,6 +207,56 @@ fun HomeScreen(
 }
 
 @Composable
+fun StudentDataSection(homeState: HomeScreenState, modifier: Modifier = Modifier) {
+    var state = homeState.studentState
+    Box(modifier = modifier) {
+        when {
+            state.isLoading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            state.error != null -> {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+
+            else -> {
+                val studentData = state.data!!
+                val initials =
+                    "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        UserInitialsIcon(initials)
+                        Text(
+                            text = "${studentData.firstname} ${studentData.lastname}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
 fun HomeScreen(
     state: HomeScreenState,
     modifier: Modifier = Modifier,
@@ -236,59 +286,12 @@ fun HomeScreen(
                     }
 
                     studentState.data != null -> {
-                        val now = LocalDateTime.now()
-                        var greeting = if (now.hour < 12) {
-                            stringResource(R.string.good_morning)
-                        } else if (now.hour < 18) {
-                            stringResource(R.string.good_afternoon)
-                        } else {
-                            stringResource(R.string.good_evening)
-                        }
-                        greeting += ","
-
-                        val name = studentState.data.firstname
-
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                val maxFontSize = 48.sp
-                                var syncedFontSize by remember { mutableStateOf(maxFontSize) }
-                                Text(
-                                    text = greeting,
-                                    style = MaterialTheme.typography.displayLarge.copy(
-                                        fontSize = syncedFontSize,
-                                        lineHeight = 52.sp
-                                    ),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    onTextLayout = { textLayoutResult ->
-                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                            syncedFontSize *= 0.9f
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.displayLarge.copy(
-                                        fontSize = syncedFontSize,
-                                        lineHeight = 52.sp
-                                    ),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    onTextLayout = { textLayoutResult ->
-                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                            syncedFontSize *= 0.9f
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            StudentDataSection(state)
                             Spacer(modifier = Modifier.height(16.dp))
                             TodaysClassesSection(
                                 state = todaysClassesState,
@@ -301,6 +304,18 @@ fun HomeScreen(
                                 onOpenScheduleClick = onNavigateToSchedule,
                                 onEventClick = { event -> selectedEvent = event },
                             )
+                            Spacer(modifier = Modifier.height(32.dp))
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Button(
+                                    onClick = {},
+                                    modifier = modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    //border = borderStroke
+                                ) {}
+                            }
                         }
                     }
                 }
