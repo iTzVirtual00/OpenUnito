@@ -64,6 +64,7 @@ import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import javax.inject.Inject
 
+//TODO: when switching tabs, it doesn't remember if profile or home tab was set
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -247,7 +248,7 @@ fun MyUniTOXApp(
                                 modifier = Modifier.padding(innerPadding)
                             )
 
-                            AppDestinations.PROFILE -> CareerScreen(
+                            AppDestinations.CAREER -> CareerScreen(
                                 modifier = Modifier.padding(innerPadding),
                             )
 
@@ -269,7 +270,7 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
-    PROFILE("Profile", Icons.Default.AccountBox),
+    CAREER("Career", Icons.Default.AccountBox),
     CALENDAR("Calendar", Icons.Default.CalendarToday),
     DEVTOOLS("Dev", Icons.Default.LogoDev),
 }

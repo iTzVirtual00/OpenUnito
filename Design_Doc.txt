@@ -55,8 +55,9 @@ Career:
 --- TODO ---
 ------------
 
-    add new votes in CareerScreen
-    add transcript and invoke in CareerScreen
     add statiscscc on dashboard click
+    
     add settings + move dev settings
-    invert grade order
+
+    transcript: invert grade order LOW
+    transcript: stop page from filling screen

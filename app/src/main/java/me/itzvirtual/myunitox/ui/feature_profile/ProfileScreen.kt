@@ -50,7 +50,7 @@ fun ProfileScreenPreview() {
 }
 //TODO: needs to be called from home profile button
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(), modifier: Modifier) {
+fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
 
@@ -111,7 +111,6 @@ fun CareersSection(state: ProfileScreenState, modifier: Modifier = Modifier) {
                     careers.forEach { career ->
                         StudentCareerCard(
                             career = career,
-                            defaultExpanded = career.isActive()
                         )
                     }
                 }

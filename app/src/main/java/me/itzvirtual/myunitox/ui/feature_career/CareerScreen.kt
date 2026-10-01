@@ -1,5 +1,6 @@
 package me.itzvirtual.myunitox.ui.feature_career
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -21,17 +22,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -70,7 +71,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -80,6 +80,7 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import me.itzvirtual.myunitox.ui.components.StdButton
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
@@ -92,7 +93,7 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 
 //TODO: add new grades, add transcript and invokes buttons
 @Composable
-@Preview(uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 fun CareerScreenPreview() {
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -105,7 +106,7 @@ fun CareerScreenPreview() {
                     ),
                     examResultsState = ExamResultsUiState(
                         results = emptyList(),
-                        isLoading = true,
+                        isLoading = false,
                         error = null
                     )
                 ),
@@ -131,10 +132,11 @@ fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifie
         onClickInvoke = { showInvoke = true },
 
     )
-
+    
     //Callback handling
     if (showStatistics) {
         TranscriptSheet(onDismiss = { showStatistics = false }) //TODO: change to Statistic fun
+
     }
     if (showTranscript) {
         TranscriptSheet(onDismiss = { showTranscript = false })
@@ -155,56 +157,44 @@ fun CareerScreenContent(
     // column??
     // Yes, column. Wdym?!
     Column(modifier = modifier) {
-        Column() {
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = modifier.clickable {
-                    onClickStatistics()
-                }
-            ) {
-                CreditsSection(
-                    state = state.dashboardState
-                )
+        Column(
+            modifier = modifier.clickable {
+                onClickStatistics()
             }
-            GoToTranscriptSection()
-            Spacer(Modifier.weight(0.1f))
-            Text(
-                text = stringResource(R.string.exam_results_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                .fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            CreditsSection(
+                state = state.dashboardState
             )
-            ExamResultsSection(state = state.examResultsState)
-            Spacer(Modifier.weight(0.1f))
-            Row(
-                Modifier.weight(1f)
-                    .padding(Dp(10f))
-            ) {
-                Button(
-                    onClick = {
-                        onClickTranscript()
-                    },
-                    modifier = modifier.weight(1f)
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Libretto")
-                }
-                Spacer(Modifier.width(Dp(10f)))
-                Button(
-                    onClick = {
-                        onClickInvoke()
-                    },
-                    modifier = modifier.weight(1f)
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    //border = borderStroke
-                ) {
-                    Text("Appelli")
-                }
-            }
-
+            GoToTranscriptSection() //TODO: replace with statistics
+            //Vai a libretto diventa vai a statiscsc
+            Spacer(modifier = Modifier.height(2.dp))
         }
+        Spacer(Modifier.height(14.dp))
+        StdButton(
+            icon = Icons.Default.Book,
+            text = "Libretto",
+            onClick = onClickTranscript,
+            modifier = Modifier.padding(8.dp, 0.dp),
+            height = 80f
+        )
+        Spacer(Modifier.height(8.dp))
+        StdButton(
+            icon = Icons.Default.AccountBalance,
+            text = "Appelli",
+            onClick = onClickInvoke,
+            modifier = Modifier.padding(8.dp, 0.dp),
+            height = 80f
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.exam_results_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        ExamResultsSection(state = state.examResultsState)
     }
 }
 
@@ -389,7 +379,7 @@ fun ExamResultsSection(state: ExamResultsUiState) {
             } else if (state.error != null) {
                 ErrorItem(state.error!!)
             } else if (results.count() == 0) {
-                ErrorItem(stringResource(R.string.no_data), Color.Companion.Gray)
+                ErrorItem(stringResource(R.string.no_data), Color.Gray)
             } else {
                 results.forEachIndexed { idx, result ->
                     val shape = when {
@@ -413,7 +403,7 @@ fun ExamResultsSection(state: ExamResultsUiState) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = shape,
-                        color = Color.Companion.Transparent // Uses parent surface color
+                        color = Color.Transparent // Uses parent surface color
                     ) {
                         ExamResultRow(result)
 
@@ -447,13 +437,13 @@ fun ExamResultRow(result: ExamResult) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .height(IntrinsicSize.Min)
                 .clickable(enabled = drawerEnabled) {
                     expanded = !expanded
                 },
-            verticalAlignment = Alignment.Companion.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
@@ -462,7 +452,7 @@ fun ExamResultRow(result: ExamResult) {
                     .weight(mainContent)
             ) {
                 Row(
-                    verticalAlignment = Alignment.Companion.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     // info
@@ -536,13 +526,13 @@ fun ExamResultRow(result: ExamResult) {
 
 
             Box(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxHeight()
                     .weight(sideContent)
                     .drawBehind {
                         if (showChroma) {
                             // ai-powered, no idea how this works. also, cool palette gemini!
-                            val brush = Brush.Companion.linearGradient(
+                            val brush = Brush.linearGradient(
                                 colors = listOf(
                                     Color(0xFF64B5F6), // Start: Blue
                                     Color(0xFFBA68C8), // Purple
@@ -553,14 +543,14 @@ fun ExamResultRow(result: ExamResult) {
                                 start = Offset(0f, chromaOffset - 1000f),
                                 // End offset stays a fixed distance away from start
                                 end = Offset(0f, chromaOffset),
-                                tileMode = TileMode.Companion.Repeated
+                                tileMode = TileMode.Repeated
                             )
                             drawRect(brush)
                         } else {
                             drawRect(animatedColor)
                         }
                     },
-                contentAlignment = Alignment.Companion.Center
+                contentAlignment = Alignment.Center
             ) {}
         }
 
@@ -593,7 +583,7 @@ fun ExamResultRow(result: ExamResult) {
                         val selectionCopy = selection
                         selection = GradeStatus.UNKNOWN // Reset selection
                         isGradeStatusLoading = true
-                        haptics.performHapticFeedback(HapticFeedbackType.Companion.LongPress)
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         scope.launch {
                             joinAll(
                                 actions.changeGradeStatus(
@@ -629,7 +619,7 @@ fun ExamResultRow(result: ExamResult) {
                 targetValue = when (selection) {
                     GradeStatus.ACCEPTED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     GradeStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
-                    else -> Color.Companion.Transparent
+                    else -> Color.Transparent
                 },
                 animationSpec = tween(durationMillis = 500),
                 label = "CircleColor"
@@ -649,7 +639,7 @@ fun ExamResultRow(result: ExamResult) {
                     .padding(bottom = 8.dp)
                     .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
                     .drawBehind {
-                        drawRect(Color.Companion.LightGray.copy(alpha = 0.3f))
+                        drawRect(Color.LightGray.copy(alpha = 0.3f))
 
                         if (radiusProgress > 0f) {
                             drawCircle(
@@ -661,7 +651,7 @@ fun ExamResultRow(result: ExamResult) {
                     }
                     .padding(16.dp)
             ) {
-                Column(horizontalAlignment = Alignment.Companion.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                         val canAccept = result.gradeResult.canAccept
                         val canReject = result.gradeResult.canReject

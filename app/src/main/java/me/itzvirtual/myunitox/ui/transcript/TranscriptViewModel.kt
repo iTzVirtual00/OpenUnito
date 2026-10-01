@@ -51,7 +51,9 @@ class TranscriptViewModel @Inject constructor(
 
             gradeDeferred.await().fold(
                 onSuccess = {
-                    val fresh = gradeRepo.getCached()
+                    val fresh = gradeRepo.getCached()?.sortedByDescending {
+                        it.score?.date
+                    }
                     _screenState.update { s ->
                         s.copy(
                             gradesState = GradesUiState(

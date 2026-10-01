@@ -1,9 +1,16 @@
 package me.itzvirtual.myunitox.ui.feature_home
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,19 +28,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,6 +68,7 @@ import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
+import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -182,7 +195,7 @@ fun HomeScreenPreview() {
     )
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            HomeScreen(
+            HomeScreenContent(
                 state = HomeScreenState(
                     studentState = StudentDataUiState(data = sampleStudentData),
                     todaysClasses = DailyClassesUiState(classes = sampleTodaysClasses),
@@ -194,7 +207,11 @@ fun HomeScreenPreview() {
             )
         }
     }
+}
 
+sealed interface HomeDestination {
+    data object Main : HomeDestination
+    data object ProfileScreen : HomeDestination
 }
 
 @Composable
@@ -203,8 +220,86 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToSchedule: () -> Unit = {}
 ) {
-    val state by viewModel.screenState.collectAsStateWithLifecycle()
-    HomeScreen(state = state, modifier = modifier, onNavigateToSchedule = onNavigateToSchedule)
+    
+
+    val backStack = remember { mutableStateListOf<HomeDestination>(HomeDestination.Main) }
+    val current = backStack.last()
+    BackHandler(enabled = backStack.size > 1) {
+        backStack.removeAt(backStack.lastIndex)
+    }
+
+
+    AnimatedContent(
+        targetState = current,
+        modifier = modifier.fillMaxSize(),
+        transitionSpec = {
+            // Compare where the screens live in the stack
+            val initialIndex = backStack.indexOf(initialState)
+            val targetIndex = backStack.indexOf(targetState)
+            val isBack = targetIndex < initialIndex || initialIndex == -1
+
+            if (isBack) {
+                slideInHorizontally { width -> -width } + fadeIn() togetherWith
+                    slideOutHorizontally { width -> width } + fadeOut()
+            } else {
+                slideInHorizontally { width -> width } + fadeIn() togetherWith
+                    slideOutHorizontally { width -> -width } + fadeOut()
+            }
+        },
+        label = "HomeStackTransition"
+    ) { destination ->
+        when (destination) {
+            is HomeDestination.Main -> {
+                val state by viewModel.screenState.collectAsStateWithLifecycle()
+                HomeScreenContent(
+                    state = state,
+                    modifier = modifier,
+                    onNavigateToSchedule = onNavigateToSchedule,
+                    onOpenProfile = {
+                        backStack.add(HomeDestination.ProfileScreen)
+                    }
+                )
+            }
+
+            is HomeDestination.ProfileScreen -> {
+                ProfileScreenContent(
+                    onBack = { backStack.removeAt(backStack.lastIndex) }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileScreenContent(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("Profile") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            ProfileScreen()
+        }
+    }
 }
 
 @Composable
@@ -280,10 +375,11 @@ fun StudentDataSection(homeState: HomeScreenState, modifier: Modifier = Modifier
 }
 
 @Composable
-fun HomeScreen(
+fun HomeScreenContent(
     state: HomeScreenState,
     modifier: Modifier = Modifier,
-    onNavigateToSchedule: () -> Unit = {}
+    onNavigateToSchedule: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
 ) {
     val studentState = state.studentState
     val todaysClassesState = state.todaysClasses
@@ -314,7 +410,9 @@ fun HomeScreen(
                                 .fillMaxSize()
                                 .padding(16.dp)
                         ) {
-                            StudentDataSection(state)
+                            StudentDataSection(state, Modifier.clickable {
+                                onOpenProfile()
+                            })
                             Spacer(modifier = Modifier.height(16.dp))
                             TodaysClassesSection(
                                 state = todaysClassesState,

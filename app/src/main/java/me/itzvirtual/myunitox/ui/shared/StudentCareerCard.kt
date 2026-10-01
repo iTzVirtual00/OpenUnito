@@ -52,13 +52,10 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.student.StudentCareer
 
 @Composable
-fun StudentCareerCard(career: StudentCareer, defaultExpanded: Boolean = true) {
-    var expanded by remember { mutableStateOf(defaultExpanded) }
-
+fun StudentCareerCard(career: StudentCareer) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
     ) {
@@ -106,76 +103,70 @@ fun StudentCareerCard(career: StudentCareer, defaultExpanded: Boolean = true) {
                 }
             }
 
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+            Column {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = career.description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (career.notes.isNotBlank()) {
                     Text(
-                        text = career.description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = career.notes,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary
                     )
-                    if (career.notes.isNotBlank()) {
-                        Text(
-                            text = career.notes,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.secondary
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Career Details Grid
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Left Column
+                    Column(modifier = Modifier.weight(1f)) {
+                        CareerDetailItem(
+                            stringResource(R.string.student_id_label),
+                            career.studentId
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(
+                            stringResource(R.string.course_year_label),
+                            career.courseYear.toString()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(stringResource(R.string.cohort_label), career.cohort)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(
+                            stringResource(R.string.normativa_label),
+                            career.normativa
                         )
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Career Details Grid
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Left Column
-                        Column(modifier = Modifier.weight(1f)) {
-                            CareerDetailItem(
-                                stringResource(R.string.student_id_label),
-                                career.studentId
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(
-                                stringResource(R.string.course_year_label),
-                                career.courseYear.toString()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(stringResource(R.string.cohort_label), career.cohort)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(
-                                stringResource(R.string.normativa_label),
-                                career.normativa
-                            )
-                        }
-
-                        // Right Column
-                        Column(modifier = Modifier.weight(1f)) {
-                            CareerDetailItem(
-                                stringResource(R.string.regulation_year_label),
-                                career.regulationYear
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(stringResource(R.string.class_label), career.className)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(
-                                stringResource(R.string.location_label),
-                                career.sedeDes
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            CareerDetailItem(
-                                stringResource(R.string.percorso_label),
-                                career.percorsoDes
-                            )
-                        }
+                    // Right Column
+                    Column(modifier = Modifier.weight(1f)) {
+                        CareerDetailItem(
+                            stringResource(R.string.regulation_year_label),
+                            career.regulationYear
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(stringResource(R.string.class_label), career.className)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(
+                            stringResource(R.string.location_label),
+                            career.sedeDes
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CareerDetailItem(
+                            stringResource(R.string.percorso_label),
+                            career.percorsoDes
+                        )
                     }
                 }
             }
