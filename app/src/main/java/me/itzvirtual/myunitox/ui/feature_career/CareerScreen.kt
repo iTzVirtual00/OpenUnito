@@ -102,6 +102,11 @@ fun CareerScreenPreview() {
                         data = dashboardDataSample,
                         isLoading = false,
                         error = null
+                    ),
+                    examResultsState = ExamResultsUiState(
+                        results = emptyList(),
+                        isLoading = true,
+                        error = null
                     )
                 ),
                 modifier = Modifier.padding(innerPadding)
@@ -163,7 +168,13 @@ fun CareerScreenContent(
             }
             GoToTranscriptSection()
             Spacer(Modifier.weight(0.1f))
-            ExamResultsSection(state = state.examResulState)
+            Text(
+                text = stringResource(R.string.exam_results_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            ExamResultsSection(state = state.examResultsState)
             Spacer(Modifier.weight(0.1f))
             Row(
                 Modifier.weight(1f)

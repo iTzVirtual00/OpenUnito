@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
+import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
 import java.io.IOException
 import javax.inject.Inject
@@ -17,6 +18,7 @@ import javax.inject.Inject
 class CareerViewModel @Inject constructor(
     private val studentRepo: StudentRepository,
     private val dashboardRepo: DashboardRepository,
+    private val examResultRepo: ExamResultRepository,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(CareerScreenState())
@@ -37,6 +39,22 @@ class CareerViewModel @Inject constructor(
                 } catch (_: Exception) {
                     null
                 }
+            }
+
+            val examResultDeferred = async {
+                val cached = examResultRepo.getCached()
+                val isStale = examResultRepo.isCacheStale()
+                if (cached != null) {
+                    _screenState.update { s ->
+                        s.copy(
+                            examResultsState = ExamResultsUiState(
+                                results = cached,
+                                isStale = isStale
+                            )
+                        )
+                    }
+                }
+                examResultRepo.refresh()
             }
 
             val dashboardDeferred = async {
@@ -65,6 +83,29 @@ class CareerViewModel @Inject constructor(
                         s.copy(
                             dashboardState = s.dashboardState.copy(
                                 error = if (e is IOException && s.dashboardState.data != null) null else e.message,
+                                isLoading = false
+                            )
+                        )
+                    }
+                }
+            )
+
+            examResultDeferred.await().fold(
+                onSuccess = {
+                    val fresh = examResultRepo.getCached()
+                    _screenState.update { s ->
+                        s.copy(
+                            examResultsState = ExamResultsUiState(
+                                results = fresh ?: emptyList()
+                            )
+                        )
+                    }
+                },
+                onFailure = { e ->
+                    _screenState.update { s ->
+                        s.copy(
+                            examResultsState = s.examResultsState.copy(
+                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
                         )
