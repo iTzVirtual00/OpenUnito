@@ -33,3 +33,44 @@ enum class GradeStatus {
         UNKNOWN -> "UNKNOWN"
     }
 }
+
+val examResultsDataSample = listOf(
+    ExamResult(
+        id = "1",
+        courseName = "Analisi Matematica",
+        courseCode = "ANMAT",
+        date = "23/09/2026",
+        weight = 9,
+        editableUntil = "29/09/2027 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.ACCEPTED,
+        gradeResult = GradeResult(
+            passed = true,
+            grade = "29",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = true,
+            canReject = true,
+            laude = false
+        )
+    ),
+    ExamResult(
+        id = "1",
+        courseName = "Ricerca Operativa",
+        courseCode = "ROP",
+        date = "23/09/2026",
+        weight = 9,
+        editableUntil = "29/09/2026 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.ACCEPTED,
+        gradeResult = GradeResult(
+            passed = true,
+            grade = "29",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = false,
+            canReject = false,
+            laude = false
+        )
+    ),
+)

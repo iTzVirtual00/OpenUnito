@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -36,7 +37,6 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -80,6 +80,7 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import me.itzvirtual.myunitox.domain.examresult.examResultsDataSample
 import me.itzvirtual.myunitox.ui.components.StdButton
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
@@ -105,7 +106,7 @@ fun CareerScreenPreview() {
                         error = null
                     ),
                     examResultsState = ExamResultsUiState(
-                        results = emptyList(),
+                        results = examResultsDataSample,
                         isLoading = false,
                         error = null
                     )
@@ -136,7 +137,6 @@ fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifie
     //Callback handling
     if (showStatistics) {
         TranscriptSheet(onDismiss = { showStatistics = false }) //TODO: change to Statistic fun
-
     }
     if (showTranscript) {
         TranscriptSheet(onDismiss = { showTranscript = false })
@@ -399,14 +399,12 @@ fun ExamResultsSection(state: ExamResultsUiState) {
 
                         else -> RectangleShape
                     }
-//                    ExamResultRow(result)
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = shape,
                         color = Color.Transparent // Uses parent surface color
                     ) {
                         ExamResultRow(result)
-
                     }
                     if (idx < results.lastIndex) {
                         HorizontalDivider(
@@ -422,7 +420,6 @@ fun ExamResultsSection(state: ExamResultsUiState) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun ExamResultRow(result: ExamResult) {
     result.gradeResult!!
 
@@ -435,10 +432,10 @@ fun ExamResultRow(result: ExamResult) {
         result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED
     val drawerEnabled = !isGradeStatusLoading && isGradeEditable
     var expanded by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .height(IntrinsicSize.Min)
                 .clickable(enabled = drawerEnabled) {
                     expanded = !expanded
