@@ -44,6 +44,6 @@
     <string name="tomorrow_classes_title">Tomorrow\'s classes</string>
     <string name="no_classes_tomorrow">No classes tomorrow</string>
     <string name="careers_title">Careers</string>
-    <string name="open_transcript">Go to transcript</string>
+    <string name="open_credit_statistics">Open statistics</string>
     <string name="error_no_calendar_configured">No calendars configured.</string>
 </resources>
