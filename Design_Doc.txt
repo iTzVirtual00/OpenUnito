@@ -56,8 +56,6 @@ Career:
 ------------
 
     add statiscscc on dashboard click
-    
     add settings + move dev settings
 
-    transcript: invert grade order LOW
-    transcript: stop page from filling screen
+    cache: capire come minchia gestire la cache

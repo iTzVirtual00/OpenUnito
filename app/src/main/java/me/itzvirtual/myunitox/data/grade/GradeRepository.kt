@@ -12,47 +12,30 @@ import me.itzvirtual.myunitox.domain.grade.ExamGrade
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class CachedGrades(
+    val grades: List<ExamGrade>,
+    val isStale: Boolean
+)
 @Singleton
 class GradeRepository @Inject constructor(
     private val api: UnitoApi,
     private val dao: ExamGradeDao,
     private val json: Json,
 ) {
-    val gradesFlow: Flow<List<ExamGrade>?> =
-        dao.get().map { entity -> entity?.toDomain(json) }
 
-    val isStaleFlow: Flow<Boolean> =
-        dao.get().map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
-        }
+    val gradesFlow: Flow<CachedGrades?> = dao.get().map { entity ->
+        if (entity == null) null
+        else {
+            val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
+            val domainList = entity.toDomain(json)
+                .sortedByDescending { it.score?.date }
 
-    suspend fun getCached(): List<ExamGrade>? {
-        return try {
-            val entity = dao.getOnce()
-            if (entity != null && System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS) {
-                dao.clearAll()
-                return null
-            }
-            entity?.toDomain(json)
-        } catch (_: Exception) {
-            null
+            CachedGrades(grades = domainList, isStale = isStale)
         }
     }
 
-    suspend fun isCacheStale(): Boolean {
-        val entity = try {
-            dao.getOnce()
-        } catch (_: Exception) {
-            null
-        }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
-    }
-
-    suspend fun refresh(): Result<Unit> = try {
+    suspend fun refresh(): Result<Unit> = runCatching {
         val response = api.getTranscript()
         dao.upsert(response.toEntity(json))
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 }

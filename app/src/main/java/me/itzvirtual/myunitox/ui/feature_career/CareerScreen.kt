@@ -93,6 +93,7 @@ import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.transcript.GradeWrapper
 import me.itzvirtual.myunitox.ui.transcript.LocalTranscriptActions
 import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
+import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 
 //TODO: add new grades, add transcript and invokes buttons
 @Composable
@@ -120,7 +121,11 @@ fun CareerScreenPreview() {
 }
 
 @Composable
-fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifier) {
+fun CareerScreen(
+    viewModel: CareerViewModel = hiltViewModel(),
+    transcriptViewModel: TranscriptViewModel = hiltViewModel(), // this prefetches the data
+    modifier: Modifier
+) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
     var showTranscript by remember { mutableStateOf(false) }
@@ -148,7 +153,7 @@ fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifie
         showStatistics = false
     }
     if (showTranscript) {
-        TranscriptSheet(onDismiss = { showTranscript = false })
+        TranscriptSheet(transcriptViewModel, onDismiss = { showTranscript = false })
     }
     if (showInvoke) {
         //TODO: change to Invokes fun

@@ -60,8 +60,8 @@ import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TranscriptSheet(
-    onDismiss: () -> Unit,
     viewModel: TranscriptViewModel = hiltViewModel(),
+    onDismiss: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -198,7 +198,10 @@ fun GradeWrapper(result: ExamResult) {
 
 @Composable
 fun GradesSection(state: GradesUiState) {
-    val grades = state.grades.filter { it.score != null }
+    val grades = remember(state.grades) {
+        state.grades?.filter { it.score != null } ?: emptyList()
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()

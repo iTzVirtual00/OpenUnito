@@ -7,6 +7,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
@@ -16,56 +18,57 @@ import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import java.io.IOException
 import javax.inject.Inject
 
+
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
-    private val examResultRepo: ExamResultRepository,
     private val gradeRepo: GradeRepository,
     private val dashboardRepo: DashboardRepository,
 ) : ViewModel() {
-
     private val _screenState = MutableStateFlow(TranscriptScreenState())
     val screenState = _screenState.asStateFlow()
 
+    // Experimental: proper Stale-While-Revalidate pattern
     init {
-        load()
+        gradeRepo.gradesFlow
+            .onEach { cachedData ->
+                _screenState.update { s ->
+                    s.copy(
+                        gradesState = s.gradesState.copy(
+                            grades = cachedData?.grades ?: emptyList(),
+                            isStale = cachedData?.isStale ?: true
+                        )
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        refreshGrades()
     }
 
-    fun load() {
+    fun refreshGrades() {
         viewModelScope.launch {
-            val gradeDeferred = async {
-                val cached = gradeRepo.getCached()
-                val isStale = gradeRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            gradesState = GradesUiState(
-                                grades = cached,
-                                isStale = isStale
-                            )
-                        )
-                    }
-                }
-                gradeRepo.refresh()
+            _screenState.update { s ->
+                s.copy(gradesState = s.gradesState.copy(isLoading = true, error = null))
             }
 
+            // val x1Deferred = async { x1Repo.refresh() }
+            // val x2Deferred = async { x2Repo.refresh() }
 
-            gradeDeferred.await().fold(
+            // val x1Res = x1.await()
+            // val x2Res = x2.await()
+
+            gradeRepo.refresh().fold(
                 onSuccess = {
-                    val fresh = gradeRepo.getCached()?.sortedByDescending {
-                        it.score?.date
-                    }
                     _screenState.update { s ->
-                        s.copy(
-                            gradesState = GradesUiState(
-                                grades = fresh ?: emptyList()
-                            )
-                        )
+                        s.copy(gradesState = s.gradesState.copy(isLoading = false))
                     }
                 },
                 onFailure = { e ->
                     _screenState.update { s ->
                         s.copy(
                             gradesState = s.gradesState.copy(
+                                // edge case: this shows error if request failed and student has no grades
+                                //            contrary to not showing error if request failed and student has grades...
                                 error = if (e is IOException && s.gradesState.grades.isNotEmpty()) null else e.message,
                                 isLoading = false
                             )
@@ -79,6 +82,10 @@ class TranscriptViewModel @Inject constructor(
     fun changeGradeStatus(examId: String, newStatus: GradeStatus): Job =
         viewModelScope.launch {
             dashboardRepo.changeGradeStatus(examId, newStatus)
-                .onSuccess { load() }
+                .onSuccess {
+                    refreshGrades()
+                }
+            // TODO: onFailure
         }
+
 }
