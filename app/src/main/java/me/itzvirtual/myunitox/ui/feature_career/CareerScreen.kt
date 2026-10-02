@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.feature_career
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -66,6 +67,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -123,6 +125,7 @@ fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifie
     var showStatistics by remember { mutableStateOf(false) }
     var showTranscript by remember { mutableStateOf(false) }
     var showInvoke by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
 
     CareerScreenContent(
@@ -134,15 +137,27 @@ fun CareerScreen(viewModel: CareerViewModel = hiltViewModel(), modifier: Modifie
 
     )
     
-    //Callback handling
+    // Callback handling
     if (showStatistics) {
-        TranscriptSheet(onDismiss = { showStatistics = false }) //TODO: change to Statistic fun
+        //TODO: change to Statistic fun
+        Toast.makeText(
+            context,
+            "WIP",
+            Toast.LENGTH_SHORT
+        ).show()
+        showStatistics = false
     }
     if (showTranscript) {
         TranscriptSheet(onDismiss = { showTranscript = false })
     }
     if (showInvoke) {
-        TranscriptSheet(onDismiss = { showInvoke = false }) //TODO: change to Invoke fun
+        //TODO: change to Invokes fun
+        Toast.makeText(
+            context,
+            "WIP",
+            Toast.LENGTH_SHORT
+        ).show()
+        showInvoke = false
     }
 }
 
@@ -167,7 +182,7 @@ fun CareerScreenContent(
             CreditsSection(
                 state = state.dashboardState
             )
-            GoToTranscriptSection() //TODO: replace with statistics
+            GoToCreditStatisticsSection() //TODO: replace with statistics
             //Vai a libretto diventa vai a statiscsc
             Spacer(modifier = Modifier.height(2.dp))
         }
@@ -199,7 +214,7 @@ fun CareerScreenContent(
 }
 
 @Composable
-fun GoToTranscriptSection() {
+fun GoToCreditStatisticsSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,7 +227,7 @@ fun GoToTranscriptSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.open_transcript),
+                text = stringResource(R.string.open_credit_statistics),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium
