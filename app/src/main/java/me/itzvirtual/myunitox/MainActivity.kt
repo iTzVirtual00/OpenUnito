@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -266,11 +268,16 @@ fun MyUniTOXApp(
 }
 
 enum class AppDestinations(
-    val label: String,
+    @StringRes private val labelRes: Int,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
-    CAREER("Career", Icons.Default.AccountBox),
-    CALENDAR("Calendar", Icons.Default.CalendarToday),
-    DEVTOOLS("Dev", Icons.Default.LogoDev),
+    HOME(R.string.home_tab_title, Icons.Default.Home),
+    CAREER(R.string.career_tab_title, Icons.Default.AccountBox),
+    CALENDAR(R.string.calendar_tab_title, Icons.Default.CalendarToday),
+    DEVTOOLS(R.string.dev_tab_title, Icons.Default.LogoDev),
+    ;
+
+    val label: String
+        @Composable
+        get() = stringResource(labelRes)
 }

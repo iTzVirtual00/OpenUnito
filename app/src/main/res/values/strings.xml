@@ -46,4 +46,8 @@
     <string name="careers_title">Careers</string>
     <string name="open_credit_statistics">Open statistics</string>
     <string name="error_no_calendar_configured">No calendars configured.</string>
+    <string name="home_tab_title">Home</string>
+    <string name="career_tab_title">Career</string>
+    <string name="calendar_tab_title">Calendar</string>
+    <string name="dev_tab_title">Dev</string>
 </resources>
