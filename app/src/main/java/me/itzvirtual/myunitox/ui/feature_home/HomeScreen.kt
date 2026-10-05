@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.feature_home
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -24,15 +25,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +70,7 @@ import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
+import me.itzvirtual.myunitox.ui.components.StdButton
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
 import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
@@ -220,12 +224,23 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToSchedule: () -> Unit = {}
 ) {
-    
+    var showAttendancesTracking by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val backStack = remember { mutableStateListOf<HomeDestination>(HomeDestination.Main) }
     val current = backStack.last()
     BackHandler(enabled = backStack.size > 1) {
         backStack.removeAt(backStack.lastIndex)
+    }
+
+    if (showAttendancesTracking) {
+        //TODO: call attendance tracking
+        Toast.makeText(
+            context,
+            "WIP",
+            Toast.LENGTH_SHORT
+        ).show()
+        showAttendancesTracking = false
     }
 
 
@@ -257,6 +272,9 @@ fun HomeScreen(
                     onNavigateToSchedule = onNavigateToSchedule,
                     onOpenProfile = {
                         backStack.add(HomeDestination.ProfileScreen)
+                    },
+                    onClickAttendance = {
+                        showAttendancesTracking = true;
                     }
                 )
             }
@@ -380,6 +398,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     onNavigateToSchedule: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
+    onClickAttendance: () -> Unit = {}
 ) {
     val studentState = state.studentState
     val todaysClassesState = state.todaysClasses
@@ -387,58 +406,60 @@ fun HomeScreenContent(
 
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-    Box(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            item {
-                when {
-                    studentState.isLoading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
 
-                    studentState.error != null -> {
-                        Text(
-                            text = studentState.error,
-                            color = MaterialTheme.colorScheme.error
+
+
+
+    Box(modifier = modifier.fillMaxSize()) {
+        when {
+            studentState.isLoading -> {
+                CircularProgressIndicator()
+            }
+
+            studentState.error != null -> {
+                Text(
+                    text = studentState.error,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            studentState.data != null -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    StudentDataSection(state, Modifier.clickable {
+                        onOpenProfile()
+                    })
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        TodaysClassesSection(
+                            state = todaysClassesState,
+                            onOpenScheduleClick = onNavigateToSchedule,
+                            onEventClick = { event -> selectedEvent = event },
                         )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        TomorrowClassesSection(
+                            state = tomorrowClassesState,
+                            onOpenScheduleClick = onNavigateToSchedule,
+                            onEventClick = { event -> selectedEvent = event },
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
                     }
-
-                    studentState.data != null -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        ) {
-                            StudentDataSection(state, Modifier.clickable {
-                                onOpenProfile()
-                            })
-                            Spacer(modifier = Modifier.height(16.dp))
-                            TodaysClassesSection(
-                                state = todaysClassesState,
-                                onOpenScheduleClick = onNavigateToSchedule,
-                                onEventClick = { event -> selectedEvent = event },
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            TomorrowClassesSection(
-                                state = tomorrowClassesState,
-                                onOpenScheduleClick = onNavigateToSchedule,
-                                onEventClick = { event -> selectedEvent = event },
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Row(
-                                modifier = modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Button(
-                                    onClick = {},
-                                    modifier = modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    //border = borderStroke
-                                ) {}
-                            }
-                        }
-                    }
+                    StdButton(
+                        icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
+                        text = stringResource(R.string.attendance_tracking_button_name),
+                        onClick = onClickAttendance,
+                        modifier = Modifier.padding(0.dp, 0.dp),
+                        height = 80f,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                    )
                 }
             }
         }
@@ -565,7 +586,7 @@ fun TodaysClassesSection(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             state.classes.forEach { entry ->
-                                TodaysClassCard(
+                                ClassCard(
                                     entry = entry,
                                     onClick = { onEventClick(entry) }
                                 )
@@ -678,7 +699,7 @@ fun TomorrowClassesSection(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             state.classes.forEach { entry ->
-                                TodaysClassCard(
+                                ClassCard(
                                     entry = entry,
                                     onClick = { onEventClick(entry) }
                                 )
@@ -692,7 +713,7 @@ fun TomorrowClassesSection(
 }
 
 @Composable
-fun TodaysClassCard(
+fun ClassCard(
     entry: AgendaEntry,
     onClick: () -> Unit,
     modifier: Modifier = Modifier

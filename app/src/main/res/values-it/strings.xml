@@ -48,4 +48,5 @@
     <string name="career_tab_title">Carriera</string>
     <string name="calendar_tab_title">Calendario</string>
     <string name="dev_tab_title">Dev</string>
+    <string name="attendance_tracking_button_name">Rilevazione Frequenze</string>
 </resources>

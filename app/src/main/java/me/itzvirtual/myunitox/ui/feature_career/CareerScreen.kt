@@ -232,7 +232,8 @@ fun CareerScreenContent(
             text = "Libretto",
             onClick = onClickTranscript,
             modifier = Modifier.padding(8.dp, 0.dp),
-            height = 80f
+            height = 80f,
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(Modifier.height(8.dp))
         StdButton(
@@ -240,7 +241,8 @@ fun CareerScreenContent(
             text = "Appelli",
             onClick = onClickInvoke,
             modifier = Modifier.padding(8.dp, 0.dp),
-            height = 80f
+            height = 80f,
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(Modifier.height(16.dp))
         Text(

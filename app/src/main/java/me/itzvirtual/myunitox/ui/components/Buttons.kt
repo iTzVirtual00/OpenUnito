@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -68,7 +69,8 @@ fun StdButton(
     text: String,
     textModifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    height: Float = 90f
+    height: Float = 90f,
+    border: BorderStroke? = null,
 ) {
     Surface(
         shape = RoundedCornerShape(25f),
@@ -76,6 +78,7 @@ fun StdButton(
         modifier = modifier
             .height(Dp(height)),
         tonalElevation = 2.dp,
+        border = border,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth()
