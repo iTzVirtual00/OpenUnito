@@ -25,30 +25,52 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Resolve and Update version.properties
+        id: version
         env:
           INPUT_VERSION_CODE: ${{ inputs.versionCode }}
           INPUT_VERSION_NAME: ${{ inputs.versionName }}
         run: |
+          echo "::group::Debug - Step Inputs"
+          echo "INPUT_VERSION_CODE='${INPUT_VERSION_CODE}'"
+          echo "INPUT_VERSION_NAME='${INPUT_VERSION_NAME}'"
+          echo "::endgroup::"
+          
           CURRENT_CODE="1"
           CURRENT_NAME="v0.0.1"
           
           if [ -f version.properties ]; then
+            echo "::group::Debug - Existing version.properties"
+            cat version.properties
+            echo "::endgroup::"
+          
             CURRENT_CODE=$(grep -E '^versionCode=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
             CURRENT_NAME=$(grep -E '^versionName=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
+          else
+            echo "version.properties not found. Using defaults."
           fi
-
+          
+          echo "::group::Debug - Parsed Current Values"
+          echo "CURRENT_CODE='${CURRENT_CODE}'"
+          echo "CURRENT_NAME='${CURRENT_NAME}'"
+          echo "::endgroup::"
+          
+          # Resolve versionCode
           # Use input if not null or increment existing by one
           if [ -n "${INPUT_VERSION_CODE}" ]; then
             RESOLVED_CODE="${INPUT_VERSION_CODE}"
+            echo "Using manual versionCode override: ${RESOLVED_CODE}"
           else
             RESOLVED_CODE=$(( ${CURRENT_CODE:-0} + 1 ))
+            echo "Incremented versionCode from '${CURRENT_CODE:-0}' to '${RESOLVED_CODE}'"
           fi
-
+          
+          # Resolve versionName
           # Use input or increment existing MINOR by one
           if [ -n "${INPUT_VERSION_NAME}" ]; then
             RESOLVED_NAME="${INPUT_VERSION_NAME}"
+            echo "Using manual versionName override: ${RESOLVED_NAME}"
           else
-            # Parse optional 'v' followed by MAJOR.MINOR.PATCH
+            # Parses optional 'v' followed by MAJOR.MINOR.PATCH
             REGEX="^(v?)([0-9]+)\.([0-9]+)\.([0-9]+)$"
             if [[ "${CURRENT_NAME}" =~ $REGEX ]]; then
               PREFIX="${BASH_REMATCH[1]}"
@@ -57,20 +79,27 @@ jobs:
               PATCH="${BASH_REMATCH[4]}"
               NEW_PATCH=$(( PATCH + 1 ))
               RESOLVED_NAME="${PREFIX}${MAJOR}.${MINOR}.${NEW_PATCH}"
+              echo "Incremented PATCH version: ${CURRENT_NAME} -> ${RESOLVED_NAME}"
             else
-              # leave unchanged if pattern does not match 
+              echo "WARNING: '${CURRENT_NAME}' did not match regex '${REGEX}'. Keeping original."
               RESOLVED_NAME="${CURRENT_NAME}"
             fi
           fi
-
+          
+          # Write to file
           cat <<EOF > version.properties
           versionCode=${RESOLVED_CODE}
           versionName=${RESOLVED_NAME}
           EOF
-
-          # Export values for subsequent steps
+          
+          # Set outputs for downstream steps
           echo "versionCode=${RESOLVED_CODE}" >> "$GITHUB_OUTPUT"
           echo "versionName=${RESOLVED_NAME}" >> "$GITHUB_OUTPUT"
+          
+          echo "::group::Debug - Final Outputs Written"
+          echo "versionCode=${RESOLVED_CODE}"
+          echo "versionName=${RESOLVED_NAME}"
+          echo "::endgroup::"
 
       - name: Commit, Tag, and Push
         env:
