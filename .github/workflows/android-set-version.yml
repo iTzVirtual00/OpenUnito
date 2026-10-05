@@ -6,23 +6,24 @@ on:
       versionCode:
         description: 'Version Code'
         required: true
+        default: "1"
         type: string
       versionName:
         description: 'Version Name'
         required: true
+        default: "v0.0.1"
         type: string
 
 jobs:
   bump-version:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to commit, push branch, and create tags
-
+      contents: write 
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Use current branch/ref that triggered the workflow
           ref: ${{ github.ref }}
 
       - name: Write version.properties
@@ -43,19 +44,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stage file
           git add version.properties
-
-          # Commit
           git commit -m "bump to ${VERSION_CODE}+${VERSION_NAME}"
 
-          # Push the commit to the current branch
-          git push origin HEAD:${{ github.ref_name }}
-
-          # Create annotated tag
           TAG_NAME="${VERSION_NAME}+${VERSION_CODE}"
           TAG_MESSAGE="Release ${VERSION_NAME} (build ${VERSION_CODE})"
           git tag -a "${TAG_NAME}" -m "${TAG_MESSAGE}"
 
-          # Push tag
-          git push origin "${TAG_NAME}"
+          git push --atomic origin "HEAD:${{ github.ref_name }}" "refs/tags/${TAG_NAME}"
