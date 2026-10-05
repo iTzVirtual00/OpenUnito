@@ -43,7 +43,7 @@ val examResultsDataSample = listOf(
         weight = 9,
         editableUntil = "29/09/2027 23:59:59",
         maxGrade = "30",
-        status = GradeStatus.ACCEPTED,
+        status = GradeStatus.NOT_TOUCHED,
         gradeResult = GradeResult(
             passed = true,
             grade = "29",
@@ -55,7 +55,26 @@ val examResultsDataSample = listOf(
         )
     ),
     ExamResult(
-        id = "1",
+        id = "2",
+        courseName = "Analisi Matematica II",
+        courseCode = "ANMAT2",
+        date = "23/05/2026",
+        weight = 9,
+        editableUntil = "29/09/2027 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.NOT_TOUCHED,
+        gradeResult = GradeResult(
+            passed = false,
+            grade = "X",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = true,
+            canReject = true,
+            laude = false
+        )
+    ),
+    ExamResult(
+        id = "3",
         courseName = "Ricerca Operativa",
         courseCode = "ROP",
         date = "23/09/2026",

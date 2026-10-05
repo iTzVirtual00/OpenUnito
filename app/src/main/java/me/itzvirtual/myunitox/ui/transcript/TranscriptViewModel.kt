@@ -87,5 +87,4 @@ class TranscriptViewModel @Inject constructor(
                 }
             // TODO: onFailure
         }
-
 }

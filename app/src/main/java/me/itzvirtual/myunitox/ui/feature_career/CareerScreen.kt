@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +77,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
@@ -92,30 +94,63 @@ import me.itzvirtual.myunitox.ui.shared.toColor
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.transcript.GradeWrapper
 import me.itzvirtual.myunitox.ui.transcript.LocalTranscriptActions
+import me.itzvirtual.myunitox.ui.transcript.TranscriptActions
 import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 //TODO: add new grades, add transcript and invokes buttons
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 fun CareerScreenPreview() {
+    var previewState by remember {
+        mutableStateOf(
+            CareerScreenState(
+                dashboardState = CareerDashboardUiState(
+                    data = dashboardDataSample,
+                    isLoading = false,
+                    error = null
+                ),
+                examResultsState = ExamResultsUiState(
+                    results = examResultsDataSample,
+                    isLoading = false,
+                    error = null
+                )
+            )
+        )
+    }
+
+    val previewScope = rememberCoroutineScope()
+
+    val mockActions = remember {
+        TranscriptActions(
+            changeGradeStatus = { id, newStatus ->
+                previewScope.launch {
+                    delay(600.milliseconds)
+                    previewState = previewState.copy(
+                        examResultsState = previewState.examResultsState.copy(
+                            results = previewState.examResultsState.results.map { result ->
+                                if (result.id == id) {
+                                    result.copy(status = newStatus)
+                                } else {
+                                    result
+                                }
+                            }
+                        )
+                    )
+                }
+            }
+        )
+    }
+
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            CareerScreenContent(
-                state = CareerScreenState(
-                    dashboardState = CareerDashboardUiState(
-                        data = dashboardDataSample,
-                        isLoading = false,
-                        error = null
-                    ),
-                    examResultsState = ExamResultsUiState(
-                        results = examResultsDataSample,
-                        isLoading = false,
-                        error = null
-                    )
-                ),
-                modifier = Modifier.padding(innerPadding)
-            )
+            CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
+                CareerScreenContent(
+                    state = previewState,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
         }
     }
 }

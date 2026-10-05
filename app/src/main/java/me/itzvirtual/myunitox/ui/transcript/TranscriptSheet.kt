@@ -158,6 +158,7 @@ fun GradeWrapper(result: ExamResult) {
                 Text(
                     text = result.gradeResult.run {
                         when {
+                            !isRevealed -> "30"
                             !passed && grade == "0" -> "X"
                             laude -> "${grade}L"
                             else -> grade
