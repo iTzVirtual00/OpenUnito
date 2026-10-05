@@ -117,7 +117,7 @@ fun GradeWrapper(result: ExamResult) {
     val scope = rememberCoroutineScope()
 
 
-    val isRevealed = result.status != GradeStatus.NOT_TOUCHED
+    val isRevealed = result.status != GradeStatus.NOT_TOUCHED || !result.gradeResult.passed
     var isLoading by remember { mutableStateOf(false) }
     AnimatedSymmetricalBorder(
         isRevealed = isRevealed,
@@ -166,9 +166,9 @@ fun GradeWrapper(result: ExamResult) {
                     },
                     style = MaterialTheme.typography.headlineMedium,
                     color = when {
-                        result.status == GradeStatus.NOT_TOUCHED -> Color.Companion.Transparent
-                        !result.gradeResult.passed -> LocalCustomColorsPalette.current.gradeNotPassed
-                        else -> LocalCustomColorsPalette.current.gradePassed
+                        !isRevealed -> Color.Transparent
+                        result.gradeResult.passed -> LocalCustomColorsPalette.current.gradePassed
+                        else -> LocalCustomColorsPalette.current.gradeNotPassed
                     },
                     fontWeight = FontWeight.ExtraBold
                 )

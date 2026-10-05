@@ -9,7 +9,8 @@ import me.itzvirtual.myunitox.domain.examresult.GradeResult
 
 fun ExamResultDto.toDomain() = ExamResult(
     id = id, courseName = courseName, courseCode = courseCode,
-    date = date, weight = weight, editableUntil = editableUntil,
+    date =
+        date, weight = weight, editableUntil = editableUntil,
     maxGrade = maxGrade, status = status, gradeResult = gradeResult?.toDomain(),
 )
 

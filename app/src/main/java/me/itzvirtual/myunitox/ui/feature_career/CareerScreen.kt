@@ -92,6 +92,7 @@ import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
 import me.itzvirtual.myunitox.ui.shared.LoadingShimmerItem
+import me.itzvirtual.myunitox.ui.shared.formatDate
 import me.itzvirtual.myunitox.ui.shared.toColor
 import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
@@ -171,14 +172,21 @@ fun CareerScreen(
     val context = LocalContext.current
 
 
-    CareerScreenContent(
-        state,
-        modifier,
-        onClickStatistics = { showStatistics = true },
-        onClickTranscript = { showTranscript = true },
-        onClickInvoke = { showInvoke = true },
-
+    val actions = TranscriptActions(
+        changeGradeStatus = { gradeId, newStatus ->
+            transcriptViewModel.changeGradeStatus(gradeId, newStatus)
+        }
     )
+
+    CompositionLocalProvider(LocalTranscriptActions provides actions) {
+        CareerScreenContent(
+            state,
+            modifier,
+            onClickStatistics = { showStatistics = true },
+            onClickTranscript = { showTranscript = true },
+            onClickInvoke = { showInvoke = true },
+        )
+    }
     
     // Callback handling
     if (showStatistics) {
@@ -220,9 +228,10 @@ fun CareerScreenContent(
             .verticalScroll(rememberScrollState()),
     ) {
         Column(
-            modifier = modifier.clickable {
-                onClickStatistics()
-            }
+            modifier = modifier
+                .clickable {
+                    onClickStatistics()
+                }
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -493,10 +502,12 @@ fun ExamResultRow(result: ExamResult) {
     var isGradeStatusLoading by remember { mutableStateOf(false) }
     val actions = LocalTranscriptActions.current
     val isGradeEditable =
-        result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED
+        result.gradeResult.passed && (result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED)
     val drawerEnabled = !isGradeStatusLoading && isGradeEditable
     var expanded by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -529,7 +540,7 @@ fun ExamResultRow(result: ExamResult) {
                             text = "${
                                 stringResource(
                                     R.string.date,
-                                    result.date
+                                    formatDate(result.date)
                                 )
                             } \u2022 ${result.weight} CFU",
                             style = MaterialTheme.typography.bodySmall
@@ -563,9 +574,12 @@ fun ExamResultRow(result: ExamResult) {
                 }
             }
 
+            val showChroma = (
+                isGradeStatusLoading
+                || (result.status == GradeStatus.VIEWED
+                || result.status == GradeStatus.NOT_TOUCHED)
+            ) && isGradeEditable
 
-            val showChroma =
-                (isGradeStatusLoading || result.status == GradeStatus.VIEWED || result.status == GradeStatus.NOT_TOUCHED) && isGradeEditable
             // when showChroma
             val infiniteTransition = rememberInfiniteTransition(label = "ChromaMovement")
             val chromaOffset by infiniteTransition.animateFloat(
@@ -579,7 +593,7 @@ fun ExamResultRow(result: ExamResult) {
             )
             // 2. when !showChroma
             val animatedColor by animateColorAsState(
-                targetValue = result.status.toColor(),
+                targetValue = if(result.gradeResult.passed) result.status.toColor() else GradeStatus.UNKNOWN.toColor(),
                 animationSpec = tween(durationMillis = 500),
                 label = "GradeStatusColor"
             )

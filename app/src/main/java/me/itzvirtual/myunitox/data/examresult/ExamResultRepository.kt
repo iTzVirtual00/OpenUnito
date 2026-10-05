@@ -34,7 +34,7 @@ class ExamResultRepository @Inject constructor(
                 dao.clearAll()
                 return null
             }
-            entity?.toDomain(json)
+            entity?.toDomain(json)?.sortedByDescending { it.date }
         } catch (_: Exception) {
             null
         }
