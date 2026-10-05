@@ -5,50 +5,86 @@ on:
     inputs:
       versionCode:
         description: 'Version Code'
-        required: true
-        default: "1"
+        required: false
         type: string
       versionName:
         description: 'Version Name'
-        required: true
-        default: "v0.0.1"
+        required: false
         type: string
 
 jobs:
   bump-version:
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
-      
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
-      - name: Write version.properties
+      - name: Resolve and Update version.properties
         env:
-          VERSION_CODE: ${{ inputs.versionCode }}
-          VERSION_NAME: ${{ inputs.versionName }}
+          INPUT_VERSION_CODE: ${{ inputs.versionCode }}
+          INPUT_VERSION_NAME: ${{ inputs.versionName }}
         run: |
+          CURRENT_CODE="1"
+          CURRENT_NAME="v0.0.1"
+          
+          if [ -f version.properties ]; then
+            CURRENT_CODE=$(grep -E '^versionCode=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
+            CURRENT_NAME=$(grep -E '^versionName=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
+          fi
+
+          # Use input if not null or increment existing by one
+          if [ -n "${INPUT_VERSION_CODE}" ]; then
+            RESOLVED_CODE="${INPUT_VERSION_CODE}"
+          else
+            RESOLVED_CODE=$(( ${CURRENT_CODE:-0} + 1 ))
+          fi
+
+          # Use input or increment existing MINOR by one
+          if [ -n "${INPUT_VERSION_NAME}" ]; then
+            RESOLVED_NAME="${INPUT_VERSION_NAME}"
+          else
+            # Parse optional 'v' followed by MAJOR.MINOR.PATCH
+            REGEX="^(v?)([0-9]+)\.([0-9]+)\.([0-9]+)$"
+            if [[ "${CURRENT_NAME}" =~ $REGEX ]]; then
+              PREFIX="${BASH_REMATCH[1]}"
+              MAJOR="${BASH_REMATCH[2]}"
+              MINOR="${BASH_REMATCH[3]}"
+              PATCH="${BASH_REMATCH[4]}"
+              NEW_PATCH=$(( PATCH + 1 ))
+              RESOLVED_NAME="${PREFIX}${MAJOR}.${MINOR}.${NEW_PATCH}"
+            else
+              # leave unchanged if pattern does not match 
+              RESOLVED_NAME="${CURRENT_NAME}"
+            fi
+          fi
+
           cat <<EOF > version.properties
-          versionCode=${VERSION_CODE}
-          versionName=${VERSION_NAME}
+          versionCode=${RESOLVED_CODE}
+          versionName=${RESOLVED_NAME}
           EOF
+
+          # Export values for subsequent steps
+          echo "versionCode=${RESOLVED_CODE}" >> "$GITHUB_OUTPUT"
+          echo "versionName=${RESOLVED_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Commit, Tag, and Push
         env:
-          VERSION_CODE: ${{ inputs.versionCode }}
-          VERSION_NAME: ${{ inputs.versionName }}
+          VERSION_CODE: ${{ steps.version.outputs.versionCode }}
+          VERSION_NAME: ${{ steps.version.outputs.versionName }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          
           git add version.properties
           git commit -m "bump to ${VERSION_CODE}+${VERSION_NAME}"
-
+          
           TAG_NAME="${VERSION_NAME}+${VERSION_CODE}"
           TAG_MESSAGE="Release ${VERSION_NAME} (build ${VERSION_CODE})"
           git tag -a "${TAG_NAME}" -m "${TAG_MESSAGE}"
-
+          
           git push --atomic origin "HEAD:${{ github.ref_name }}" "refs/tags/${TAG_NAME}"
