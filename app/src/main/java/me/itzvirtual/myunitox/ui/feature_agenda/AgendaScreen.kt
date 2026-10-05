@@ -1010,7 +1010,7 @@ internal fun EventDetailView(
                 // Activity code
                 DetailRow(
                     label = "Codice Attività",
-                    value = event.activityCode.hashCode().toString()
+                    value = event.activityCode
                 )
 
                 // Date and time
