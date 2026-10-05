@@ -68,8 +68,8 @@ val examResultsDataSample = listOf(
             grade = "X",
             isAbsent = false,
             isWithdrawn = false,
-            canAccept = true,
-            canReject = true,
+            canAccept = false,
+            canReject = false,
             laude = false
         )
     ),
@@ -89,6 +89,63 @@ val examResultsDataSample = listOf(
             isWithdrawn = false,
             canAccept = false,
             canReject = false,
+            laude = false
+        )
+    ),
+    ExamResult(
+        id = "4",
+        courseName = "Analisi Matematica",
+        courseCode = "ANMAT",
+        date = "23/09/2026",
+        weight = 9,
+        editableUntil = "29/09/2027 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.NOT_TOUCHED,
+        gradeResult = GradeResult(
+            passed = true,
+            grade = "29",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = true,
+            canReject = true,
+            laude = false
+        )
+    ),
+    ExamResult(
+        id = "5",
+        courseName = "Analisi Matematica",
+        courseCode = "ANMAT",
+        date = "23/09/2026",
+        weight = 9,
+        editableUntil = "29/09/2027 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.NOT_TOUCHED,
+        gradeResult = GradeResult(
+            passed = true,
+            grade = "29",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = true,
+            canReject = true,
+            laude = false
+        )
+    ),
+    ExamResult(
+        id = "6",
+        courseName = "Analisi Matematica",
+        courseCode = "ANMAT",
+        date = "23/09/2026",
+        weight = 9,
+        editableUntil = "29/09/2027 23:59:59",
+        maxGrade = "30",
+        status = GradeStatus.NOT_TOUCHED,
+        gradeResult = GradeResult(
+            passed = true,
+            grade = "29",
+            isAbsent = false,
+            isWithdrawn = false,
+            canAccept = true,
+            canReject = true,
             laude = false
         )
     ),

@@ -30,7 +30,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalance
@@ -91,6 +93,7 @@ import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
 import me.itzvirtual.myunitox.ui.shared.LoadingShimmerItem
 import me.itzvirtual.myunitox.ui.shared.toColor
+import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import me.itzvirtual.myunitox.ui.transcript.GradeWrapper
 import me.itzvirtual.myunitox.ui.transcript.LocalTranscriptActions
@@ -211,7 +214,11 @@ fun CareerScreenContent(
 ) {
     // column??
     // Yes, column. Wdym?!
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
         Column(
             modifier = modifier.clickable {
                 onClickStatistics()
@@ -381,7 +388,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
 
 
 @Composable
-fun YearlyProgressCard(
+fun YearlyProgressCard( //TODO: move to components package
     title: String,
     current: Int,
     total: Int,
@@ -512,7 +519,7 @@ fun ExamResultRow(result: ExamResult) {
                     // info
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = result.courseName,
+                            text = unShoutCourseName(result.courseName),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2

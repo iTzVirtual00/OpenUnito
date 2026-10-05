@@ -53,6 +53,7 @@ import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.text.lowercase
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -264,4 +265,13 @@ fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarC
         context.deleteSharedPreferences("secure_auth_prefs")
     }
     prefsFile.delete()
+}
+
+fun unShoutCourseName(input: String): String {
+    return input.lowercase().replace(Regex("""\b\w""")) { matchResult ->
+        matchResult.value.uppercase()
+    }
+        .replace("Ii", "II") // E E E EEE <3
+        .replace("Iii", "III") // EEE, La vendetta
+        .replace("Iv", "IV") // Just in case
 }
