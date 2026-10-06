@@ -35,7 +35,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -73,10 +73,13 @@ import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.components.StdButton
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
 import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
+import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
+val debug = false // TODO: make debug a setting
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
@@ -288,6 +291,85 @@ fun HomeScreen(
     }
 }
 
+@Composable
+fun HomeScreenContent(
+    state: HomeScreenState,
+    modifier: Modifier = Modifier,
+    onNavigateToSchedule: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
+    onClickAttendance: () -> Unit = {}
+) {
+    val studentState = state.studentState
+    val todayClassesState = state.todaysClasses
+    val tomorrowClassesState = state.tomorrowClasses
+
+    // State for selected event detail view
+    // What does this even mean?
+    var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+
+    Box(modifier = modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                ProfileSection(state, Modifier.clickable {
+                    onOpenProfile()
+                })
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    ClassesSection(
+                        title = stringResource(R.string.todays_classes_title),
+                        state = todayClassesState,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event }
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ClassesSection(
+                        title = stringResource(R.string.tomorrow_classes_title),
+                        state = tomorrowClassesState,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event }
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+                StdButton(
+                    icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
+                    text = stringResource(R.string.attendance_tracking_button_name),
+                    onClick = onClickAttendance,
+                    modifier = Modifier.padding(0.dp, 0.dp),
+                    height = 80f,
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                )
+            }
+        // Class detail overlay
+        // Keep a reference to the event being displayed (for exit animation)
+        var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+        if (selectedEvent != null) {
+            displayedEvent = selectedEvent
+        }
+
+        AnimatedVisibility(
+            visible = selectedEvent != null,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
+        ) {
+            // Use displayedEvent which keeps the last non-null value during exit animation
+            displayedEvent?.let { event ->
+                EventDetailView(
+                    event = event,
+                    onDismiss = { selectedEvent = null }
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreenContent(
@@ -343,48 +425,60 @@ fun UserInitialsIcon(
 }
 
 @Composable
-fun StudentDataSection(homeState: HomeScreenState, modifier: Modifier = Modifier) {
-    var state = homeState.studentState
-    Box(modifier = modifier) {
-        when {
-            state.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
+fun ProfileSection(
+    homeState: HomeScreenState,
+    modifier: Modifier = Modifier
+) {
+    val state = homeState.studentState
 
-            state.error != null -> {
-                Surface(
+    val initials: String
+    val firstName: String
+    val lastName: String
+
+    if (state.data != null) {
+        val studentData = state.data
+        initials =
+            "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
+        firstName = studentData.firstname
+        lastName = studentData.lastname
+    }
+    else {
+        initials = "/"
+        firstName = "Profile" //add translation
+        lastName = ""
+    }
+
+
+    Box(modifier = modifier) {
+        if (debug && state.error != null) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = state.error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+        else {
+            Column {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(top = 16.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    UserInitialsIcon(initials)
                     Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
+                        text = "$firstName $lastName",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                }
-            }
-
-            else -> {
-                val studentData = state.data!!
-                val initials =
-                    "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        UserInitialsIcon(initials)
-                        Text(
-                            text = "${studentData.firstname} ${studentData.lastname}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
                 }
             }
         }
@@ -393,320 +487,90 @@ fun StudentDataSection(homeState: HomeScreenState, modifier: Modifier = Modifier
 }
 
 @Composable
-fun HomeScreenContent(
-    state: HomeScreenState,
+fun ClassesSection(
+    title: String,
     modifier: Modifier = Modifier,
-    onNavigateToSchedule: () -> Unit = {},
-    onOpenProfile: () -> Unit = {},
-    onClickAttendance: () -> Unit = {}
+    state: DailyClassesUiState,
+    onOpenScheduleClick: () -> Unit,
+    onEventClick: (AgendaEntry) -> Unit
 ) {
-    val studentState = state.studentState
-    val todaysClassesState = state.todaysClasses
-    val tomorrowClassesState = state.tomorrowClasses
+    val classes = state.classes
 
-    // State for selected event detail view
-    var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-
-
-
-
-    Box(modifier = modifier.fillMaxSize()) {
-        when {
-            studentState.isLoading -> {
-                CircularProgressIndicator()
-            }
-
-            studentState.error != null -> {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Row(
+                modifier = Modifier.clickable { onOpenScheduleClick() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = studentState.error,
-                    color = MaterialTheme.colorScheme.error
+                    text = stringResource(R.string.open_schedule),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
 
-            studentState.data != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    StudentDataSection(state, Modifier.clickable {
-                        onOpenProfile()
-                    })
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (!state.isLoading && state.error == null && !classes.isEmpty()) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState())
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        TodaysClassesSection(
-                            state = todaysClassesState,
-                            onOpenScheduleClick = onNavigateToSchedule,
-                            onEventClick = { event -> selectedEvent = event },
-                        )
-                        Spacer(modifier = Modifier.height(32.dp))
-                        TomorrowClassesSection(
-                            state = tomorrowClassesState,
-                            onOpenScheduleClick = onNavigateToSchedule,
-                            onEventClick = { event -> selectedEvent = event },
-                        )
-                        Spacer(modifier = Modifier.height(32.dp))
-                    }
-                    StdButton(
-                        icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
-                        text = stringResource(R.string.attendance_tracking_button_name),
-                        onClick = onClickAttendance,
-                        modifier = Modifier.padding(0.dp, 0.dp),
-                        height = 80f,
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-                    )
-                }
-            }
-        }
-        // Event detail overlay
-        // Keep a reference to the event being displayed (for exit animation)
-        var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-        if (selectedEvent != null) {
-            displayedEvent = selectedEvent
-        }
-
-        AnimatedVisibility(
-            visible = selectedEvent != null,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
-        ) {
-            // Use displayedEvent which keeps the last non-null value during exit animation
-            displayedEvent?.let { event ->
-                EventDetailView(
-                    event = event,
-                    onDismiss = { selectedEvent = null }
-                )
-            }
-        }
-    }
-}
-
-// TODO: generalize classes sections since today and tomorrow classes are almost identical
-@Composable
-fun TodaysClassesSection(
-    state: DailyClassesUiState,
-    onOpenScheduleClick: () -> Unit,
-    onEventClick: (AgendaEntry) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Header row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.todays_classes_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Row(
-                modifier = Modifier.clickable { onOpenScheduleClick() },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.open_schedule),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Classes list
-                when {
-                    state.isLoading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                        classes.forEach { entry ->
+                            ClassCard(
+                                entry = entry,
+                                onClick = { onEventClick(entry) }
+                            )
                         }
                     }
-
-                    state.error != null -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            val errMsg = if (state.error == "NO_CALENDAR") {
+                }
+                else {
+                    Surface(
+                        modifier = modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                    ) {
+                        val message = (
+                            if (state.error == "NO_CALENDAR") { // error or loading
                                 stringResource(R.string.error_no_calendar_configured)
-                            } else {
+                            } else if (debug && state.error != null) {
                                 state.error
+                            } else if (state.isLoading || state.error != null) { // !debug, error or loading or empty
+                                "No Data"
+                            } else {
+                                stringResource(R.string.no_classes_today)
                             }
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = errMsg,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
+                        ) as String //Why?
 
-                    state.classes.isEmpty() -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.no_classes_today),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
 
-                    else -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            state.classes.forEach { entry ->
-                                ClassCard(
-                                    entry = entry,
-                                    onClick = { onEventClick(entry) }
-                                )
-                            }
+                        Row(modifier.padding(12.dp)) {
+                            ErrorItem(
+                                errorMessage = message,
+                                color = Color.Gray
+                            )
                         }
                     }
                 }
-            }
-        }
-    }
-}
 
-@Composable
-fun TomorrowClassesSection(
-    state: DailyClassesUiState,
-    onOpenScheduleClick: () -> Unit,
-    onEventClick: (AgendaEntry) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Header row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.tomorrow_classes_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Row(
-                modifier = Modifier.clickable { onOpenScheduleClick() },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.open_schedule),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Classes list
-                when {
-                    state.isLoading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                        }
-                    }
-
-                    state.error != null -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                val errMsg = if (state.error == "NO_CALENDAR") {
-                                    stringResource(R.string.error_no_calendar_configured)
-                                } else {
-                                    state.error
-                                }
-                                Text(
-                                    text = errMsg,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-
-                    state.classes.isEmpty() -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.no_classes_tomorrow),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    else -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            state.classes.forEach { entry ->
-                                ClassCard(
-                                    entry = entry,
-                                    onClick = { onEventClick(entry) }
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }

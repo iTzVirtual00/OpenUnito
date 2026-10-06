@@ -52,10 +52,11 @@ import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
-import me.itzvirtual.myunitox.ui.shared.LoadingShimmerItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
 import me.itzvirtual.myunitox.ui.shared.shimmerEffect
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
+
+val debug = false // TODO: make debug a setting
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -200,8 +201,10 @@ fun GradeWrapper(result: ExamResult) {
 @Composable
 fun GradesSection(state: GradesUiState) {
     val grades = remember(state.grades) {
-        state.grades?.filter { it.score != null } ?: emptyList()
+        state.grades.filter { it.score != null } ?: emptyList()
     }
+    val showDebug = debug && state.error != null
+
 
     Surface(
         modifier = Modifier
@@ -215,12 +218,11 @@ fun GradesSection(state: GradesUiState) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (state.isLoading) {
-                LoadingShimmerItem()
-            } else if (state.error != null) {
-                ErrorItem(state.error!!)
-            } else if (grades.count() == 0) {
-                ErrorItem(stringResource(R.string.no_data), Color.Companion.Gray)
+
+            if (showDebug) {
+                ErrorItem(state.error)
+            } else if (grades.count() == 0 || state.error != null || state.isLoading) { // !showDebug
+                ErrorItem(stringResource(R.string.no_data), Color.Gray)
             } else {
                 grades.forEachIndexed { idx, grade ->
                     GradeRow(

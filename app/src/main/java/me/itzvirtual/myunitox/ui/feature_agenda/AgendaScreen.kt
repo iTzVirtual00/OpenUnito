@@ -104,6 +104,8 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+val debug = false // TODO: make debug a setting
+
 /**
  * Filter options for the agenda
  */
@@ -187,7 +189,6 @@ fun AgendaScreen(
             onCalendarDelete = { viewModel.deleteCalendar(it) },
         )
 
-        // Loading overlay
         if (screenState.isLoading) {
             Box(
                 modifier = Modifier
@@ -197,10 +198,7 @@ fun AgendaScreen(
             ) {
                 LoadingIconItem(modifier = Modifier.size(64.dp))
             }
-        }
-
-        // Error message overlay
-        if (screenState.agendaState.error != null) {
+        } else if (screenState.agendaState.error != null) {
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)

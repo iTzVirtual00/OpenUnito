@@ -90,8 +90,6 @@ import me.itzvirtual.myunitox.domain.examresult.examResultsDataSample
 import me.itzvirtual.myunitox.ui.components.StdButton
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
-import me.itzvirtual.myunitox.ui.shared.LoadingIconItem
-import me.itzvirtual.myunitox.ui.shared.LoadingShimmerItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
 import me.itzvirtual.myunitox.ui.shared.toColor
 import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
@@ -102,6 +100,8 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptActions
 import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 import kotlin.time.Duration.Companion.milliseconds
+
+val debug = false // TODO: make debug a setting
 
 //TODO: add new grades, add transcript and invokes buttons
 @Composable
@@ -238,7 +238,6 @@ fun CareerScreenContent(
             CreditsSection(
                 state = state.dashboardState
             )
-            GoToCreditStatisticsSection() //TODO: replace with statistics
             //Vai a libretto diventa vai a statiscsc
             Spacer(modifier = Modifier.height(2.dp))
         }
@@ -303,7 +302,33 @@ fun GoToCreditStatisticsSection() {
 
 @Composable
 fun CreditsSection(state: CareerDashboardUiState) {
+    val showDebug = debug && state.error != null
+
     val data = state.data
+    val currentCredits: Int
+    val totalPlannedCredits: Int
+    val totalCredits: Int
+    val yearlyProgress: Float
+    val remainingCfu: String
+
+
+    if (!state.isLoading && state.error == null) {
+        val stats = data!!.stats
+
+        currentCredits = stats.creditsGained.toInt()
+        totalPlannedCredits = stats.totalPlanCredits
+        totalCredits = stats.totalCredits
+        remainingCfu = (totalCredits - currentCredits).toString()
+        yearlyProgress = currentCredits.toFloat() / totalPlannedCredits.toFloat()
+    }
+    else {
+        currentCredits = -1
+        totalPlannedCredits = -1
+        totalCredits = -1
+        remainingCfu = "--"
+        yearlyProgress = 0f
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -320,22 +345,19 @@ fun CreditsSection(state: CareerDashboardUiState) {
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                if (state.isLoading) {
-                    LoadingIconItem(Modifier.height(72.dp))
-                } else if (state.error != null) {
+                if (showDebug) {
                     ErrorItem(state.error)
-                } else {
-                    data!!
-                    val stats = state.data.stats
+                }
+                else { // !debug or !error
                     Box(
                         modifier = Modifier.padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CreditProgressIndicator(
                             modifier = Modifier.size(100.dp),
-                            credits = stats.creditsGained.toInt(),
-                            totalCredits = stats.totalCredits,
-                            plannedCredits = stats.totalPlanCredits,
+                            credits = currentCredits,
+                            totalCredits = totalCredits,
+                            plannedCredits = totalPlannedCredits,
                             progressColor = MaterialTheme.colorScheme.primary,
                             plannedProgressColor = MaterialTheme.colorScheme.primary,
                             backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -353,46 +375,49 @@ fun CreditsSection(state: CareerDashboardUiState) {
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
             ) {
-                if (state.isLoading) {
-                    LoadingShimmerItem()
-                } else if (state.error != null) {
-                    ErrorItem(state.error!!)
-                    //TODO: add refresh button and show error numbers only in dev mode
-                } else {
-                    val stats = data!!.stats
-                    val yearlyProgress = stats.creditsGained.toFloat() / stats.totalPlanCredits
+                //TODO: add refresh button and show error numbers only in dev mode
+                if (showDebug) {
+                    ErrorItem(state.error)
+                }
+                else { // !debug or !error
                     YearlyProgressCard(
                         title = stringResource(R.string.yearly_progress_title),
-                        current = stats.creditsGained.toInt(),
-                        total = stats.totalPlanCredits,
+                        current = currentCredits,
+                        total = totalPlannedCredits,
                         progress = yearlyProgress
                     )
                 }
             }
             Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.4f),
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = Modifier.fillMaxWidth()
             ) {
-                if (state.isLoading) {
-                    LoadingShimmerItem()
-                } else if (state.error != null) {
+                if (showDebug) {
                     ErrorItem(state.error)
                 } else {
-                    val stats = data!!.stats
-                    Text(
-                        text = stringResource(
-                            R.string.remaining_cfu_title,
-                            stats.totalCredits - stats.creditsGained.toInt()
-                        ),
-                        modifier = Modifier.padding(12.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.remaining_cfu_title,
+                                remainingCfu
+                            ),
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+
+                            )
+                    }
                 }
             }
         }
     }
+    GoToCreditStatisticsSection() //TODO: replace with statistics
 }
 
 
@@ -421,7 +446,7 @@ fun YearlyProgressCard( //TODO: move to components package
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "$current / $total CFU",
+            text = "${if (current >= 0) current else "--"} / ${if (current >= 0) total else "--"} CFU", // TODO: is this any good?
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )
@@ -432,6 +457,7 @@ fun YearlyProgressCard( //TODO: move to components package
 
 @Composable
 fun ExamResultsSection(state: ExamResultsUiState) {
+    val showDebug = debug && state.error != null
     val results = state.results
     val cornerRadius = 16.dp
 
@@ -447,11 +473,9 @@ fun ExamResultsSection(state: ExamResultsUiState) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (state.isLoading) {
-                LoadingShimmerItem()
-            } else if (state.error != null) {
-                ErrorItem(state.error!!)
-            } else if (results.count() == 0) {
+            if (showDebug) {
+                ErrorItem(state.error)
+            } else if (results.count() == 0 || state.error != null || state.isLoading) { // !showDebug
                 ErrorItem(stringResource(R.string.no_data), Color.Gray)
             } else {
                 results.forEachIndexed { idx, result ->
@@ -777,6 +801,4 @@ fun ExamResultRow(result: ExamResult) {
             }
         }
     }
-
-
 }

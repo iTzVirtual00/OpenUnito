@@ -15,7 +15,7 @@
     <string name="credits_section_title">Credits</string>
     <string name="grades_section_title">Grades</string>
     <string name="yearly_progress_title">Yearly Progress</string>
-    <string name="remaining_cfu_title">%1$d CFU remaining for degree</string>
+    <string name="remaining_cfu_title">%1$s CFU remaining for degree</string>
 
     <!-- Student Info Section TODO: annotate other strings -->
     <string name="student_id_label">Student ID</string>
