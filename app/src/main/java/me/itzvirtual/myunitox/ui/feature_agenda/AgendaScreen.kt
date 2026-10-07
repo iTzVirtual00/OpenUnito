@@ -104,7 +104,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-val debug = false // TODO: make debug a setting
+const val debug = false // TODO: make debug a setting
 
 /**
  * Filter options for the agenda
@@ -172,9 +172,9 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxSize(),
             currentWeekStart = (screenState.selectedStart ?: LocalDate.now())
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-            onWeekChange = { startDate, endDate ->
-                viewModel.loadAgendaForWeek(startDate, endDate)
-            },
+            onNextWeek = { viewModel.onNextWeek() },
+            goToToday = { viewModel.goToToday() },
+            onPreviousWeek = { viewModel.onPreviousWeek() },
             calendars = screenState.calendars,
             selectedCalendar = screenState.selectedCalendar,
             onCalendarSelected = { viewModel.selectCalendar(it) },
@@ -234,7 +234,9 @@ fun Agenda(
     modifier: Modifier = Modifier,
     currentWeekStart: LocalDate = LocalDate.now()
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-    onWeekChange: (LocalDate, LocalDate) -> Unit = { _, _ -> },
+    onNextWeek: () -> Unit = {},
+    goToToday: () -> Unit = {},
+    onPreviousWeek: () -> Unit = {},
     calendars: List<CalendarConfig> = emptyList(),
     selectedCalendar: CalendarConfig? = null,
     onCalendarSelected: (CalendarConfig) -> Unit = {},
@@ -243,7 +245,6 @@ fun Agenda(
 ) {
 
     var selectedFilter by remember { mutableStateOf(AgendaFilter.EVENTS) }
-    var showFilterDropdown by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
 
     val currentWeekEnd by remember(currentWeekStart) {
@@ -276,22 +277,8 @@ fun Agenda(
             AgendaHeader(
                 currentWeekStart = currentWeekStart,
                 currentWeekEnd = currentWeekEnd,
-                selectedFilter = selectedFilter,
-                showFilterDropdown = showFilterDropdown,
-//                onFilterClick = { showFilterDropdown = true },
-//                onFilterDismiss = { showFilterDropdown = false },
-//                onFilterSelect = { filter ->
-//                    selectedFilter = filter
-//                    showFilterDropdown = false
-//                },
-                onPreviousWeek = {
-                    val newStart = currentWeekStart.minusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
-                onNextWeek = {
-                    val newStart = currentWeekStart.plusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
+                onNextWeek = onNextWeek,
+                onPreviousWeek = onPreviousWeek,
                 calendars = calendars,
                 selectedCalendar = selectedCalendar,
                 onCalendarSelected = onCalendarSelected,
@@ -306,17 +293,10 @@ fun Agenda(
             AgendaGrid(
                 events = filteredEvents,
                 startHour = startHour,
-//                endHour = endHour,
                 weekStartDate = currentWeekStart,
                 onEventClick = { event -> selectedEvent = event },
-                onPreviousWeek = {
-                    val newStart = currentWeekStart.minusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
-                onNextWeek = {
-                    val newStart = currentWeekStart.plusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
+                onNextWeek = onNextWeek,
+                onPreviousWeek = onPreviousWeek,
             )
         }
 
@@ -347,11 +327,6 @@ fun Agenda(
 private fun AgendaHeader(
     currentWeekStart: LocalDate,
     currentWeekEnd: LocalDate,
-    selectedFilter: AgendaFilter,
-    showFilterDropdown: Boolean,
-//    onFilterClick: () -> Unit,
-//    onFilterDismiss: () -> Unit,
-//    onFilterSelect: (AgendaFilter) -> Unit,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit,
     calendars: List<CalendarConfig>,

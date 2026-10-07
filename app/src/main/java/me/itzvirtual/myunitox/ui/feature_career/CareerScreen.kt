@@ -101,7 +101,7 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
-val debug = false // TODO: make debug a setting
+const val debug = false // TODO: make debug a setting
 
 //TODO: add new grades, add transcript and invokes buttons
 @Composable

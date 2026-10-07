@@ -3,9 +3,9 @@ package me.itzvirtual.myunitox.ui.feature_career
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
@@ -21,99 +21,112 @@ class CareerViewModel @Inject constructor(
     private val examResultRepo: ExamResultRepository,
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(CareerScreenState())
+    private val _screenState = MutableStateFlow(CareerScreenState(isGlobalLoading = true))
     val screenState = _screenState.asStateFlow()
 
     init {
-        load()
+        observeDashboard()
+        observeExamResults()
     }
 
-    fun load() {
+    /**
+     * Observes dashboard cache flow. Renders Room data immediately
+     * and performs background revalidation if data is absent or stale.
+     */
+    private fun observeDashboard() {
         viewModelScope.launch {
-            _screenState.update { it.copy(isGlobalLoading = true) }
+            // Assumes dashboardRepo exposes dashboardCacheFlow (analogous to studentCacheFlow / CachedGrades)
+            dashboardRepo.dashboardCacheFlow.collectLatest { cached ->
+                _screenState.update { s ->
+                    s.copy(
+                        dashboardState = CareerDashboardUiState(
+                            data = cached.data,
+                            isStale = cached.isStale ?: true,
+                            isLoading = cached.data == null,
+                            error = null
+                        ),
+                        // Release global loading as soon as initial cache pass arrives
+                        isGlobalLoading = false
+                    )
+                }
 
-            // MAY BE USEFUL
-            val studentDeferred = async {
-                try {
-                    studentRepo.getStudentData()
-                } catch (_: Exception) {
-                    null
+                if (cached.data == null || cached.isStale) {
+                    refreshDashboard()
                 }
             }
-
-            val examResultDeferred = async {
-                val cached = examResultRepo.getCached()
-                val isStale = examResultRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = cached,
-                                isStale = isStale
-                            )
-                        )
-                    }
-                }
-                examResultRepo.refresh()
-            }
-
-            val dashboardDeferred = async {
-                val cached = dashboardRepo.getCached()
-                val isStale = dashboardRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            dashboardState = CareerDashboardUiState(
-                                data = cached,
-                                isStale = isStale
-                            )
-                        )
-                    }
-                }
-                dashboardRepo.refresh()
-            }
-
-            dashboardDeferred.await().fold(
-                onSuccess = {
-                    val fresh = dashboardRepo.getCached()
-                    _screenState.update { s -> s.copy(dashboardState = CareerDashboardUiState(data = fresh)) }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            dashboardState = s.dashboardState.copy(
-                                error = if (e is IOException && s.dashboardState.data != null) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
-
-            examResultDeferred.await().fold(
-                onSuccess = {
-                    val fresh = examResultRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = fresh ?: emptyList()
-                            )
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = s.examResultsState.copy(
-                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
-
-            _screenState.update { it.copy(isGlobalLoading = false) }
         }
+    }
+
+    /**
+     * Observes exam results cache flow. Updates UI reactively on every database change.
+     */
+    private fun observeExamResults() {
+        viewModelScope.launch {
+            // Assumes examResultRepo exposes examResultsCacheFlow
+            examResultRepo.examResultsCacheFlow.collectLatest { cached ->
+                val list = cached?.results ?: emptyList()
+                _screenState.update { s ->
+                    s.copy(
+                        examResultsState = ExamResultsUiState(
+                            results = list,
+                            isStale = cached?.isStale ?: true,
+                            isLoading = list.isEmpty(),
+                            error = null
+                        )
+                    )
+                }
+
+                if (list.isEmpty() || cached?.isStale == true) {
+                    refreshExamResults()
+                }
+            }
+        }
+    }
+
+    /**
+     * Revalidates dashboard data over the network and saves to Room.
+     * Supresses network errors if offline and stale cache is already on screen.
+     */
+    fun refreshDashboard() {
+        viewModelScope.launch {
+            dashboardRepo.refresh().onFailure { e ->
+                _screenState.update { s ->
+                    val shouldSuppress = e is IOException && s.dashboardState.data != null
+                    s.copy(
+                        dashboardState = s.dashboardState.copy(
+                            error = if (shouldSuppress) null else e.message,
+                            isLoading = false
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Revalidates exam results over the network and saves to Room.
+     */
+    fun refreshExamResults() {
+        viewModelScope.launch {
+            examResultRepo.refresh().onFailure { e ->
+                _screenState.update { s ->
+                    val shouldSuppress = e is IOException && s.examResultsState.results.isNotEmpty()
+                    s.copy(
+                        examResultsState = s.examResultsState.copy(
+                            error = if (shouldSuppress) null else e.message,
+                            isLoading = false
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Triggered by swipe-to-refresh to sync all modules concurrently.
+     */
+    fun refreshAll() {
+        refreshDashboard()
+        refreshExamResults()
     }
 }

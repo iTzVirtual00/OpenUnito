@@ -1,6 +1,9 @@
 package me.itzvirtual.myunitox.data.examdate
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import me.itzvirtual.myunitox.core.cache.CacheConfig
@@ -12,47 +15,59 @@ import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class CachedExamDates(
+    val dates: List<ExamDate>?,
+    val isStale: Boolean
+)
+
 @Singleton
 class ExamDateRepository @Inject constructor(
     private val api: UnitoApi,
     private val dao: ExamDateDao,
     private val json: Json,
 ) {
-    val examDatesFlow: Flow<List<ExamDate>?> =
-        dao.get().map { entity -> entity?.toDomain(json) }
-
-    val isStaleFlow: Flow<Boolean> =
-        dao.get().map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.EXAM_DATE_STALE_MS
-        }
-
-    suspend fun getCached(): List<ExamDate>? {
-        return try {
-            val entity = dao.getOnce()
-            if (entity != null && System.currentTimeMillis() - entity.cachedAt > CacheConfig.EXAM_DATE_STALE_MS) {
-                dao.clearAll()
-                return null
+    /**
+     * Emits cached exam dates along with staleness whenever Room updates.
+     */
+    val examDatesCacheFlow: Flow<CachedExamDates> = dao.get()
+        .map { entity ->
+            if (entity == null) {
+                CachedExamDates(dates = null, isStale = true)
+            } else {
+                val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.EXAM_DATE_STALE_MS
+                CachedExamDates(dates = entity.toDomain(json), isStale = isStale)
             }
-            entity?.toDomain(json)
-        } catch (_: Exception) {
-            null
         }
-    }
+        .distinctUntilChanged()
 
-    suspend fun isCacheStale(): Boolean {
-        val entity = try {
-            dao.getOnce()
-        } catch (_: Exception) {
-            null
-        }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.EXAM_DATE_STALE_MS
-    }
+    /**
+     * Direct domain model flow for consumers that only need the latest list.
+     */
+    val examDatesFlow: Flow<List<ExamDate>?> = examDatesCacheFlow
+        .map { it.dates }
+        .distinctUntilChanged()
 
-    suspend fun refresh(): Result<Unit> = try {
+    /**
+     * Refreshes the exam dates from the network and updates the Room cache.
+     */
+    suspend fun refresh(): Result<Unit> = runCatching {
         val response = api.getExamDates()
         dao.upsert(response.toEntity(json))
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+    }
+
+    /**
+     * One-shot read: returns cached data immediately if available,
+     * otherwise triggers a network refresh and awaits the saved entity.
+     */
+    suspend fun getExamDates(): List<ExamDate> {
+        val currentCached = examDatesFlow.first()
+        if (currentCached != null) return currentCached
+
+        refresh().getOrThrow()
+        return examDatesFlow.filterNotNull().first()
+    }
+
+    suspend fun clearCache() {
+        dao.clearAll()
     }
 }

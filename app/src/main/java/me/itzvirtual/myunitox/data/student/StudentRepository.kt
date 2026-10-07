@@ -1,13 +1,18 @@
 package me.itzvirtual.myunitox.data.student
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import me.itzvirtual.myunitox.core.cache.CacheConfig
 import me.itzvirtual.myunitox.core.network.API_URL
 import me.itzvirtual.myunitox.data.student.local.StudentDao
 import me.itzvirtual.myunitox.data.student.mapper.toDomain
@@ -18,81 +23,77 @@ import me.itzvirtual.myunitox.domain.student.StudentData
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-/**
- * Constructed explicitly in NetworkModule so that UnitoApi can depend on it.
- * The StudentDao is injected via [setDao] after the database is ready.
- * This breaks the circular dependency: NetworkModule → StudentRepository ← DatabaseModule.
- */
+data class CachedStudentData(
+    val data: StudentData?,
+    val isStale: Boolean
+)
+
 class StudentRepository(
     private val client: OkHttpClient,
     private val json: Json,
 ) {
-    // Injected lazily after DI graph is assembled
-    internal var studentDao: StudentDao? = null
+    private val daoState = MutableStateFlow<StudentDao?>(null)
 
-    private val mutex = Mutex()
-    private var inMemoryCache: StudentData? = null
+    // Setter called when database module gets the value
+    var studentDao: StudentDao?
+        get() = daoState.value
+        set(value) {
+            daoState.value = value
+        }
 
-    val studentDataFlow: Flow<StudentData?>
-        get() = studentDao?.get()?.map { it?.toDomain(json) }
-            ?: kotlinx.coroutines.flow.flowOf(null)
-
-    suspend fun getStudentData(): StudentData {
-        inMemoryCache?.let { return it }
-        return mutex.withLock {
-            inMemoryCache ?: run {
-                // Try Room cache first
-                val cached = try {
-                    studentDao?.get()?.first()?.toDomain(json)
-                } catch (_: Exception) {
-                    null
-                }
-
-                if (cached != null) {
-                    inMemoryCache = cached
-                    cached
-                } else {
-                    fetchAndCache()
-                }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val studentCacheFlow: Flow<CachedStudentData> = daoState
+        .flatMapLatest { dao ->
+            dao?.get() ?: flowOf(null)
+        }
+        .map { entity ->
+            if (entity == null) {
+                CachedStudentData(data = null, isStale = true)
+            } else {
+                val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.STUDENT_STALE_MS
+                CachedStudentData(data = entity.toDomain(json), isStale = isStale)
             }
         }
-    }
+        .distinctUntilChanged()
 
-    suspend fun checkAuth(): Boolean = try {
-        fetchAndCache()
-        true
-    } catch (_: Exception) {
-        false
+    val studentDataFlow: Flow<StudentData?> = studentCacheFlow
+        .map { it.data }
+        .distinctUntilChanged()
+
+    suspend fun getStudentData(): StudentData {
+        val currentCached = studentDataFlow.first()
+        if (currentCached != null) return currentCached
+
+        refresh().getOrThrow()
+        return studentDataFlow.filterNotNull().first()
     }
 
     suspend fun getCurrentCareer(): StudentCareer =
         getStudentData().careers.firstOrNull()
             ?: throw IllegalStateException("No careers found for student")
 
-    suspend fun refresh(): Result<Unit> = try {
-        fetchAndCache()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
+    suspend fun checkAuth(): Boolean = refresh().isSuccess
 
-    private suspend fun fetchAndCache(): StudentData = withContext(Dispatchers.IO) {
-        val request = Request.Builder()
-            .url("${API_URL}app/init?os=android&os_version=16&app_version=25.7.0.0.17")
-            .build()
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("AppInit failed: ${response.code}")
-            val body = response.body.string()
-            val appInit = json.decodeFromString<AppInitDto>(body)
-            val session = appInit.session ?: throw Exception("No auth session")
-            studentDao?.upsert(session.toEntity(json))
-            val domain = session.toDomain()
-            inMemoryCache = domain
-            domain
+    suspend fun refresh(): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            val request = Request.Builder()
+                .url("${API_URL}app/init?os=android&os_version=16&app_version=25.7.0.0.17")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("AppInit failed: ${response.code}")
+                val body = response.body.string()
+                val appInit = json.decodeFromString<AppInitDto>(body)
+                val session = appInit.session ?: throw Exception("No auth session")
+
+                daoState.value?.upsert(session.toEntity(json))
+            }
         }
     }
 
-    fun clearCache() {
-        inMemoryCache = null
+    suspend fun clearCache() {
+        withContext(Dispatchers.IO) {
+            daoState.value?.clearAll()
+        }
     }
 }

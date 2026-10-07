@@ -1,6 +1,8 @@
 package me.itzvirtual.myunitox.data.config
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import me.itzvirtual.myunitox.data.config.local.AppConfig
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import javax.inject.Inject
@@ -18,7 +20,12 @@ class AppConfigRepository @Inject constructor(
 
     fun getCalendarClientId(): String = "5852fd1ab7305612a8354d51"
 
+    val selectedCalendarIdFlow: Flow<Int?> = configDao.getConfig()
+        .map { config -> config?.selectedCalendarId }
+        .distinctUntilChanged()
+
     suspend fun getSelectedCalendarId(): Int? = configDao.getSelectedCalendarId()
+
     suspend fun setSelectedCalendarId(calendarId: Int?) = configDao.updateSelectedCalendarId(calendarId)
 
     suspend fun clearAuth() = configDao.updateToken(null)

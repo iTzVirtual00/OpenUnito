@@ -3,9 +3,10 @@ package me.itzvirtual.myunitox.ui.feature_examdates
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
@@ -19,87 +20,90 @@ class ExamDatesViewModel @Inject constructor(
     private val examResultRepo: ExamResultRepository,
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(ExamDatesScreenState())
+    private val _screenState = MutableStateFlow(ExamDatesScreenState(isGlobalLoading = true))
     val screenState = _screenState.asStateFlow()
 
     init {
-        load()
+        observeData()
     }
 
-    fun load() {
+    /**
+     * Combines both cache flows to render Room state instantly.
+     * Triggers a background refresh if data is absent or stale.
+     */
+    private fun observeData() {
         viewModelScope.launch {
-            _screenState.update { it.copy(isGlobalLoading = true) }
-
-            val examDatesDeferred = async {
-                val cached = examDateRepo.getCached()
-                val isStale = examDateRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(examDatesState = ExamDatesUiState(dates = cached, isStale = isStale))
-                    }
+            combine(
+                examDateRepo.examDatesCacheFlow,
+                examResultRepo.examResultsCacheFlow
+            ) { datesCache, resultsCache ->
+                datesCache to resultsCache
+            }.collectLatest { (datesCache, resultsCache) ->
+                _screenState.update { current ->
+                    current.copy(
+                        isGlobalLoading = datesCache.dates == null && resultsCache.results == null,
+                        examDatesState = current.examDatesState.copy(
+                            dates = datesCache.dates ?: emptyList(),
+                            isStale = datesCache.isStale,
+                            isLoading = datesCache.dates == null,
+                            error = null
+                        ),
+                        examResultsState = current.examResultsState.copy(
+                            results = resultsCache.results ?: emptyList(),
+                            isStale = resultsCache.isStale,
+                            isLoading = resultsCache.results == null,
+                            error = null
+                        )
+                    )
                 }
-                examDateRepo.refresh()
+
+                // Auto-refresh when either cache is missing or stale
+                if (datesCache.dates == null || datesCache.isStale) {
+                    refreshExamDates()
+                }
+                if (resultsCache.results == null || resultsCache.isStale) {
+                    refreshExamResults()
+                }
             }
+        }
+    }
 
-            val examResultDeferred = async {
-                val cached = examResultRepo.getCached()
-                val isStale = examResultRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsForDatesUiState(
-                                results = cached,
-                                isStale = isStale
-                            )
+    fun refresh() {
+        refreshExamDates()
+        refreshExamResults()
+    }
+
+    private fun refreshExamDates() {
+        viewModelScope.launch {
+            examDateRepo.refresh().onFailure { err ->
+                _screenState.update { current ->
+                    val hasCached = current.examDatesState.dates.isNotEmpty()
+                    current.copy(
+                        isGlobalLoading = false,
+                        examDatesState = current.examDatesState.copy(
+                            isLoading = false,
+                            error = if (err is IOException && hasCached) null else err.message
                         )
-                    }
+                    )
                 }
-                examResultRepo.refresh()
             }
+        }
+    }
 
-            examDatesDeferred.await().fold(
-                onSuccess = {
-                    val fresh = examDateRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(examDatesState = ExamDatesUiState(dates = fresh ?: emptyList()))
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            examDatesState = s.examDatesState.copy(
-                                error = if (e is IOException && s.examDatesState.dates.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
+    private fun refreshExamResults() {
+        viewModelScope.launch {
+            examResultRepo.refresh().onFailure { err ->
+                _screenState.update { current ->
+                    val hasCached = current.examResultsState.results.isNotEmpty()
+                    current.copy(
+                        isGlobalLoading = false,
+                        examResultsState = current.examResultsState.copy(
+                            isLoading = false,
+                            error = if (err is IOException && hasCached) null else err.message
                         )
-                    }
+                    )
                 }
-            )
-
-            examResultDeferred.await().fold(
-                onSuccess = {
-                    val fresh = examResultRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsForDatesUiState(
-                                results = fresh ?: emptyList()
-                            )
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = s.examResultsState.copy(
-                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
-
-            _screenState.update { it.copy(isGlobalLoading = false) }
+            }
         }
     }
 }
