@@ -54,6 +54,7 @@ import me.itzvirtual.myunitox.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
 import me.itzvirtual.myunitox.ui.shared.shimmerEffect
+import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 
 val debug = false // TODO: make debug a setting
@@ -201,7 +202,7 @@ fun GradeWrapper(result: ExamResult) {
 @Composable
 fun GradesSection(state: GradesUiState) {
     val grades = remember(state.grades) {
-        state.grades.filter { it.score != null } ?: emptyList()
+        state.grades.filter { it.score != null }
     }
     val showDebug = debug && state.error != null
 
@@ -264,7 +265,7 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
             // info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = courseName,
+                    text = unShoutCourseName(courseName),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2

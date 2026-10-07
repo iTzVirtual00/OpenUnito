@@ -70,7 +70,7 @@ import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
-import me.itzvirtual.myunitox.ui.components.StdButton
+import me.itzvirtual.myunitox.ui.components.StdIconTextButton
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
 import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
@@ -338,7 +338,7 @@ fun HomeScreenContent(
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                 }
-                StdButton(
+                StdIconTextButton(
                     icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
                     text = stringResource(R.string.attendance_tracking_button_name),
                     onClick = onClickAttendance,

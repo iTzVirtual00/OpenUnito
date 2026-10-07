@@ -87,7 +87,7 @@ import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.domain.examresult.examResultsDataSample
-import me.itzvirtual.myunitox.ui.components.StdButton
+import me.itzvirtual.myunitox.ui.components.StdIconTextButton
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
@@ -103,7 +103,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 const val debug = false // TODO: make debug a setting
 
-//TODO: add new grades, add transcript and invokes buttons
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 fun CareerScreenPreview() {
@@ -187,7 +186,7 @@ fun CareerScreen(
             onClickInvoke = { showInvoke = true },
         )
     }
-    
+
     // Callback handling
     if (showStatistics) {
         //TODO: change to Statistic fun
@@ -242,7 +241,7 @@ fun CareerScreenContent(
             Spacer(modifier = Modifier.height(2.dp))
         }
         Spacer(Modifier.height(14.dp))
-        StdButton(
+        StdIconTextButton(
             icon = Icons.Default.Book,
             text = "Libretto",
             onClick = onClickTranscript,
@@ -251,7 +250,7 @@ fun CareerScreenContent(
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(Modifier.height(8.dp))
-        StdButton(
+        StdIconTextButton(
             icon = Icons.Default.AccountBalance,
             text = "Appelli",
             onClick = onClickInvoke,
@@ -320,8 +319,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
         totalCredits = stats.totalCredits
         remainingCfu = (totalCredits - currentCredits).toString()
         yearlyProgress = currentCredits.toFloat() / totalPlannedCredits.toFloat()
-    }
-    else {
+    } else {
         currentCredits = -1
         totalPlannedCredits = -1
         totalCredits = -1
@@ -347,8 +345,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
             ) {
                 if (showDebug) {
                     ErrorItem(state.error)
-                }
-                else { // !debug or !error
+                } else { // !debug or !error
                     Box(
                         modifier = Modifier.padding(20.dp),
                         contentAlignment = Alignment.Center
@@ -378,8 +375,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
                 //TODO: add refresh button and show error numbers only in dev mode
                 if (showDebug) {
                     ErrorItem(state.error)
-                }
-                else { // !debug or !error
+                } else { // !debug or !error
                     YearlyProgressCard(
                         title = stringResource(R.string.yearly_progress_title),
                         current = currentCredits,
@@ -454,7 +450,6 @@ fun YearlyProgressCard( //TODO: move to components package
 }
 
 
-
 @Composable
 fun ExamResultsSection(state: ExamResultsUiState) {
     val showDebug = debug && state.error != null
@@ -520,8 +515,8 @@ fun ExamResultsSection(state: ExamResultsUiState) {
 fun ExamResultRow(result: ExamResult) {
     result.gradeResult!!
 
-    val mainContent = 0.95f
-    val sideContent = 1 - mainContent
+    val mainContentWeight = 0.95f
+    val sideContentWeight = 1 - mainContentWeight
 
     var isGradeStatusLoading by remember { mutableStateOf(false) }
     val actions = LocalTranscriptActions.current
@@ -529,9 +524,11 @@ fun ExamResultRow(result: ExamResult) {
         result.gradeResult.passed && (result.gradeResult.canAccept || result.gradeResult.canReject || result.status == GradeStatus.NOT_TOUCHED)
     val drawerEnabled = !isGradeStatusLoading && isGradeEditable
     var expanded by remember { mutableStateOf(false) }
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .wrapContentHeight()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -545,7 +542,7 @@ fun ExamResultRow(result: ExamResult) {
                 modifier = Modifier
                     .padding(16.dp)
                     .padding(end = 0.dp)
-                    .weight(mainContent)
+                    .weight(mainContentWeight)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -570,7 +567,6 @@ fun ExamResultRow(result: ExamResult) {
                             style = MaterialTheme.typography.bodySmall
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-
                     }
 
                     Spacer(modifier = Modifier.weight(0.1f))
@@ -599,10 +595,10 @@ fun ExamResultRow(result: ExamResult) {
             }
 
             val showChroma = (
-                isGradeStatusLoading
-                || (result.status == GradeStatus.VIEWED
-                || result.status == GradeStatus.NOT_TOUCHED)
-            ) && isGradeEditable
+                    isGradeStatusLoading
+                            || (result.status == GradeStatus.VIEWED
+                            || result.status == GradeStatus.NOT_TOUCHED)
+                    ) && isGradeEditable
 
             // when showChroma
             val infiniteTransition = rememberInfiniteTransition(label = "ChromaMovement")
@@ -617,17 +613,14 @@ fun ExamResultRow(result: ExamResult) {
             )
             // 2. when !showChroma
             val animatedColor by animateColorAsState(
-                targetValue = if(result.gradeResult.passed) result.status.toColor() else GradeStatus.UNKNOWN.toColor(),
+                targetValue = if (result.gradeResult.passed) result.status.toColor() else GradeStatus.UNKNOWN.toColor(),
                 animationSpec = tween(durationMillis = 500),
                 label = "GradeStatusColor"
             )
-
-
-
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .weight(sideContent)
+                    .weight(sideContentWeight)
                     .drawBehind {
                         if (showChroma) {
                             // ai-powered, no idea how this works. also, cool palette gemini!
