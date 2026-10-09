@@ -4,22 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
-import java.io.IOException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
@@ -38,10 +36,6 @@ class AgendaViewModel @Inject constructor(
     private val calendarConfigRepo: CalendarConfigRepository,
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(AgendaScreenState())
-    val screenState = _screenState.asStateFlow()
-
-    // Internal state driving the active week
     private val currentWeek = run {
         val now = LocalDate.now()
         WeekRange(
@@ -49,158 +43,93 @@ class AgendaViewModel @Inject constructor(
             end = now.with(DayOfWeek.SUNDAY)
         )
     }
+
     private val selectedWeekFlow = MutableStateFlow(currentWeek)
 
-    // Tracks ongoing refresh jobs to cancel prior network requests when changing weeks
-    private var refreshJob: Job? = null
-
-    init {
-        observeCalendarsList()
-        observeAgendaFlow()
+    // This only populates AgendaUiData (internal structure)
+    private val agendaDataFlow = combine(
+        calendarConfigRepo.selectedCalendarFlow,
+        selectedWeekFlow
+    ) { selectedCalendar, week ->
+        selectedCalendar to week
     }
-
-    /**
-     * Reactively keeps available calendars and selected calendar updated in UI state.
-     */
-    private fun observeCalendarsList() {
-        viewModelScope.launch {
-            combine(
-                calendarConfigRepo.calendarsFlow,
-                calendarConfigRepo.selectedCalendarFlow
-            ) { calendars, selected ->
-                calendars to selected
-            }.collectLatest { (calendars, selected) ->
-                _screenState.update {
-                    it.copy(
-                        calendars = calendars,
-                        selectedCalendar = selected
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Core reactive engine:
-     * Combines the selected calendar and the active week.
-     * Whenever either changes, it switches observation to the matching Room entry.
-     */
-    private fun observeAgendaFlow() {
-        viewModelScope.launch {
-            combine(
-                calendarConfigRepo.selectedCalendarFlow,
-                selectedWeekFlow
-            ) { selectedCalendar, week ->
-                selectedCalendar to week
-            }
-                .distinctUntilChanged()
-                .flatMapLatest { (calendar, week) ->
-                    if (calendar == null) {
-                        flowOf(Triple(null, week, null))
-                    } else {
-                        val startInstant =
-                            week.start.atStartOfDay(ZoneId.systemDefault()).toInstant()
-                        val endInstant =
-                            week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-
-                        agendaRepository.getAgendaFlow(
-                            calendar.calendarLinkId,
-                            startInstant,
-                            endInstant
-                        )
-                            .map { cachedAgenda ->
-                                Triple(calendar, week, cachedAgenda)
-                            }
-                    }
-                }
-                .collectLatest { (calendar, week, cachedAgenda) ->
-                    if (calendar == null) {
-                        _screenState.update {
-                            it.copy(
-                                selectedStart = week.start,
-                                selectedEnd = week.end,
-                                isLoading = false,
-                                agendaState = AgendaUiState(
-                                    agendaEntries = emptyList(),
-                                    error = "NO_CALENDAR"
-                                )
-                            )
-                        }
-                        return@collectLatest
-                    }
-
-                    val hasCachedData = cachedAgenda != null
-
-                    // Update UI state in a single atomic update:
-                    // - If data exists in Room, render it immediately with isLoading = false (ZERO flicker)
-                    // - Only show isLoading = true if Room has no cache for this week
-                    _screenState.update { current ->
-                        current.copy(
-                            selectedStart = week.start,
-                            selectedEnd = week.end,
-                            isLoading = !hasCachedData,
-                            agendaState = current.agendaState.copy(
-                                agendaEntries = cachedAgenda?.entries ?: emptyList(),
-                                isStale = cachedAgenda?.isStale ?: true,
-                                error = null
-                            )
-                        )
-                    }
-
-                    // Treat staleness purely as a background refresh trigger
-                    if (!hasCachedData || cachedAgenda?.isStale == true) {
-                        triggerBackgroundRefresh(
-                            calendarLinkId = calendar.calendarLinkId,
-                            week = week,
-                            hasCachedData = hasCachedData
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun triggerBackgroundRefresh(
-        calendarLinkId: String,
-        week: WeekRange,
-        hasCachedData: Boolean
-    ) {
-        refreshJob?.cancel()
-        refreshJob = viewModelScope.launch {
-            val startInstant = week.start.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            val endInstant = week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-            val clientId = appConfigRepo.getCalendarClientId()
-
-            val result =
-                agendaRepository.refresh(calendarLinkId, clientId, startInstant, endInstant)
-            result.onFailure { err ->
-                _screenState.update { current ->
-                    current.copy(
+        .distinctUntilChanged()
+        // flatMapLatest automagically cancels the flow we were attached to if the tuple changes.
+        // DAMN
+        .flatMapLatest { (calendar, week) ->
+            if (calendar == null) {
+                flowOf(
+                    AgendaUiData(
+                        week = week,
                         isLoading = false,
-                        agendaState = current.agendaState.copy(
-                            error = if (err is IOException && hasCachedData) null else err.message
+                        agendaState = AgendaUiState(
+                            agendaEntries = emptyList(),
+                            error = "NO_CALENDAR"
+                        )
+                    )
+                )
+            } else {
+                val startInstant = week.start.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                val endInstant = week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+                agendaRepository.getAgendaFlow(
+                    calendarLinkId = calendar.calendarLinkId,
+                    startDate = startInstant,
+                    endDate = endInstant
+                ).map { cachedAgenda ->
+                    val hasCachedData = cachedAgenda != null
+                    AgendaUiData(
+                        week = week,
+                        isLoading = !hasCachedData,
+                        agendaState = AgendaUiState(
+                            agendaEntries = cachedAgenda?.entries ?: emptyList(),
+                            isStale = cachedAgenda?.isStale ?: false,
+                            error = null
                         )
                     )
                 }
             }
-            // On success: Room updates its table, triggering dao.getByKeyFlow -> UI updates automatically!
         }
-    }
+
+    val screenState: StateFlow<AgendaScreenState> = combine(
+        calendarConfigRepo.calendarsFlow,
+        calendarConfigRepo.selectedCalendarFlow,
+        agendaDataFlow
+    ) { calendars, selectedCalendar, agendaData ->
+        AgendaScreenState(
+            calendars = calendars,
+            selectedCalendar = selectedCalendar,
+            // Applies AgendaUiData to the ui state
+            selectedStart = agendaData.week.start,
+            selectedEnd = agendaData.week.end,
+            isLoading = agendaData.isLoading,
+            agendaState = agendaData.agendaState
+        )
+    }.stateIn(
+        // stateIn is so cool (it's the single collector of the above flow,
+        // and it emits the latest value when someone subscribes
+        // (otherwise the above flow will run again every time someone subscribes)
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AgendaScreenState(
+            selectedStart = currentWeek.start,
+            selectedEnd = currentWeek.end,
+            isLoading = true
+        )
+    )
 
     // --- Navigation ---
 
     fun onNextWeek() {
-        val nextStart = selectedWeekFlow.value.start.plusWeeks(1)
-        selectWeek(nextStart)
+        selectWeek(selectedWeekFlow.value.start.plusWeeks(1))
     }
 
     fun onPreviousWeek() {
-        val prevStart = selectedWeekFlow.value.start.minusWeeks(1)
-        selectWeek(prevStart)
+        selectWeek(selectedWeekFlow.value.start.minusWeeks(1))
     }
 
     fun goToToday() {
-        val today = LocalDate.now()
-        selectWeek(today)
+        selectWeek(LocalDate.now())
     }
 
     fun selectWeek(targetDate: LocalDate) {
@@ -247,4 +176,10 @@ class AgendaViewModel @Inject constructor(
             calendarConfigRepo.delete(id)
         }
     }
+
+    private data class AgendaUiData(
+        val week: WeekRange,
+        val isLoading: Boolean,
+        val agendaState: AgendaUiState
+    )
 }

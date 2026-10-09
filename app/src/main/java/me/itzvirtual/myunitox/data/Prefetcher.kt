@@ -1,9 +1,13 @@
 package me.itzvirtual.myunitox.data
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.core.network.ApplicationScope
+import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
@@ -24,30 +28,40 @@ class Prefetcher @Inject constructor(
     private val examDateRepo: ExamDateRepository,
     private val examResultRepo: ExamResultRepository,
     private val gradeRepository: GradeRepository,
-    private val appConfigRepo: AppConfigRepository,
     private val calendarConfigRepo: CalendarConfigRepository,
+
+    @param:ApplicationScope private val scope: CoroutineScope,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
     fun prefetchData(scope: CoroutineScope) {
-        scope.launch(Dispatchers.IO) {
-            val jobs = listOf(
-                launch {
-                    val now = LocalDate.now()
-                    val startDate = now.with(DayOfWeek.MONDAY)
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    val endDate = now.with(DayOfWeek.SUNDAY).plusDays(1)
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    val selectedCalendar = calendarConfigRepo.getSelectedCalendar()
-                    val calendarClientId = appConfigRepo.getCalendarClientId()
-                    if (selectedCalendar != null) {
-                        agendaRepo.refresh(selectedCalendar.calendarLinkId, calendarClientId, startDate, endDate)
-                    }
-                },
-                launch { dashboardRepo.refresh() },
-                launch { examDateRepo.refresh() },
-                launch { examResultRepo.refresh() },
-                launch { gradeRepository.refresh() },
+        // Note: we are not prefetching student data as it is initialized with UnitoApi bullshit
+        // Check StudentRepository.refresh() for more info
+        scope.launch(ioDispatcher) {
+            val globalWarmingJobs = listOf(
+                launch { dashboardRepo.dashboardCacheFlow.first() },
+                launch { examDateRepo.examDatesCacheFlow.first() },
+                launch { examResultRepo.examResultsCacheFlow.first() },
+                launch { gradeRepository.gradesFlow.first() }
             )
-            joinAll(*jobs.toTypedArray())
+
+            val agendaJob = launch {
+                val calendar = calendarConfigRepo.selectedCalendarFlow.first()
+                if (calendar != null) {
+                    // weekly prefetch
+                    val now = LocalDate.now()
+
+                    val start = now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    val end = now.with(DayOfWeek.SUNDAY).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, start, end).first()
+
+                    // today and tomorrow prefetch
+                    val startOfToday = now.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    val endOfTomorrow = now.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, startOfToday, endOfTomorrow).first()
+                }
+            }
+
+            (globalWarmingJobs + agendaJob).joinAll()
         }
     }
 }
