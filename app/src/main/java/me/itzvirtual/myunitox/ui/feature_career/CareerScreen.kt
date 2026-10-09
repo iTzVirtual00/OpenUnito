@@ -83,10 +83,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
+import me.itzvirtual.myunitox.domain.dashboard.DashboardData
 import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.domain.examresult.examResultsDataSample
+import me.itzvirtual.myunitox.ui.components.GenericSurface
 import me.itzvirtual.myunitox.ui.components.StdIconTextButton
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
@@ -102,61 +104,6 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
 const val debug = false // TODO: make debug a setting
-
-@Composable
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-fun CareerScreenPreview() {
-    var previewState by remember {
-        mutableStateOf(
-            CareerScreenState(
-                dashboardState = CareerDashboardUiState(
-                    data = dashboardDataSample,
-                    isLoading = false,
-                    error = null
-                ),
-                examResultsState = ExamResultsUiState(
-                    results = examResultsDataSample,
-                    isLoading = false,
-                    error = null
-                )
-            )
-        )
-    }
-
-    val previewScope = rememberCoroutineScope()
-
-    val mockActions = remember {
-        TranscriptActions(
-            changeGradeStatus = { id, newStatus ->
-                previewScope.launch {
-                    delay(600.milliseconds)
-                    previewState = previewState.copy(
-                        examResultsState = previewState.examResultsState.copy(
-                            results = previewState.examResultsState.results.map { result ->
-                                if (result.id == id) {
-                                    result.copy(status = newStatus)
-                                } else {
-                                    result
-                                }
-                            }
-                        )
-                    )
-                }
-            }
-        )
-    }
-
-    MyUnitoXTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
-                CareerScreenContent(
-                    state = previewState,
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun CareerScreen(
@@ -234,9 +181,16 @@ fun CareerScreenContent(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(8.dp))
+
+
+
             CreditsSection(
-                state = state.dashboardState
+                data = state.dashboardState.data,
+                isLoading = state.dashboardState.isLoading,
+                stateError = state.dashboardState.error
             )
+
+
             //Vai a libretto diventa vai a statiscsc
             Spacer(modifier = Modifier.height(2.dp))
         }
@@ -265,7 +219,11 @@ fun CareerScreenContent(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        ExamResultsSection(state = state.examResultsState)
+        ExamResultsSection(
+            results = state.examResultsState.results,
+            stateError = state.examResultsState.error,
+            isLoading = state.examResultsState.isLoading
+        )
     }
 }
 
@@ -300,10 +258,13 @@ fun GoToCreditStatisticsSection() {
 
 
 @Composable
-fun CreditsSection(state: CareerDashboardUiState) {
-    val showDebug = debug && state.error != null
+fun CreditsSection(
+    data: DashboardData?,
+    isLoading: Boolean,
+    stateError: String?
+) {
+    val showDebug = debug && stateError != null
 
-    val data = state.data
     val currentCredits: Int
     val totalPlannedCredits: Int
     val totalCredits: Int
@@ -311,7 +272,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
     val remainingCfu: String
 
 
-    if (!state.isLoading && state.error == null) {
+    if (!isLoading && stateError == null) {
         val stats = data!!.stats
 
         currentCredits = stats.creditsGained.toInt()
@@ -344,7 +305,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
                 contentAlignment = Alignment.Center,
             ) {
                 if (showDebug) {
-                    ErrorItem(state.error)
+                    ErrorItem(stateError)
                 } else { // !debug or !error
                     Box(
                         modifier = Modifier.padding(20.dp),
@@ -374,7 +335,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
             ) {
                 //TODO: add refresh button and show error numbers only in dev mode
                 if (showDebug) {
-                    ErrorItem(state.error)
+                    ErrorItem(stateError)
                 } else { // !debug or !error
                     YearlyProgressCard(
                         title = stringResource(R.string.yearly_progress_title),
@@ -392,7 +353,7 @@ fun CreditsSection(state: CareerDashboardUiState) {
                 color = MaterialTheme.colorScheme.tertiaryContainer,
             ) {
                 if (showDebug) {
-                    ErrorItem(state.error)
+                    ErrorItem(stateError)
                 } else {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -451,12 +412,14 @@ fun YearlyProgressCard( //TODO: move to components package
 
 
 @Composable
-fun ExamResultsSection(state: ExamResultsUiState) {
-    val showDebug = debug && state.error != null
-    val results = state.results
+fun ExamResultsSection(
+    results: List<ExamResult>,
+    stateError: String?,
+    isLoading: Boolean,
+) {
     val cornerRadius = 16.dp
 
-    Surface(
+    Surface( // Why doesn't generic surface work?!
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
@@ -468,42 +431,48 @@ fun ExamResultsSection(state: ExamResultsUiState) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            if (showDebug) {
-                ErrorItem(state.error)
-            } else if (results.count() == 0 || state.error != null || state.isLoading) { // !showDebug
-                ErrorItem(stringResource(R.string.no_data), Color.Gray)
-            } else {
-                results.forEachIndexed { idx, result ->
-                    val shape = when {
-                        results.size == 1 -> androidx.compose.foundation.shape.RoundedCornerShape(
-                            cornerRadius
-                        )
+            when {
+                debug && stateError != null -> {
+                    ErrorItem(stateError)
+                }
 
-                        idx == 0 -> RoundedCornerShape(
-                            topStart = cornerRadius,
-                            topEnd = cornerRadius
-                        )
+                results.isEmpty() || stateError != null || isLoading -> {
+                    ErrorItem(stringResource(R.string.no_data), Color.Gray)
+                }
 
-                        idx == results.lastIndex -> RoundedCornerShape(
-                            bottomStart = cornerRadius,
-                            bottomEnd = cornerRadius
-                        )
+                else -> {
+                    results.forEachIndexed { idx, result ->
+                        val shape = when {
+                            results.size == 1 -> androidx.compose.foundation.shape.RoundedCornerShape(
+                                cornerRadius
+                            )
 
-                        else -> RectangleShape
-                    }
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = shape,
-                        color = Color.Transparent // Uses parent surface color
-                    ) {
-                        ExamResultRow(result)
-                    }
-                    if (idx < results.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(end = 60.dp), // cool? not cool? idk
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
+                            idx == 0 -> RoundedCornerShape(
+                                topStart = cornerRadius,
+                                topEnd = cornerRadius
+                            )
+
+                            idx == results.lastIndex -> RoundedCornerShape(
+                                bottomStart = cornerRadius,
+                                bottomEnd = cornerRadius
+                            )
+
+                            else -> RectangleShape
+                        }
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = shape,
+                            color = Color.Transparent // Uses parent surface color
+                        ) {
+                            ExamResultRow(result)
+                        }
+                        if (idx < results.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(end = 60.dp), // cool? not cool? idk
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
                     }
                 }
             }
@@ -791,6 +760,61 @@ fun ExamResultRow(result: ExamResult) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+fun CareerScreenPreview() {
+    var previewState by remember {
+        mutableStateOf(
+            CareerScreenState(
+                dashboardState = CareerDashboardUiState(
+                    data = dashboardDataSample,
+                    isLoading = false,
+                    error = null
+                ),
+                examResultsState = ExamResultsUiState(
+                    results = examResultsDataSample,
+                    isLoading = false,
+                    error = null
+                )
+            )
+        )
+    }
+
+    val previewScope = rememberCoroutineScope()
+
+    val mockActions = remember {
+        TranscriptActions(
+            changeGradeStatus = { id, newStatus ->
+                previewScope.launch {
+                    delay(600.milliseconds)
+                    previewState = previewState.copy(
+                        examResultsState = previewState.examResultsState.copy(
+                            results = previewState.examResultsState.results.map { result ->
+                                if (result.id == id) {
+                                    result.copy(status = newStatus)
+                                } else {
+                                    result
+                                }
+                            }
+                        )
+                    )
+                }
+            }
+        )
+    }
+
+    MyUnitoXTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
+                CareerScreenContent(
+                    state = previewState,
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
     }

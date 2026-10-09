@@ -299,9 +299,12 @@ fun HomeScreenContent(
     onOpenProfile: () -> Unit = {},
     onClickAttendance: () -> Unit = {}
 ) {
+    val showAttendance = true // TODO: add this in settings
+
     val studentState = state.studentState
     val todayClassesState = state.todaysClasses
     val tomorrowClassesState = state.tomorrowClasses
+
 
     // State for selected event detail view
     // What does this even mean?
@@ -325,27 +328,33 @@ fun HomeScreenContent(
                 ) {
                     ClassesSection(
                         title = stringResource(R.string.todays_classes_title),
-                        state = todayClassesState,
+                        classes = todayClassesState.classes,
+                        isLoading = todayClassesState.isLoading,
+                        stateError = todayClassesState.error,
                         onOpenScheduleClick = onNavigateToSchedule,
                         onEventClick = { event -> selectedEvent = event }
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     ClassesSection(
                         title = stringResource(R.string.tomorrow_classes_title),
-                        state = tomorrowClassesState,
+                        classes = tomorrowClassesState.classes,
+                        isLoading = tomorrowClassesState.isLoading,
+                        stateError = tomorrowClassesState.error,
                         onOpenScheduleClick = onNavigateToSchedule,
                         onEventClick = { event -> selectedEvent = event }
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                 }
-                StdIconTextButton(
-                    icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
-                    text = stringResource(R.string.attendance_tracking_button_name),
-                    onClick = onClickAttendance,
-                    modifier = Modifier.padding(0.dp, 0.dp),
-                    height = 80f,
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-                )
+                if (showAttendance) {
+                    StdIconTextButton(
+                        icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
+                        text = stringResource(R.string.attendance_tracking_button_name),
+                        onClick = onClickAttendance,
+                        modifier = Modifier.padding(0.dp, 0.dp),
+                        height = 80f,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
             }
         // Class detail overlay
         // Keep a reference to the event being displayed (for exit animation)
@@ -490,11 +499,13 @@ fun ProfileSection(
 fun ClassesSection(
     title: String,
     modifier: Modifier = Modifier,
-    state: DailyClassesUiState,
+    classes: List<AgendaEntry>,
+    isLoading: Boolean,
+    stateError: String?,
     onOpenScheduleClick: () -> Unit,
     onEventClick: (AgendaEntry) -> Unit
 ) {
-    val classes = state.classes
+
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -530,47 +541,47 @@ fun ClassesSection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
+                when {
+                    isLoading || stateError != null || classes.isEmpty() -> {
+                        Surface(
+                            modifier = modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                        ) {
+                            val message = (
+                                    if (stateError == "NO_CALENDAR") { // error or loading
+                                        stringResource(R.string.error_no_calendar_configured)
+                                    } else if (debug && stateError != null) {
+                                        stateError
+                                    } else if (isLoading || stateError != null) { // !debug, error or loading or empty
+                                        ErrorItem(stringResource(R.string.no_data), Color.Gray)
+                                    } else {
+                                        stringResource(R.string.no_classes_today)
+                                    }
+                                    ) as String //Why?
 
-                if (!state.isLoading && state.error == null && !classes.isEmpty()) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        classes.forEach { entry ->
-                            ClassCard(
-                                entry = entry,
-                                onClick = { onEventClick(entry) }
-                            )
-                        }
-                    }
-                }
-                else {
-                    Surface(
-                        modifier = modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                    ) {
-                        val message = (
-                            if (state.error == "NO_CALENDAR") { // error or loading
-                                stringResource(R.string.error_no_calendar_configured)
-                            } else if (debug && state.error != null) {
-                                state.error
-                            } else if (state.isLoading || state.error != null) { // !debug, error or loading or empty
-                                "No Data"
-                            } else {
-                                stringResource(R.string.no_classes_today)
+
+                            Row(modifier.padding(12.dp)) {
+                                ErrorItem(
+                                    errorMessage = message,
+                                    color = Color.Gray
+                                )
                             }
-                        ) as String //Why?
-
-
-                        Row(modifier.padding(12.dp)) {
-                            ErrorItem(
-                                errorMessage = message,
-                                color = Color.Gray
-                            )
+                        }
+                    }
+                    else -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            classes.forEach { entry ->
+                                ClassCard(
+                                    entry = entry,
+                                    onClick = { onEventClick(entry) }
+                                )
+                            }
                         }
                     }
                 }
-
             }
         }
     }

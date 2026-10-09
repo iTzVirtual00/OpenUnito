@@ -253,8 +253,8 @@ fun Agenda(
 
     val filteredEvents by remember(events, selectedFilter) {
         derivedStateOf {
-            when (selectedFilter) {
-                AgendaFilter.EVENTS -> events
+            when (selectedFilter) { // Future-proofing
+                AgendaFilter.EVENTS -> events // Always .EVENTS
                 AgendaFilter.LESSONS -> events.filter { it.activityType.code == "LEZ" }
                 AgendaFilter.EXAMS -> events.filter { it.activityType.code == "ESA" || it.activityType.code == "PRF" }
             }
