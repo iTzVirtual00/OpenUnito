@@ -104,8 +104,6 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-const val debug = false // TODO: make debug a setting
-
 /**
  * Filter options for the agenda
  */

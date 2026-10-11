@@ -198,41 +198,6 @@ fun restartApp(context: Context) {
 
 fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
 
-class MemoizedFetcher<K, V>(
-    private val ttlMillis: Long = 5 * 60 * 1000,
-    private val provider: suspend (K) -> V,
-) {
-    private val cache = mutableMapOf<K, CacheEntry<V>>()
-    private val cacheLock = Mutex()
-    private val argumentLocks = mutableMapOf<K, Mutex>()
-    private data class CacheEntry<V>(val data: V, val timestamp: Long)
-
-    suspend fun execute(key: K, skipCache: Boolean = false): V {
-        val now = System.currentTimeMillis()
-        if (!skipCache) {
-            cacheLock.withLock { cache[key] }?.let { entry ->
-                if (now - entry.timestamp <= ttlMillis) return entry.data
-            }
-        }
-        val keyMutex = cacheLock.withLock { argumentLocks.getOrPut(key) { Mutex() } }
-        return keyMutex.withLock {
-            if (!skipCache) {
-                cacheLock.withLock { cache[key] }?.let { entry ->
-                    if (System.currentTimeMillis() - entry.timestamp <= ttlMillis) return entry.data
-                }
-            }
-            val newData = provider(key)
-            val isFailure = (newData as? Result<*>)?.isFailure ?: false
-            if (!isFailure) cacheLock.withLock {
-                cache[key] = CacheEntry(newData, System.currentTimeMillis())
-            }
-            newData
-        }
-    }
-
-    suspend fun clear() = cacheLock.withLock { cache.clear(); argumentLocks.clear() }
-}
-
 fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarConfigDao: CalendarConfigDao) {
     val prefsFile = java.io.File(context.filesDir.parent, "shared_prefs/secure_auth_prefs.xml")
     if (!prefsFile.exists()) return

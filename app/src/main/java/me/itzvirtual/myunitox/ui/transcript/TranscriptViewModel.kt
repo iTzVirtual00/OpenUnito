@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.grade.GradeRepository
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class TranscriptViewModel @Inject constructor(
     private val gradeRepo: GradeRepository,
     private val dashboardRepo: DashboardRepository,
+    private val appConfigRepo: AppConfigRepository,
 ) : ViewModel() {
 
     private val manualError = MutableStateFlow<String?>(null)
@@ -28,8 +30,9 @@ class TranscriptViewModel @Inject constructor(
     val screenState: StateFlow<TranscriptScreenState> = combine(
         gradeRepo.gradesFlow,
         manualError,
-        isManualRefreshing
-    ) { cachedData, error, manualRefreshing ->
+        isManualRefreshing,
+        appConfigRepo.config
+    ) { cachedData, error, manualRefreshing, config ->
         val isLoading = cachedData == null || manualRefreshing
 
         TranscriptScreenState(
@@ -38,13 +41,14 @@ class TranscriptViewModel @Inject constructor(
                 isStale = cachedData?.isStale ?: false,
                 isLoading = isLoading,
                 error = error
-            )
+            ),
+            debug = config?.debug ?: false,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = TranscriptScreenState(
-            gradesState = GradesUiState(isLoading = true)
+            gradesState = GradesUiState(isLoading = true),
         )
     )
 

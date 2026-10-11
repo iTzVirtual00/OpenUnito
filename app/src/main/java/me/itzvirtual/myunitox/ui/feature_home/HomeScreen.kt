@@ -82,7 +82,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 //TODO: "Back" button goes to previous tab
-val debug = false // TODO: make debug a setting
 
 sealed interface HomeDestination {
     data object Main : HomeDestination
@@ -200,7 +199,8 @@ fun HomeScreenContent(
                         isLoading = todayClassesState.isLoading,
                         stateError = todayClassesState.error,
                         onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event }
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = state.debug,
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     ClassesSection(
@@ -209,7 +209,8 @@ fun HomeScreenContent(
                         isLoading = tomorrowClassesState.isLoading,
                         stateError = tomorrowClassesState.error,
                         onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event }
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = state.debug,
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                 }
@@ -303,11 +304,12 @@ fun UserInitialsIcon(
 }
 
 @Composable
-fun ProfileSection(
+fun ProfileSection( //TODO: pull state to top level
     homeState: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
     val state = homeState.studentState
+    val debug = homeState.debug
 
     val initials: String
     val firstName: String
@@ -372,7 +374,8 @@ fun ClassesSection(
     isLoading: Boolean,
     stateError: String?,
     onOpenScheduleClick: () -> Unit,
-    onEventClick: (AgendaEntry) -> Unit
+    onEventClick: (AgendaEntry) -> Unit,
+    debug: Boolean,
 ) {
 
 

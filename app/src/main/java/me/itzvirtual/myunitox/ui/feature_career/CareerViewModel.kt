@@ -15,7 +15,7 @@ import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import java.io.IOException
 import javax.inject.Inject
 
-inline fun <T1, T2, T3, T4, T5, T6, R> combine(
+inline fun <T1, T2, T3, T4, T5, T6, R> uberCombine(
     flow: Flow<T1>,
     flow2: Flow<T2>,
     flow3: Flow<T3>,
@@ -49,7 +49,7 @@ class CareerViewModel @Inject constructor(
     private val examResultsManualError = MutableStateFlow<String?>(null)
     private val isManualRefreshing = MutableStateFlow(false)
 
-    val screenState: StateFlow<CareerScreenState> = combine(
+    val screenState: StateFlow<CareerScreenState> = uberCombine(
         dashboardRepo.dashboardCacheFlow,
         examResultRepo.examResultsCacheFlow,
         dashboardManualError,

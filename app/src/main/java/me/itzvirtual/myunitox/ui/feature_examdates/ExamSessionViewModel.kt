@@ -9,28 +9,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
-import me.itzvirtual.myunitox.ui.feature_career.ExamResultsUiState
+import me.itzvirtual.myunitox.ui.feature_career.uberCombine
 import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
-class ExamDatesViewModel @Inject constructor(
+class ExamSessionViewModel @Inject constructor(
     private val examDateRepo: ExamDateRepository,
     private val examResultRepo: ExamResultRepository,
+    private val appConfigRepo: AppConfigRepository,
 ) : ViewModel() {
     private val datesManualError = MutableStateFlow<String?>(null)
     private val resultsManualError = MutableStateFlow<String?>(null)
     private val isManualRefreshing = MutableStateFlow(false)
 
-    val screenState: StateFlow<ExamDatesScreenState> = combine(
+    val screenState: StateFlow<ExamDatesScreenState> = uberCombine(
         examDateRepo.examDatesCacheFlow,
         examResultRepo.examResultsCacheFlow,
         datesManualError,
         resultsManualError,
-        isManualRefreshing
-    ) { cachedDates, cachedResults, datesError, resultsError, manualRefreshing ->
+        isManualRefreshing,
+        appConfigRepo.config
+    ) { cachedDates, cachedResults, datesError, resultsError, manualRefreshing, config ->
 
         val isDatesLoading = cachedDates == null
         val isResultsLoading = cachedResults == null
@@ -42,19 +45,12 @@ class ExamDatesViewModel @Inject constructor(
             error = datesError
         )
 
-        val examResultsUiState = ExamResultsForDatesUiState(
-            results = cachedResults?.results ?: emptyList(),
-            isStale = cachedResults?.isStale ?: false,
-            isLoading = isResultsLoading,
-            error = resultsError
-        )
-
         val isGlobalLoading = (isDatesLoading && isResultsLoading) || manualRefreshing
 
         ExamDatesScreenState(
-            isGlobalLoading = isGlobalLoading,
             examDatesState = examDatesUiState,
-            examResultsState = examResultsUiState
+            isGlobalLoading = isGlobalLoading,
+            debug = config?.debug ?: false,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -70,7 +66,6 @@ class ExamDatesViewModel @Inject constructor(
             isManualRefreshing.value = true
             try {
                 launch { refreshExamDates() }
-                launch { refreshExamResults() }
             } finally {
                 isManualRefreshing.value = false
             }
@@ -88,22 +83,6 @@ class ExamDatesViewModel @Inject constructor(
                 val shouldSuppress = err is IOException && hasCached
                 if (!shouldSuppress) {
                     datesManualError.value = err.message ?: "Failed to refresh exam dates"
-                }
-            }
-        }
-    }
-
-    /**
-     * User-initiated refresh for exam results.
-     */
-    fun refreshExamResults() {
-        viewModelScope.launch {
-            resultsManualError.value = null
-            examResultRepo.refresh().onFailure { err ->
-                val hasCached = screenState.value.examResultsState.results.isNotEmpty()
-                val shouldSuppress = err is IOException && hasCached
-                if (!shouldSuppress) {
-                    resultsManualError.value = err.message ?: "Failed to refresh exam results"
                 }
             }
         }

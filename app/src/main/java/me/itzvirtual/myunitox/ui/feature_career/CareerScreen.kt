@@ -104,8 +104,6 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
-//const val debug = true // TODO: make debug a setting
-
 @Composable
 fun CareerScreen(
     viewModel: CareerViewModel = hiltViewModel(),
@@ -117,8 +115,6 @@ fun CareerScreen(
     var showTranscript by remember { mutableStateOf(false) }
     var showInvoke by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    val debug = state.debug
 
     val actions = TranscriptActions(
         changeGradeStatus = { gradeId, newStatus ->

@@ -58,8 +58,6 @@ import me.itzvirtual.myunitox.ui.shared.shimmerEffect
 import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 
-val debug = true // TODO: make debug a setting
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TranscriptSheet(
@@ -96,7 +94,8 @@ fun TranscriptSheet(
                 GradesSection(
                     state.gradesState.grades,
                     state.gradesState.isLoading,
-                    state.gradesState.error
+                    state.gradesState.error,
+                    debug = state.debug,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -208,7 +207,8 @@ fun GradeWrapper(result: ExamResult) {
 fun GradesSection(
     rawGrades: List<ExamGrade>,
     isLoading: Boolean,
-    stateError: String?
+    stateError: String?,
+    debug: Boolean,
 ) {
     val grades = remember(rawGrades) {
         rawGrades.filter { it.score != null }

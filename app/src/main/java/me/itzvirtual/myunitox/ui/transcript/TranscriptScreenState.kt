@@ -11,4 +11,5 @@ data class GradesUiState(
 
 data class TranscriptScreenState(
     val gradesState: GradesUiState = GradesUiState(isLoading = true),
+    val debug: Boolean = false,
 )

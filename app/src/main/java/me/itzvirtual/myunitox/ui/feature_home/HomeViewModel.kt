@@ -26,6 +26,7 @@ class HomeViewModel @Inject constructor(
     private val studentRepo: StudentRepository,
     private val agendaRepo: AgendaRepository,
     private val calendarConfigRepo: CalendarConfigRepository,
+    private val appConfigRepo: AppConfigRepository,
 ) : ViewModel() {
 
     private val studentUiStateFlow = studentRepo.studentCacheFlow.map { cached ->
@@ -36,6 +37,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
+    //Pulls uiState from agenda, through a Flow, for today's and tomorrow's classes section
     private val agendaUiStateFlow = calendarConfigRepo.selectedCalendarFlow
         .distinctUntilChangedBy { it?.calendarLinkId }
         .flatMapLatest { selectedCalendar ->
@@ -77,13 +79,15 @@ class HomeViewModel @Inject constructor(
 
     val screenState: StateFlow<HomeScreenState> = combine(
         studentUiStateFlow,
-        agendaUiStateFlow
-    ) { studentState, agendaState ->
+        agendaUiStateFlow,
+        appConfigRepo.config,
+    ) { studentState, agendaState, config ->
         HomeScreenState(
             studentState = studentState,
             todaysClasses = agendaState.todaysClasses,
             tomorrowClasses = agendaState.tomorrowClasses,
-            isGlobalLoading = studentState.isLoading && agendaState.todaysClasses.isLoading
+            isGlobalLoading = studentState.isLoading && agendaState.todaysClasses.isLoading,
+            debug = config?.debug ?: false
         )
     }.stateIn(
         scope = viewModelScope,
