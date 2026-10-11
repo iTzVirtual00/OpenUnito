@@ -216,7 +216,7 @@ fun GradesSection(
 
 
     ListWrapper(
-        list = grades,
+        isEmpty = grades.isEmpty(),
         debug = debug,
         isLoading = isLoading,
         stateError = stateError

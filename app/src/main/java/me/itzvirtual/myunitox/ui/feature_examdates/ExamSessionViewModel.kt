@@ -6,12 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
+import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.ui.feature_career.uberCombine
 import java.io.IOException
 import javax.inject.Inject
@@ -38,8 +38,25 @@ class ExamSessionViewModel @Inject constructor(
         val isDatesLoading = cachedDates == null
         val isResultsLoading = cachedResults == null
 
+        var datesMap: HashMap<String, List<ExamDate>> = HashMap<String, List<ExamDate>>()
+        val sortedDates = cachedDates?.dates?.sortedByDescending { it.title } ?: emptyList()
+        sortedDates.forEach { date ->
+            val title = date.title
+
+            val el = datesMap.putIfAbsent(
+                title,
+                List(1) {
+                    date
+                }
+            )
+
+            if (el != null) {
+                el.plus(date)
+            }
+        }
+
         val examDatesUiState = ExamDatesUiState(
-            dates = cachedDates?.dates ?: emptyList(),
+            dates = datesMap,
             isStale = cachedDates?.isStale ?: false,
             isLoading = isDatesLoading,
             error = datesError

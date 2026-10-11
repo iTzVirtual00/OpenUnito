@@ -3,8 +3,8 @@ package me.itzvirtual.myunitox.ui.feature_examdates
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 
 data class ExamDatesUiState(
-    val dates: List<ExamDate> = emptyList(),
-    val isLoading: Boolean = false,
+    val dates: HashMap<String, List<ExamDate>> = HashMap<String, List<ExamDate>>(),  // Outer list contains the subject("ad" in Api),
+    val isLoading: Boolean = false,                 // inner contains the single session
     val isStale: Boolean = false,
     val error: String? = null,
 )

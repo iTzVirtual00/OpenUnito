@@ -56,7 +56,7 @@ data class DevtoolsActions(
 )
 
 val LocalDevtoolsActions = compositionLocalOf { DevtoolsActions() }
-
+//TODO: add database dump feature
 @Composable
 fun DevtoolsScreen(
     modifier: Modifier = Modifier,

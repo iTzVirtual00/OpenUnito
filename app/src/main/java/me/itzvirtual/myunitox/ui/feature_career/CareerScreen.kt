@@ -416,7 +416,7 @@ fun ExamResultsSection(
     val cornerRadius = 16.dp
 
     ListWrapper(
-        results,
+        results.isEmpty(),
         debug = debug,
         isLoading = isLoading,
         stateError = stateError

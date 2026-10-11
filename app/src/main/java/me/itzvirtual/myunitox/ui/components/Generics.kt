@@ -2,6 +2,7 @@ package me.itzvirtual.myunitox.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -18,12 +19,14 @@ import me.itzvirtual.myunitox.ui.shared.ErrorItem
 
 @Composable
 fun StdSurface(
+    modifier: Modifier = Modifier,
     cornerRadius: Dp = 16.dp,
     content: @Composable (() -> Unit)
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .height(90.dp)
             .padding(8.dp),
         shape = RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
@@ -35,13 +38,13 @@ fun StdSurface(
 
 @Composable
 fun ListWrapper(
-    list: List<Any>,
+    isEmpty: Boolean,
     debug: Boolean,
     isLoading:Boolean,
     stateError: String?,
     content: @Composable () -> Unit,
 ) {
-    if (list.isEmpty() || stateError != null || isLoading) {
+    if (isEmpty || stateError != null || isLoading) {
         StdSurface() {
             if (debug) {
                 val msg =

@@ -415,7 +415,7 @@ fun ClassesSection(
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 ListWrapper(
-                    list = classes,
+                    isEmpty = classes.isEmpty(),
                     debug = debug,
                     isLoading = isLoading,
                     stateError =
