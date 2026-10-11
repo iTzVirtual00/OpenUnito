@@ -14,9 +14,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -28,16 +25,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.student.StudentCareer
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
-import me.itzvirtual.myunitox.ui.components.GenericSurface
+import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.StudentCareerCard
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 
 
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
+fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    var showStatistics by remember { mutableStateOf(false) }
 
     ProfileScreenContent(state, modifier)
 }
@@ -90,7 +89,7 @@ fun CareersSection(
                 }
 
                 stateError != null || careers.isEmpty() -> {
-                    GenericSurface() {
+                    StdSurface() {
                         if (debug) {
                             val msg = stateError ?: "List is empty" //If state error is null, no error has occurred and list is empty
                             ErrorItem(

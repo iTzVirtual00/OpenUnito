@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.feature_examdates
 
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,11 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.domain.InvokeDate
+import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.ui.components.StdTextButton
-import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreenContent
-import me.itzvirtual.myunitox.ui.feature_profile.ProfileViewModel
+import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.util.Date
+
+//Maybe call it ExamSession or just Session
 
 /*
 lista materie (codice):
@@ -41,28 +41,34 @@ lista materie (codice):
         if (prenotabile) prenota
  */
 
+
+
 @Composable
 fun InvokeScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ExamDatesViewModel = hiltViewModel()
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    var showStatistics by remember { mutableStateOf(false) }
 
-    ProfileScreenContent(state, modifier)
+    InvokeScreenContent(modifier, state.examDatesState)
 }
 
 @Composable
 fun InvokeScreenContent(
     modifier: Modifier = Modifier,
-    dates: List<InvokeDate>,
+    state: ExamDatesUiState
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    val dates = state.dates
+
+
     Column() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp),
+                .height(80.dp)
+                .padding(0.dp),
         ) {
             StdTextButton(
                 modifier = Modifier
@@ -71,7 +77,7 @@ fun InvokeScreenContent(
                 text = "Bookable", //TODO: translation
                 shape = RectangleShape,
                 tonalElevation = when (selectedTab) {
-                    0 -> 4f.dp
+                    0 -> 2f.dp
                     else -> 1f.dp
                 }
             )
@@ -88,6 +94,9 @@ fun InvokeScreenContent(
             )
         }
         Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp),
             tonalElevation = 2f.dp
         ) {
             when (selectedTab) {
@@ -95,8 +104,8 @@ fun InvokeScreenContent(
                     LazyColumn(
                         modifier = modifier
                     ) {
-                        items(dates) { date ->
-                            ExamCard(
+                    items(dates) { date ->
+                            ExamBookingCard(
                                 title = date.title,
                                 courseId = date.adCode,
                                 bookingEnabled = date.bookingEnabled,
@@ -107,14 +116,19 @@ fun InvokeScreenContent(
                     }
                 }
                 1 -> {
-                    val date = dates.get(0)
-                    ExamCard(
-                        title = date.title,
-                        courseId = date.adCode,
-                        bookingEnabled = date.bookingEnabled,
-                        bookingFirstDate = date.bookingStartDate,
-                        bookingLastDate = date.bookingEndDate
-                    )
+                    if (dates.isNotEmpty()) {
+                        val date = dates[0]
+                        ExamBookingCard(
+                            title = date.title,
+                            courseId = date.adCode,
+                            bookingEnabled = date.bookingEnabled,
+                            bookingFirstDate = date.bookingStartDate,
+                            bookingLastDate = date.bookingEndDate
+                        )
+                    }
+                    else {
+                        ErrorItem("Li muerti")
+                    }
                 }
             }
         }
@@ -123,7 +137,7 @@ fun InvokeScreenContent(
 
 
 @Composable
-fun ExamCard(
+fun ExamBookingCard(
     title: String,
     courseId: String,
     bookingEnabled: Boolean,
@@ -133,14 +147,14 @@ fun ExamCard(
 
     Surface() {
         Text(
-            text = "suca"
+            text = title
         )
     }
 
 }
 
 @Composable
-fun ExamEntry(
+fun ExamSessionEntry(
 
 ) {
 
@@ -154,73 +168,75 @@ fun ProfileScreenPreview() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             InvokeScreenContent(
                 modifier = Modifier.padding(innerPadding),
-                dates = List<InvokeDate>(5) {
-                    InvokeDate(
-                        "mate",
-                        "cazzo ne so",
-                        "",
-                        "INF001",
-                        "",
-                        "",
-                        Date(),
-                        Date(),
-                        Date(),
-                        true,
-                        true,
-                        true,
-                        0,
-                        "Conti",
-                    )
-                    InvokeDate(
-                        "mate",
-                        "cazzo ne so",
-                        "",
-                        "INF001",
-                        "",
-                        "",
-                        Date(),
-                        Date(),
-                        Date(),
-                        true,
-                        true,
-                        true,
-                        0,
-                        "Conti",
-                    )
-                    InvokeDate(
-                        "mate",
-                        "cazzo ne so",
-                        "",
-                        "INF001",
-                        "",
-                        "",
-                        Date(),
-                        Date(),
-                        Date(),
-                        true,
-                        true,
-                        true,
-                        0,
-                        "Conti",
-                    )
-                    InvokeDate(
-                        "mate",
-                        "cazzo ne so",
-                        "",
-                        "INF001",
-                        "",
-                        "",
-                        Date(),
-                        Date(),
-                        Date(),
-                        true,
-                        true,
-                        true,
-                        0,
-                        "Conti",
-                    )
-                }
+                state = ExamDatesUiState(
+                    dates = List(5) {
+                        ExamDate(
+                            title = "mate",
+                            description = "cazzo ne so",
+                            note = "",
+                            adCode = "INF001",
+                            adDescription = "",
+                            appDescription = "",
+                            date = Date(),
+                            bookingStartDate = Date(),
+                            bookingEndDate = Date(),
+                            bookableExam = true,
+                            bookingEnabled = true,
+                            unbookingEnabled = true,
+                            students = 0,
+                            president = "Conti",
+                        )
+                        ExamDate(
+                            "mate",
+                            "cazzo ne so",
+                            "",
+                            "INF001",
+                            "",
+                            "",
+                            Date(),
+                            Date(),
+                            Date(),
+                            true,
+                            true,
+                            true,
+                            0,
+                            "Conti",
+                        )
+                        ExamDate(
+                            "mate",
+                            "cazzo ne so",
+                            "",
+                            "INF001",
+                            "",
+                            "",
+                            Date(),
+                            Date(),
+                            Date(),
+                            true,
+                            true,
+                            true,
+                            0,
+                            "Conti",
+                        )
+                        ExamDate(
+                            "mate",
+                            "cazzo ne so",
+                            "",
+                            "INF001",
+                            "",
+                            "",
+                            Date(),
+                            Date(),
+                            Date(),
+                            true,
+                            true,
+                            true,
+                            0,
+                            "Conti",
+                        )
+                    }
 
+                )
             )
         }
     }

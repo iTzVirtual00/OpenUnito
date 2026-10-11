@@ -50,14 +50,15 @@ import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import me.itzvirtual.myunitox.domain.grade.ExamGrade
+import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.shared.AnimatedSymmetricalBorder
-import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
 import me.itzvirtual.myunitox.ui.shared.shimmerEffect
 import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 
-val debug = false // TODO: make debug a setting
+val debug = true // TODO: make debug a setting
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +93,11 @@ fun TranscriptSheet(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                GradesSection(state.gradesState)
+                GradesSection(
+                    state.gradesState.grades,
+                    state.gradesState.isLoading,
+                    state.gradesState.error
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -200,31 +205,34 @@ fun GradeWrapper(result: ExamResult) {
 }
 
 @Composable
-fun GradesSection(state: GradesUiState) {
-    val grades = remember(state.grades) {
-        state.grades.filter { it.score != null }
+fun GradesSection(
+    rawGrades: List<ExamGrade>,
+    isLoading: Boolean,
+    stateError: String?
+) {
+    val grades = remember(rawGrades) {
+        rawGrades.filter { it.score != null }
     }
-    val showDebug = debug && state.error != null
 
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ListWrapper(
+        list = grades,
+        debug = debug,
+        isLoading = isLoading,
+        stateError = stateError
     ) {
-        Column(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
-
-            if (showDebug) {
-                ErrorItem(state.error)
-            } else if (grades.count() == 0 || state.error != null || state.isLoading) { // !showDebug
-                ErrorItem(stringResource(R.string.no_data), Color.Gray)
-            } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 grades.forEachIndexed { idx, grade ->
                     GradeRow(
                         courseName = grade.courseName,
@@ -250,6 +258,7 @@ fun GradesSection(state: GradesUiState) {
         }
     }
 }
+
 
 @Composable
 fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {

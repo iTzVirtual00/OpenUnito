@@ -10,7 +10,7 @@ data class ExamDatesUiState(
     val error: String? = null,
 )
 
-data class ExamResultsForDatesUiState(
+data class ExamResultsForDatesUiState( //Remove it, should be useless
     val results: List<ExamResult> = emptyList(),
     val isLoading: Boolean = false,
     val isStale: Boolean = false,

@@ -67,7 +67,7 @@ fun DevtoolsScreen(
     // Bind ViewModel logic to the Actions data class
     val actions = remember(viewModel, context) {
         DevtoolsActions(
-            setToken = { token -> viewModel.login(token) { restartApp(context) } },
+            setToken = { token -> viewModel.login(token) { viewModel.purgeAllCaches { restartApp(context) } } },
             copyToken = { viewModel.copyTokenToClipboard(context) },
             clearToken = { viewModel.clearToken { restartApp(context) } },
             purgeAllCaches = { viewModel.purgeAllCaches { restartApp(context) } }

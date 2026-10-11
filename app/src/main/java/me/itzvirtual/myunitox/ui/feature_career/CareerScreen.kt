@@ -88,8 +88,9 @@ import me.itzvirtual.myunitox.domain.dashboard.dashboardDataSample
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import me.itzvirtual.myunitox.domain.examresult.examResultsDataSample
-import me.itzvirtual.myunitox.ui.components.GenericSurface
+import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.components.StdIconTextButton
+import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.shared.CreditProgressIndicator
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.formatDate
@@ -103,7 +104,7 @@ import me.itzvirtual.myunitox.ui.transcript.TranscriptSheet
 import me.itzvirtual.myunitox.ui.transcript.TranscriptViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
-const val debug = false // TODO: make debug a setting
+//const val debug = true // TODO: make debug a setting
 
 @Composable
 fun CareerScreen(
@@ -117,6 +118,7 @@ fun CareerScreen(
     var showInvoke by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val debug = state.debug
 
     val actions = TranscriptActions(
         changeGradeStatus = { gradeId, newStatus ->
@@ -181,20 +183,14 @@ fun CareerScreenContent(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-
-
-
             CreditsSection(
                 data = state.dashboardState.data,
                 isLoading = state.dashboardState.isLoading,
-                stateError = state.dashboardState.error
+                stateError = state.dashboardState.error,
+                debug = state.debug
             )
-
-
-            //Vai a libretto diventa vai a statiscsc
-            Spacer(modifier = Modifier.height(2.dp))
         }
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
         StdIconTextButton(
             icon = Icons.Default.Book,
             text = "Libretto",
@@ -222,7 +218,8 @@ fun CareerScreenContent(
         ExamResultsSection(
             results = state.examResultsState.results,
             stateError = state.examResultsState.error,
-            isLoading = state.examResultsState.isLoading
+            isLoading = state.examResultsState.isLoading,
+            debug = state.debug,
         )
     }
 }
@@ -261,7 +258,8 @@ fun GoToCreditStatisticsSection() {
 fun CreditsSection(
     data: DashboardData?,
     isLoading: Boolean,
-    stateError: String?
+    stateError: String?,
+    debug: Boolean = false,
 ) {
     val showDebug = debug && stateError != null
 
@@ -270,7 +268,6 @@ fun CreditsSection(
     val totalCredits: Int
     val yearlyProgress: Float
     val remainingCfu: String
-
 
     if (!isLoading && stateError == null) {
         val stats = data!!.stats
@@ -333,8 +330,10 @@ fun CreditsSection(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
             ) {
-                //TODO: add refresh button and show error numbers only in dev mode
-                if (showDebug) {
+                //TODO: add refresh button
+                if (debug && isLoading) {
+                    ErrorItem("Loading")
+                } else if (debug && stateError != null) {
                     ErrorItem(stateError)
                 } else { // !debug or !error
                     YearlyProgressCard(
@@ -352,8 +351,8 @@ fun CreditsSection(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.tertiaryContainer,
             ) {
-                if (showDebug) {
-                    ErrorItem(stateError)
+                if (debug && (stateError != null || isLoading)) {
+                    ErrorItem(stateError ?: "Loading")
                 } else {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -416,63 +415,52 @@ fun ExamResultsSection(
     results: List<ExamResult>,
     stateError: String?,
     isLoading: Boolean,
+    debug: Boolean = false,
 ) {
     val cornerRadius = 16.dp
 
-    Surface( // Why doesn't generic surface work?!
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(cornerRadius),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ListWrapper(
+        results,
+        debug = debug,
+        isLoading = isLoading,
+        stateError = stateError
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            when {
-                debug && stateError != null -> {
-                    ErrorItem(stateError)
-                }
+        StdSurface {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                results.forEachIndexed { idx, result ->
+                    val shape = when {
+                        results.size == 1 -> androidx.compose.foundation.shape.RoundedCornerShape(
+                            cornerRadius
+                        )
 
-                results.isEmpty() || stateError != null || isLoading -> {
-                    ErrorItem(stringResource(R.string.no_data), Color.Gray)
-                }
+                        idx == 0 -> RoundedCornerShape(
+                            topStart = cornerRadius,
+                            topEnd = cornerRadius
+                        )
 
-                else -> {
-                    results.forEachIndexed { idx, result ->
-                        val shape = when {
-                            results.size == 1 -> androidx.compose.foundation.shape.RoundedCornerShape(
-                                cornerRadius
-                            )
+                        idx == results.lastIndex -> RoundedCornerShape(
+                            bottomStart = cornerRadius,
+                            bottomEnd = cornerRadius
+                        )
 
-                            idx == 0 -> RoundedCornerShape(
-                                topStart = cornerRadius,
-                                topEnd = cornerRadius
-                            )
-
-                            idx == results.lastIndex -> RoundedCornerShape(
-                                bottomStart = cornerRadius,
-                                bottomEnd = cornerRadius
-                            )
-
-                            else -> RectangleShape
-                        }
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = shape,
-                            color = Color.Transparent // Uses parent surface color
-                        ) {
-                            ExamResultRow(result)
-                        }
-                        if (idx < results.lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(end = 60.dp), // cool? not cool? idk
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant
-                            )
-                        }
+                        else -> RectangleShape
+                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = shape,
+                        color = Color.Transparent // Uses parent surface color
+                    ) {
+                        ExamResultRow(result)
+                    }
+                    if (idx < results.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(end = 60.dp), // cool? not cool? idk
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
                     }
                 }
             }

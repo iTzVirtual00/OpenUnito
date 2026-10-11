@@ -3,22 +3,45 @@ package me.itzvirtual.myunitox.ui.feature_career
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import java.io.IOException
 import javax.inject.Inject
 
+inline fun <T1, T2, T3, T4, T5, T6, R> combine(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>, // Scalable!!
+    crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
+): Flow<R> {
+    return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*> ->
+        @Suppress("UNCHECKED_CAST")
+        transform(
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+        )
+    }
+}
+
 @HiltViewModel
 class CareerViewModel @Inject constructor(
     private val dashboardRepo: DashboardRepository,
     private val examResultRepo: ExamResultRepository,
+    private val appConfigRepo: AppConfigRepository,
 ) : ViewModel() {
 
     // Overrides for manual refresh errors (e.g. pull-to-refresh network failures)
@@ -31,8 +54,9 @@ class CareerViewModel @Inject constructor(
         examResultRepo.examResultsCacheFlow,
         dashboardManualError,
         examResultsManualError,
-        isManualRefreshing
-    ) { cachedDashboard, cachedExamResults, dashError, examError, manualRefreshing ->
+        isManualRefreshing,
+        appConfigRepo.config
+    ) { cachedDashboard, cachedExamResults, dashError, examError, manualRefreshing, config ->
 
         val isDashboardLoading = cachedDashboard == null
         val isExamResultsLoading = cachedExamResults == null
@@ -56,7 +80,8 @@ class CareerViewModel @Inject constructor(
         CareerScreenState(
             dashboardState = dashboardUiState,
             examResultsState = examResultsUiState,
-            isGlobalLoading = isGlobalLoading
+            isGlobalLoading = isGlobalLoading,
+            debug = config?.debug ?: false
         )
     }.stateIn(
         scope = viewModelScope,

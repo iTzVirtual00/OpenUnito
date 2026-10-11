@@ -70,151 +70,19 @@ import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
+import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.components.StdIconTextButton
+import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
+import me.itzvirtual.myunitox.ui.feature_examdates.InvokeScreen
 import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
+//TODO: "Back" button goes to previous tab
 val debug = false // TODO: make debug a setting
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val sampleTodaysClasses = listOf(
-        AgendaEntry(
-            id = "0",
-            title = "Digital Thinking",
-            startDateTime = Instant.parse("2026-02-22T06:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
-            activityCode = "DT001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
-            ),
-            professors = listOf(
-                Professor("prof1", "Elena", "Galli")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "1",
-            title = "Digital Thinking",
-            startDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T10:00:00.000Z"),
-            activityCode = "DT001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
-            ),
-            professors = listOf(
-                Professor("prof1", "Elena", "Galli")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Computer Science",
-            startDateTime = Instant.parse("2026-02-22T11:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T13:00:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Kitchen",
-            startDateTime = Instant.parse("2026-02-22T19:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T23:30:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Sleep",
-            startDateTime = Instant.parse("2026-02-22T23:40:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T07:40:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-    )
-    val sampleTomorrowClasses = listOf(
-        AgendaEntry(
-            id = "3",
-            title = "Mathematics",
-            startDateTime = Instant.parse("2026-02-23T08:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
-            activityCode = "MATH001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
-            ),
-            professors = listOf(
-                Professor("prof3", "Luca", "Bianchi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "3",
-            title = "Mathematics",
-            startDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T12:00:00.000Z"),
-            activityCode = "MATH001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
-            ),
-            professors = listOf(
-                Professor("prof3", "Luca", "Bianchi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-    )
-    MyUnitoXTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            HomeScreenContent(
-                state = HomeScreenState(
-                    studentState = StudentDataUiState(data = sampleStudentData),
-                    todaysClasses = DailyClassesUiState(classes = sampleTodaysClasses),
-                    tomorrowClasses = DailyClassesUiState(classes = sampleTomorrowClasses)
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
-        }
-    }
-}
 
 sealed interface HomeDestination {
     data object Main : HomeDestination
@@ -406,7 +274,8 @@ fun ProfileScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            ProfileScreen()
+//            ProfileScreen()// TODO: restore this
+            InvokeScreen()
         }
     }
 }
@@ -541,44 +410,23 @@ fun ClassesSection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                when {
-                    isLoading || stateError != null || classes.isEmpty() -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            val message = (
-                                    if (stateError == "NO_CALENDAR") { // error or loading
-                                        stringResource(R.string.error_no_calendar_configured)
-                                    } else if (debug && stateError != null) {
-                                        stateError
-                                    } else if (isLoading || stateError != null) { // !debug, error or loading or empty
-                                        ErrorItem(stringResource(R.string.no_data), Color.Gray)
-                                    } else {
-                                        stringResource(R.string.no_classes_today)
-                                    }
-                                    ) as String //Why?
 
-
-                            Row(modifier.padding(12.dp)) {
-                                ErrorItem(
-                                    errorMessage = message,
-                                    color = Color.Gray
-                                )
-                            }
-                        }
-                    }
-                    else -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            classes.forEach { entry ->
-                                ClassCard(
-                                    entry = entry,
-                                    onClick = { onEventClick(entry) }
-                                )
-                            }
+                ListWrapper(
+                    list = classes,
+                    debug = debug,
+                    isLoading = isLoading,
+                    stateError =
+                        if (stateError == "NO_CALENDAR") stringResource(R.string.error_no_calendar_configured)
+                        else stateError
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        classes.forEach { entry ->
+                            ClassCard(
+                                entry = entry,
+                                onClick = { onEventClick(entry) }
+                            )
                         }
                     }
                 }
@@ -733,6 +581,141 @@ fun ClassCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    val sampleTodaysClasses = listOf(
+        AgendaEntry(
+            id = "0",
+            title = "Digital Thinking",
+            startDateTime = Instant.parse("2026-02-22T06:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
+            activityCode = "DT001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
+            ),
+            professors = listOf(
+                Professor("prof1", "Elena", "Galli")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "1",
+            title = "Digital Thinking",
+            startDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T10:00:00.000Z"),
+            activityCode = "DT001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
+            ),
+            professors = listOf(
+                Professor("prof1", "Elena", "Galli")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Computer Science",
+            startDateTime = Instant.parse("2026-02-22T11:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T13:00:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Kitchen",
+            startDateTime = Instant.parse("2026-02-22T19:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T23:30:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Sleep",
+            startDateTime = Instant.parse("2026-02-22T23:40:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T07:40:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+    )
+    val sampleTomorrowClasses = listOf(
+        AgendaEntry(
+            id = "3",
+            title = "Mathematics",
+            startDateTime = Instant.parse("2026-02-23T08:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
+            activityCode = "MATH001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
+            ),
+            professors = listOf(
+                Professor("prof3", "Luca", "Bianchi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "3",
+            title = "Mathematics",
+            startDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T12:00:00.000Z"),
+            activityCode = "MATH001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
+            ),
+            professors = listOf(
+                Professor("prof3", "Luca", "Bianchi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+    )
+    MyUnitoXTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            HomeScreenContent(
+                state = HomeScreenState(
+                    studentState = StudentDataUiState(data = sampleStudentData),
+                    todaysClasses = DailyClassesUiState(classes = sampleTodaysClasses),
+                    tomorrowClasses = DailyClassesUiState(classes = sampleTomorrowClasses)
+                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
         }
     }
 }

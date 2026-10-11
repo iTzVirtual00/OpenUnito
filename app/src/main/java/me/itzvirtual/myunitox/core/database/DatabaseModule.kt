@@ -2,6 +2,7 @@ package me.itzvirtual.myunitox.core.database
 
 import android.content.Context
 import android.util.Log
+import androidx.room.AutoMigration
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -40,6 +41,7 @@ object DatabaseModule {
             })
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
+
 
     @Provides
     fun provideConfigDao(db: AppDatabase): AppConfigDao = db.configDao()

@@ -21,4 +21,5 @@ data class CareerScreenState(
     val dashboardState: CareerDashboardUiState = CareerDashboardUiState(isLoading = true),
     val examResultsState: ExamResultsUiState = ExamResultsUiState(isLoading = true),
     val isGlobalLoading: Boolean = true,
+    val debug: Boolean = false,
 )

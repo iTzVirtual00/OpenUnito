@@ -1,5 +1,6 @@
 package me.itzvirtual.myunitox.core.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
@@ -32,8 +33,11 @@ import me.itzvirtual.myunitox.data.student.local.StudentEntity
         ExamDateEntity::class,
         ExamGradeEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(3,4)
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun configDao(): AppConfigDao

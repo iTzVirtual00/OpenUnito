@@ -129,7 +129,9 @@ class StudentRepository @Inject constructor(
     }
 
     suspend fun getCurrentCareer(): StudentCareer =
-        getStudentData().careers.firstOrNull()
+        getStudentData().careers.firstOrNull {
+            it.id != 0/*REDACTED*/ // TODO: tf is this + add career selection
+        }
             ?: throw IllegalStateException("No careers found for student")
 
     suspend fun checkAuth(): Boolean = refresh().isSuccess

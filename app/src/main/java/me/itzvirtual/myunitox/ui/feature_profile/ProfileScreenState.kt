@@ -8,4 +8,3 @@ data class ProfileScreenState(
     val isStale: Boolean = false,
     val error: String? = null,
 )
-//TODO: add dashboard state
