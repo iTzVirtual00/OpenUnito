@@ -106,9 +106,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun CareerScreen(
+    modifier: Modifier = Modifier,
     viewModel: CareerViewModel = hiltViewModel(),
-    transcriptViewModel: TranscriptViewModel = hiltViewModel(), // this prefetches the data
-    modifier: Modifier
+    transcriptViewModel: TranscriptViewModel = hiltViewModel() // this prefetches the data
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
