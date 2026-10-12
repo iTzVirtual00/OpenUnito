@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox.ui.feature_examdates
+package me.itzvirtual.myunitox.ui.feature_examsessions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

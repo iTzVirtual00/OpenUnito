@@ -52,7 +52,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -72,11 +71,8 @@ import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.components.StdIconTextButton
-import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
-import me.itzvirtual.myunitox.ui.feature_examdates.InvokeScreen
-import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
-import me.itzvirtual.myunitox.ui.shared.ErrorItem
+import me.itzvirtual.myunitox.ui.feature_examsessions.InvokeScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
