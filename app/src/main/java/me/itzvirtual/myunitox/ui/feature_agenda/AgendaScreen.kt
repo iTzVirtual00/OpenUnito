@@ -79,7 +79,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
@@ -122,10 +122,10 @@ enum class AgendaFilter {
 fun AgendaEntry.getColor(): Color {
     val rand = Random(activityCode.hashCode())
 
-    val hue = rand.nextInt(0, 360/5) * 5f
+    val hue = rand.nextInt(0, 360 / 5) * 5f
     val sat = rand.nextDouble(0.65, 0.85).toFloat()
 
-    return Color.hsv(hue,sat,0.65f)
+    return Color.hsv(hue, sat, 0.65f)
 }
 
 /**
@@ -550,7 +550,7 @@ private fun UpsertCalendarDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isValidating) onDismiss() },
-        title = { Text(if(calendarEntryId==null) "Add Calendar" else "Edit Calendar") },
+        title = { Text(if (calendarEntryId == null) "Add Calendar" else "Edit Calendar") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -607,7 +607,7 @@ private fun UpsertCalendarDialog(
                 },
                 enabled = !isValidating,
             ) {
-                Text(if(calendarEntryId==null) "Add" else "Edit")
+                Text(if (calendarEntryId == null) "Add" else "Edit")
             }
         },
         dismissButton = {

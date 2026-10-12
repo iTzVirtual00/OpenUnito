@@ -40,12 +40,12 @@ fun StdSurface(
 fun ListWrapper(
     isEmpty: Boolean,
     debug: Boolean,
-    isLoading:Boolean,
+    isLoading: Boolean,
     stateError: String?,
     content: @Composable () -> Unit,
 ) {
     if (isEmpty || stateError != null || isLoading) {
-        StdSurface() {
+        StdSurface {
             if (debug) {
                 val msg =
                     if (isLoading) "Loading"
@@ -55,8 +55,7 @@ fun ListWrapper(
                 ErrorItem(stringResource(R.string.no_data), Color.Gray)
             }
         }
-    }
-    else {
+    } else {
         content()
     }
 }

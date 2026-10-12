@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.core.database
 
 import android.content.Context
 import android.util.Log
-import androidx.room.AutoMigration
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -45,18 +44,25 @@ object DatabaseModule {
 
     @Provides
     fun provideConfigDao(db: AppDatabase): AppConfigDao = db.configDao()
+
     @Provides
     fun provideAgendaDao(db: AppDatabase): AgendaDao = db.agendaDao()
+
     @Provides
     fun provideCalendarConfigDao(db: AppDatabase): CalendarConfigDao = db.calendarConfigDao()
+
     @Provides
     fun provideDashboardDao(db: AppDatabase): DashboardDao = db.dashboardDao()
+
     @Provides
     fun provideStudentDao(db: AppDatabase): StudentDao = db.studentDao()
+
     @Provides
     fun provideExamResultDao(db: AppDatabase): ExamResultDao = db.examResultDao()
+
     @Provides
     fun provideExamDateDao(db: AppDatabase): ExamDateDao = db.examDateDao()
+
     @Provides
     fun provideExamGradeDao(db: AppDatabase): ExamGradeDao = db.examGradeDao()
 }

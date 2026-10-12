@@ -43,8 +43,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
@@ -53,15 +51,16 @@ import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.lowercase
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingIconItem(modifier: Modifier) {
     Box(contentAlignment = Alignment.Center) {
-        LoadingIndicator(modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier))
+        LoadingIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(modifier)
+        )
     }
 }
 
@@ -198,7 +197,11 @@ fun restartApp(context: Context) {
 
 fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
 
-fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarConfigDao: CalendarConfigDao) {
+fun cleanupLegacyStorage(
+    context: Context,
+    appConfigDao: AppConfigDao,
+    calendarConfigDao: CalendarConfigDao
+) {
     val prefsFile = java.io.File(context.filesDir.parent, "shared_prefs/secure_auth_prefs.xml")
     if (!prefsFile.exists()) return
     try {

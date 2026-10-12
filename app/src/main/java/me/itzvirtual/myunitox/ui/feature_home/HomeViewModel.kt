@@ -44,14 +44,21 @@ class HomeViewModel @Inject constructor(
             if (selectedCalendar == null) {
                 flowOf(
                     HomeAgendaUiState(
-                        todaysClasses = DailyClassesUiState(isLoading = false, error = "NO_CALENDAR"),
-                        tomorrowClasses = DailyClassesUiState(isLoading = false, error = "NO_CALENDAR")
+                        todaysClasses = DailyClassesUiState(
+                            isLoading = false,
+                            error = "NO_CALENDAR"
+                        ),
+                        tomorrowClasses = DailyClassesUiState(
+                            isLoading = false,
+                            error = "NO_CALENDAR"
+                        )
                     )
                 )
             } else {
                 val today = LocalDate.now()
                 val startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant()
-                val endOfTomorrow = today.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                val endOfTomorrow =
+                    today.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
 
                 agendaRepo.getAgendaFlow(
                     calendarLinkId = selectedCalendar.calendarLinkId,

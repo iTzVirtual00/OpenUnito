@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
@@ -133,7 +133,7 @@ fun GradeWrapper(result: ExamResult) {
     ) {
         Box {
             Column(
-                horizontalAlignment = Alignment.Companion.End,
+                horizontalAlignment = Alignment.End,
                 modifier = Modifier.clip(
                     androidx.compose.foundation.shape.RoundedCornerShape(
                         cornerRadius
@@ -144,7 +144,7 @@ fun GradeWrapper(result: ExamResult) {
                     indication = null
                 ) {
                     isLoading = true
-                    haptics.performHapticFeedback(HapticFeedbackType.Companion.LongPress)
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     scope.launch {
                         joinAll(actions.changeGradeStatus(result.id, GradeStatus.VIEWED))
                         isLoading = false
@@ -153,7 +153,7 @@ fun GradeWrapper(result: ExamResult) {
                     .let {
                         when (result.status) {
                             GradeStatus.NOT_TOUCHED -> if (!isRevealed) it.shimmerEffect(
-                                Color.Companion.Gray
+                                Color.Gray
                             ) else it
 
                             else -> it
@@ -191,10 +191,10 @@ fun GradeWrapper(result: ExamResult) {
                     modifier = Modifier
                         .matchParentSize()
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Companion.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        modifier = Modifier.Companion.size(24.dp),
+                        modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                 }
@@ -268,7 +268,7 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
             .fillMaxWidth(),
     ) {
         Row(
-            verticalAlignment = Alignment.Companion.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // info
@@ -294,7 +294,7 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
             Spacer(modifier = Modifier.weight(0.1f))
 
             // grade
-            Column(horizontalAlignment = Alignment.Companion.End) {
+            Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = grade,
                     style = MaterialTheme.typography.headlineMedium,

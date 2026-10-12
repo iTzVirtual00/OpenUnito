@@ -16,10 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -192,7 +189,7 @@ fun StdArrowButton(
 fun CareerScreenPreview() {
     MyUnitoXTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
-            Column() {
+            Column {
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {

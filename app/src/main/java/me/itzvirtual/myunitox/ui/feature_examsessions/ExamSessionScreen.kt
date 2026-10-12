@@ -4,7 +4,6 @@ package me.itzvirtual.myunitox.ui.feature_examsessions
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,7 +24,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.ui.components.ListWrapper
@@ -250,8 +248,8 @@ fun ExamSessionEntry(
     bookingStartDate: Date,
     bookingEndDate: Date,
 ) {
-    Row() {
-        Column() {
+    Row {
+        Column {
             Text(
                 text = date.toString(),
                 fontWeight = FontWeight.Bold

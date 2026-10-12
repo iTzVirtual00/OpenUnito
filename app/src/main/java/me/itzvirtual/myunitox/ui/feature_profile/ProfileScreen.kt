@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.student.StudentCareer
@@ -89,22 +89,22 @@ fun CareersSection(
                 }
 
                 stateError != null || careers.isEmpty() -> {
-                    StdSurface() {
+                    StdSurface {
                         if (debug) {
-                            val msg = stateError ?: "List is empty" //If state error is null, no error has occurred and list is empty
+                            val msg = stateError
+                                ?: "List is empty" //If state error is null, no error has occurred and list is empty
                             ErrorItem(
                                 errorMessage = msg,
                                 color = MaterialTheme.colorScheme.error,
                             )
-                        }
-                        else {
+                        } else {
                             ErrorItem(stringResource(R.string.no_data), Color.Gray)
                         }
                     }
                 }
 
                 else -> {
-                    LazyColumn() {
+                    LazyColumn {
                         items(careers) { career ->
                             Spacer(modifier = Modifier.height(8.dp))
                             StudentCareerCard(

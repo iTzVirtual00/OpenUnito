@@ -26,7 +26,8 @@ class AppConfigRepository @Inject constructor(
 
     suspend fun getSelectedCalendarId(): Int? = configDao.getSelectedCalendarId()
 
-    suspend fun setSelectedCalendarId(calendarId: Int?) = configDao.updateSelectedCalendarId(calendarId)
+    suspend fun setSelectedCalendarId(calendarId: Int?) =
+        configDao.updateSelectedCalendarId(calendarId)
 
     suspend fun clearAuth() = configDao.updateToken(null)
 }

@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.data
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -10,7 +9,6 @@ import me.itzvirtual.myunitox.core.network.ApplicationScope
 import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
-import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
@@ -50,14 +48,19 @@ class Prefetcher @Inject constructor(
                     // weekly prefetch
                     val now = LocalDate.now()
 
-                    val start = now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    val end = now.with(DayOfWeek.SUNDAY).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    val start =
+                        now.with(DayOfWeek.MONDAY).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    val end =
+                        now.with(DayOfWeek.SUNDAY).plusDays(1).atStartOfDay(ZoneId.systemDefault())
+                            .toInstant()
                     agendaRepo.getAgendaFlow(calendar.calendarLinkId, start, end).first()
 
                     // today and tomorrow prefetch
                     val startOfToday = now.atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    val endOfTomorrow = now.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
-                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, startOfToday, endOfTomorrow).first()
+                    val endOfTomorrow =
+                        now.plusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, startOfToday, endOfTomorrow)
+                        .first()
                 }
             }
 

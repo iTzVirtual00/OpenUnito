@@ -2,12 +2,9 @@ package me.itzvirtual.myunitox.data.examdate
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -49,7 +46,8 @@ class ExamDateRepository @Inject constructor(
                 triggerBackgroundRefresh()
                 null
             } else {
-                val isStale = (System.currentTimeMillis() - entity.cachedAt) > CacheConfig.EXAM_DATE_STALE_MS
+                val isStale =
+                    (System.currentTimeMillis() - entity.cachedAt) > CacheConfig.EXAM_DATE_STALE_MS
 
                 if (isStale) {
                     triggerBackgroundRefresh()

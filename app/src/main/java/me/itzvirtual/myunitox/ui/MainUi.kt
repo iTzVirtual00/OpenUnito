@@ -383,12 +383,20 @@ enum class AppDestinations(
 
 // --- Graphs and Routes definitions ---
 // Example of Route that needs a nested graph
-@Serializable object HomeGraph
-@Serializable object HomeScreenRoute
-@Serializable object ProfileScreenRoute
+@Serializable
+object HomeGraph
 
-@Serializable object CareerRoute
+@Serializable
+object HomeScreenRoute
 
-@Serializable object CalendarRoute
+@Serializable
+object ProfileScreenRoute
 
-@Serializable object DevToolsRoute
+@Serializable
+object CareerRoute
+
+@Serializable
+object CalendarRoute
+
+@Serializable
+object DevToolsRoute

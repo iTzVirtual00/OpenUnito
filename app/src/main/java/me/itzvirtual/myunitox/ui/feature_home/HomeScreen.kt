@@ -53,7 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.agenda.ActivityType
@@ -261,8 +261,7 @@ fun ProfileSection( //TODO: pull state to top level
             "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
         firstName = studentData.firstname
         lastName = studentData.lastname
-    }
-    else {
+    } else {
         initials = "/"
         firstName = "Profile" //add translation
         lastName = ""
@@ -282,8 +281,7 @@ fun ProfileSection( //TODO: pull state to top level
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-        }
-        else {
+        } else {
             Column {
                 Row(
                     modifier = Modifier

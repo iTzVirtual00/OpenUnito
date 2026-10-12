@@ -1,10 +1,7 @@
 package me.itzvirtual.myunitox.domain.examresult
 
-import java.time.temporal.ChronoUnit
 import java.util.Date
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 data class ExamResult(
     val id: String,

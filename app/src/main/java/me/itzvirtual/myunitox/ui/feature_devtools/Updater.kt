@@ -33,7 +33,8 @@ sealed class UpdateCheckResult {
 
 class HTTPUpdater(private val context: Context) {
     companion object {
-        private const val WEBHOOK_BASE_URL = "REDACTED_WEBHOOK_URL"
+        private const val WEBHOOK_BASE_URL =
+            "REDACTED_WEBHOOK_URL"
         private const val USERNAME = "REDACTED_USERNAME"
         private const val PASSWORD = "REDACTED_PASSWORD"
 
@@ -55,7 +56,8 @@ REDACTED_CA_CERT
             val customCa = certificateFactory.generateCertificate(caInputStream) as X509Certificate
             caInputStream.close()
 
-            val defaultTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            val defaultTrustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
             defaultTrustManagerFactory.init(null as KeyStore?) // null = use system default
             val defaultTrustManager = defaultTrustManagerFactory.trustManagers
                 .filterIsInstance<X509TrustManager>()
@@ -67,7 +69,8 @@ REDACTED_CA_CERT
             customKeyStore.setCertificateEntry("custom-ca", customCa)
 
             // Create a TrustManager for the custom CA
-            val customTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            val customTrustManagerFactory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
             customTrustManagerFactory.init(customKeyStore)
             val customTrustManager = customTrustManagerFactory.trustManagers
                 .filterIsInstance<X509TrustManager>()
@@ -75,7 +78,10 @@ REDACTED_CA_CERT
 
             // Create a composite TrustManager that trusts both system and custom CA
             val compositeTrustManager = object : X509TrustManager {
-                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                override fun checkClientTrusted(
+                    chain: Array<out X509Certificate>?,
+                    authType: String?
+                ) {
                     try {
                         defaultTrustManager.checkClientTrusted(chain, authType)
                     } catch (e: Exception) {
@@ -83,7 +89,10 @@ REDACTED_CA_CERT
                     }
                 }
 
-                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+                override fun checkServerTrusted(
+                    chain: Array<out X509Certificate>?,
+                    authType: String?
+                ) {
                     try {
                         defaultTrustManager.checkServerTrusted(chain, authType)
                     } catch (e: Exception) {
@@ -123,29 +132,30 @@ REDACTED_CA_CERT
             .build()
     }
 
-    suspend fun checkForUpdates(currentVersionCode: Int): UpdateCheckResult = withContext(Dispatchers.IO) {
-        try {
-            val request = authenticatedRequest("version.json")
-            val response = client.newCall(request).execute()
+    suspend fun checkForUpdates(currentVersionCode: Int): UpdateCheckResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val request = authenticatedRequest("version.json")
+                val response = client.newCall(request).execute()
 
-            if (!response.isSuccessful) {
-                return@withContext UpdateCheckResult.Error("HTTP ${response.code}: ${response.message}")
+                if (!response.isSuccessful) {
+                    return@withContext UpdateCheckResult.Error("HTTP ${response.code}: ${response.message}")
+                }
+
+                val body = response.body.string()
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val versionInfo = json.decodeFromString<VersionInfo>(body)
+
+                if (versionInfo.versionCode > currentVersionCode) {
+                    UpdateCheckResult.UpdateAvailable(versionInfo)
+                } else {
+                    UpdateCheckResult.NoUpdateAvailable
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                UpdateCheckResult.Error(e.message ?: "Unknown error")
             }
-
-            val body = response.body.string()
-            val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-            val versionInfo = json.decodeFromString<VersionInfo>(body)
-
-            if (versionInfo.versionCode > currentVersionCode) {
-                UpdateCheckResult.UpdateAvailable(versionInfo)
-            } else {
-                UpdateCheckResult.NoUpdateAvailable
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            UpdateCheckResult.Error(e.message ?: "Unknown error")
         }
-    }
 
     suspend fun downloadApk(onProgress: (Float) -> Unit): File? = withContext(Dispatchers.IO) {
         try {

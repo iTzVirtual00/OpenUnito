@@ -70,7 +70,8 @@ class AgendaViewModel @Inject constructor(
                 )
             } else {
                 val startInstant = week.start.atStartOfDay(ZoneId.systemDefault()).toInstant()
-                val endInstant = week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                val endInstant =
+                    week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
 
                 agendaRepository.getAgendaFlow(
                     calendarLinkId = calendar.calendarLinkId,

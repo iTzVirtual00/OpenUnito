@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.data.agenda
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -62,13 +61,24 @@ class AgendaRepository @Inject constructor(
         return dao.getByKeyFlow(key)
             .map { entity ->
                 if (entity == null) {
-                    backgroundRefresh(calendarLinkId,  appConfigRepo.getCalendarClientId(), startDate, endDate)
+                    backgroundRefresh(
+                        calendarLinkId,
+                        appConfigRepo.getCalendarClientId(),
+                        startDate,
+                        endDate
+                    )
                     null
                 } else {
-                    val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
+                    val isStale =
+                        System.currentTimeMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
 
                     if (isStale) {
-                        backgroundRefresh(calendarLinkId,  appConfigRepo.getCalendarClientId(), startDate, endDate)
+                        backgroundRefresh(
+                            calendarLinkId,
+                            appConfigRepo.getCalendarClientId(),
+                            startDate,
+                            endDate
+                        )
                     }
 
                     val domainList = runCatching {
@@ -118,7 +128,12 @@ class AgendaRepository @Inject constructor(
     ): Result<Unit> = runCatching {
         refreshMutex.withLock {
             val response = api.getPublicAgenda(
-                PublicAgendaRequest(calendarLinkId, clientId, startDate.toString(), endDate.toString())
+                PublicAgendaRequest(
+                    calendarLinkId,
+                    clientId,
+                    startDate.toString(),
+                    endDate.toString()
+                )
             )
             val key = buildKey(calendarLinkId, startDate, endDate)
             dao.upsert(response.toEntity(key, json))

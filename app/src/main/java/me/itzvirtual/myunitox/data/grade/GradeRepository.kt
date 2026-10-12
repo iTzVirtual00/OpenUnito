@@ -13,7 +13,6 @@ import me.itzvirtual.myunitox.core.cache.CacheConfig
 import me.itzvirtual.myunitox.core.network.ApplicationScope
 import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.core.network.UnitoApi
-import me.itzvirtual.myunitox.data.examdate.mapper.toEntity
 import me.itzvirtual.myunitox.data.grade.local.ExamGradeDao
 import me.itzvirtual.myunitox.data.grade.mapper.toDomain
 import me.itzvirtual.myunitox.data.grade.mapper.toEntity
@@ -26,6 +25,7 @@ data class CachedGrades(
     val grades: List<ExamGrade>,
     val isStale: Boolean
 )
+
 @Singleton
 class GradeRepository @Inject constructor(
     private val api: UnitoApi,
@@ -42,8 +42,7 @@ class GradeRepository @Inject constructor(
         if (entity == null) {
             triggerBackgroundRefresh()
             null
-        }
-        else {
+        } else {
             val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
 
             if (isStale) {
