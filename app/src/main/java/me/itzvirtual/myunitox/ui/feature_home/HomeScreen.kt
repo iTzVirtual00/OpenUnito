@@ -2,16 +2,9 @@ package me.itzvirtual.myunitox.ui.feature_home
 
 import android.content.res.Configuration
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +39,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -77,27 +69,16 @@ import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-//TODO: "Back" button goes to previous tab
-
-sealed interface HomeDestination {
-    data object Main : HomeDestination
-    data object ProfileScreen : HomeDestination
-}
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToSchedule: () -> Unit = {}
+    onNavigateToSchedule: () -> Unit = {},
+    onOpenProfile: () -> Unit = {}
 ) {
     var showAttendancesTracking by remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    val backStack = remember { mutableStateListOf<HomeDestination>(HomeDestination.Main) }
-    val current = backStack.last()
-    BackHandler(enabled = backStack.size > 1) {
-        backStack.removeAt(backStack.lastIndex)
-    }
 
     if (showAttendancesTracking) {
         //TODO: call attendance tracking
@@ -109,49 +90,15 @@ fun HomeScreen(
         showAttendancesTracking = false
     }
 
+    val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    AnimatedContent(
-        targetState = current,
-        modifier = modifier.fillMaxSize(),
-        transitionSpec = {
-            // Compare where the screens live in the stack
-            val initialIndex = backStack.indexOf(initialState)
-            val targetIndex = backStack.indexOf(targetState)
-            val isBack = targetIndex < initialIndex || initialIndex == -1
-
-            if (isBack) {
-                slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                    slideOutHorizontally { width -> width } + fadeOut()
-            } else {
-                slideInHorizontally { width -> width } + fadeIn() togetherWith
-                    slideOutHorizontally { width -> -width } + fadeOut()
-            }
-        },
-        label = "HomeStackTransition"
-    ) { destination ->
-        when (destination) {
-            is HomeDestination.Main -> {
-                val state by viewModel.screenState.collectAsStateWithLifecycle()
-                HomeScreenContent(
-                    state = state,
-                    modifier = modifier,
-                    onNavigateToSchedule = onNavigateToSchedule,
-                    onOpenProfile = {
-                        backStack.add(HomeDestination.ProfileScreen)
-                    },
-                    onClickAttendance = {
-                        showAttendancesTracking = true;
-                    }
-                )
-            }
-
-            is HomeDestination.ProfileScreen -> {
-                ProfileScreenContent(
-                    onBack = { backStack.removeAt(backStack.lastIndex) }
-                )
-            }
-        }
-    }
+    HomeScreenContent(
+        state = state,
+        modifier = modifier,
+        onNavigateToSchedule = onNavigateToSchedule,
+        onOpenProfile = onOpenProfile,
+        onClickAttendance = { showAttendancesTracking = true }
+    )
 }
 
 @Composable
@@ -164,65 +111,63 @@ fun HomeScreenContent(
 ) {
     val showAttendance = true // TODO: add this in settings
 
-    val studentState = state.studentState
     val todayClassesState = state.todaysClasses
     val tomorrowClassesState = state.tomorrowClasses
 
 
     // State for selected event detail view
-    // What does this even mean?
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
 
     Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            ProfileSection(
+                homeState = state,
+                modifier = Modifier.clickable { onOpenProfile() }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                ProfileSection(state, Modifier.clickable {
-                    onOpenProfile()
-                })
-                Spacer(modifier = Modifier.height(16.dp))
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    ClassesSection(
-                        title = stringResource(R.string.todays_classes_title),
-                        classes = todayClassesState.classes,
-                        isLoading = todayClassesState.isLoading,
-                        stateError = todayClassesState.error,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                        debug = state.debug,
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    ClassesSection(
-                        title = stringResource(R.string.tomorrow_classes_title),
-                        classes = tomorrowClassesState.classes,
-                        isLoading = tomorrowClassesState.isLoading,
-                        stateError = tomorrowClassesState.error,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                        debug = state.debug,
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-                if (showAttendance) {
-                    StdIconTextButton(
-                        icon = Icons.Default.HistoryEdu, //Maybe change with EventAvailable
-                        text = stringResource(R.string.attendance_tracking_button_name),
-                        onClick = onClickAttendance,
-                        modifier = Modifier.padding(0.dp, 0.dp),
-                        height = 80f,
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-                    )
-                }
+                ClassesSection(
+                    title = stringResource(R.string.todays_classes_title),
+                    classes = todayClassesState.classes,
+                    isLoading = todayClassesState.isLoading,
+                    stateError = todayClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = state.debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                ClassesSection(
+                    title = stringResource(R.string.tomorrow_classes_title),
+                    classes = tomorrowClassesState.classes,
+                    isLoading = tomorrowClassesState.isLoading,
+                    stateError = tomorrowClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = state.debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
             }
-        // Class detail overlay
-        // Keep a reference to the event being displayed (for exit animation)
+            if (showAttendance) {
+                StdIconTextButton(
+                    icon = Icons.Default.HistoryEdu,
+                    text = stringResource(R.string.attendance_tracking_button_name),
+                    onClick = onClickAttendance,
+                    modifier = Modifier.padding(0.dp, 0.dp),
+                    height = 80f,
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                )
+            }
+        }
+
         var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
         if (selectedEvent != null) {
             displayedEvent = selectedEvent
@@ -233,7 +178,6 @@ fun HomeScreenContent(
             enter = slideInVertically(initialOffsetY = { it }),
             exit = slideOutVertically(targetOffsetY = { it })
         ) {
-            // Use displayedEvent which keeps the last non-null value during exit animation
             displayedEvent?.let { event ->
                 EventDetailView(
                     event = event,
