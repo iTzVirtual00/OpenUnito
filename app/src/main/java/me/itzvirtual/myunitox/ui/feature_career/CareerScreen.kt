@@ -108,12 +108,12 @@ import kotlin.time.Duration.Companion.milliseconds
 fun CareerScreen(
     modifier: Modifier = Modifier,
     viewModel: CareerViewModel = hiltViewModel(),
-    transcriptViewModel: TranscriptViewModel = hiltViewModel() // this prefetches the data
+    transcriptViewModel: TranscriptViewModel = hiltViewModel(),
+    onOpenInvokes: () -> Unit = {}
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
     var showTranscript by remember { mutableStateOf(false) }
-    var showInvoke by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     val actions = TranscriptActions(
@@ -128,7 +128,7 @@ fun CareerScreen(
             modifier,
             onClickStatistics = { showStatistics = true },
             onClickTranscript = { showTranscript = true },
-            onClickInvoke = { showInvoke = true },
+            onClickInvoke = onOpenInvokes,
         )
     }
 
@@ -144,15 +144,6 @@ fun CareerScreen(
     }
     if (showTranscript) {
         TranscriptSheet(transcriptViewModel, onDismiss = { showTranscript = false })
-    }
-    if (showInvoke) {
-        //TODO: change to Invokes fun
-        Toast.makeText(
-            context,
-            "WIP",
-            Toast.LENGTH_SHORT
-        ).show()
-        showInvoke = false
     }
 }
 

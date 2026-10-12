@@ -45,6 +45,7 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.ui.feature_agenda.AgendaScreen
 import me.itzvirtual.myunitox.ui.feature_career.CareerScreen
 import me.itzvirtual.myunitox.ui.feature_devtools.DevtoolsScreen
+import me.itzvirtual.myunitox.ui.feature_examsessions.InvokeScreen
 import me.itzvirtual.myunitox.ui.feature_home.HomeScreen
 import me.itzvirtual.myunitox.ui.feature_home.ProfileScreenContent
 import me.itzvirtual.myunitox.ui.feature_login.AuthViewModel
@@ -137,10 +138,14 @@ fun MyUniTOXApp(
     val activeTab = AppDestinations.entries.firstOrNull { dest ->
         currentDestination?.hierarchy?.any { it.hasRoute(dest.graphClass) } == true
     } ?: tabHistory.last()
-
     // Are any nested screens open?
     val isCurrentTabAtRoot = currentDestination?.hasRoute(activeTab.rootRouteClass) == true
 
+    // see BackHandler comments for more info
+    val canPopHistory = tabHistory.size > 1
+    val shouldFallbackToHome = tabHistory.size <= 1 && activeTab != AppDestinations.HOME
+
+    // TODO: move this mf outta here
     fun navigateToTab(targetTab: AppDestinations, isBackNav: Boolean = false) {
         if (targetTab == activeTab && isCurrentTabAtRoot && !isBackNav) return
 
@@ -161,11 +166,19 @@ fun MyUniTOXApp(
         }
     }
 
-    // Step through the LRU tabHistory if we are at root
-    BackHandler(enabled = isCurrentTabAtRoot && tabHistory.size > 1) {
-        tabHistory.removeAt(tabHistory.lastIndex)
-        val previousTab = tabHistory.last()
-        navigateToTab(previousTab, isBackNav = true)
+    // Only step through the LRU tabHistory if:
+    BackHandler(enabled = isCurrentTabAtRoot && (canPopHistory || shouldFallbackToHome)) {
+        if (canPopHistory) {
+            // Normal LRU pop
+            tabHistory.removeAt(tabHistory.lastIndex)
+            val previousTab = tabHistory.last()
+            navigateToTab(previousTab, isBackNav = true)
+        } else {
+            // Fallback to Home if we are not at home and stack is empty (more natural)
+            tabHistory.clear()
+            tabHistory.add(AppDestinations.HOME)
+            navigateToTab(AppDestinations.HOME, isBackNav = true)
+        }
     }
 
     NavigationSuiteScaffold(
@@ -321,8 +334,13 @@ fun MyUniTOXApp(
                         }
                     }
 
-                    composable<CareerRoute> {
-                        CareerScreen()
+                    navigation<CareerGraph>(startDestination = CareerRoute){
+                        composable<CareerRoute> {
+                            CareerScreen(onOpenInvokes = { navController.navigate(InvokeRoute) })
+                        }
+                        composable<InvokeRoute> {
+                            InvokeScreen()
+                        }
                     }
 
                     composable<CalendarRoute> {
@@ -358,7 +376,7 @@ enum class AppDestinations(
         R.string.career_tab_title,
         Icons.Default.AccountBox,
         CareerRoute,
-        CareerRoute::class,
+        CareerGraph::class,
         CareerRoute::class
     ),
     CALENDAR(
@@ -382,21 +400,49 @@ enum class AppDestinations(
 }
 
 // --- Graphs and Routes definitions ---
-// Example of Route that needs a nested graph
-@Serializable
-object HomeGraph
 
+// <Home>
+// Example of Route that needs a nested graph, remember to update AppDestination's graphClass
 @Serializable
-object HomeScreenRoute
+private object HomeGraph
+@Serializable
+private object HomeScreenRoute
+@Serializable
+private object ProfileScreenRoute
+// </Home>
 
+// <Career>
 @Serializable
-object ProfileScreenRoute
+private object CareerGraph
+@Serializable
+private object CareerRoute
+@Serializable
+private object InvokeRoute
+// </Career>
 
+// <Calendar>
 @Serializable
-object CareerRoute
+private object CalendarRoute
+// </Calendar>
 
+// <DevTools>
 @Serializable
-object CalendarRoute
+private object DevToolsRoute
+// </DevTools>
 
-@Serializable
-object DevToolsRoute
+/*
+Notes:
+
+# Pass data to views
+- use data class instead of object
+- follow this example:
+composable<ProfileScreenRoute> { backStackEntry ->
+    // Extract using .toRoute<T>()
+    val profileArgs = backStackEntry.toRoute<ProfileScreenRoute>()
+
+    ProfileScreenContent(
+        userId = profileArgs.userId,
+        onBack = { navController.popBackStack() }
+    )
+}
+ */

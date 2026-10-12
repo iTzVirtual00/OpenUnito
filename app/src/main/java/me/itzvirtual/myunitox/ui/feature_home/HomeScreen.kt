@@ -64,7 +64,7 @@ import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.components.StdIconTextButton
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
-import me.itzvirtual.myunitox.ui.feature_examsessions.InvokeScreen
+import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -215,8 +215,7 @@ fun ProfileScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-//            ProfileScreen()// TODO: restore this
-            InvokeScreen()
+            ProfileScreen()
         }
     }
 }
