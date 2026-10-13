@@ -21,12 +21,13 @@ ktor = "3.1.1"
 coreKtx = "1.17.0"
 appcompat = "1.7.1"
 material3 = "1.5.0-alpha14"
-roomRuntime = "2.8.4"
+room3 = "3.0.3"
 securityCrypto = "1.1.0"
 animation = "1.10.3"
 animationCore = "1.10.3"
 ui = "1.10.3"
 uiTextGoogleFonts = "1.10.3"
+sqliteBundled = "2.7.1"
 
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
@@ -36,9 +37,8 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
+androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
@@ -70,6 +70,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core", version.ref = "animationCore" }
+androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqliteBundled" }
 
 
 [plugins]

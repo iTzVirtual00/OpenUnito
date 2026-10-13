@@ -2,9 +2,11 @@ package me.itzvirtual.myunitox.core.database
 
 import android.content.Context
 import android.util.Log
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
@@ -17,7 +19,7 @@ import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 
-private fun dbInitialize(db: SupportSQLiteDatabase) {
+private fun dbInitialize(db: SQLiteConnection) {
     db.execSQL("INSERT OR IGNORE INTO app_config (id) VALUES (0)")
 }
 
@@ -28,12 +30,13 @@ class DatabaseModule {
     fun provideDatabase(context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "my_unitox_db")
             .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
+                override suspend fun onCreate(db: SQLiteConnection) {
                     super.onCreate(db)
                     Log.i("Database", "Pre-populating database with initial data")
                     dbInitialize(db)
                 }
             })
+            .setDriver(BundledSQLiteDriver())
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 

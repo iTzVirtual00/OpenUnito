@@ -5,5 +5,5 @@ plugins {
 
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     id("com.google.devtools.ksp") version "2.3.6" apply false
-    id("androidx.room") version "2.8.4" apply false
+    id("androidx.room3") version "3.0.3" apply false
 }

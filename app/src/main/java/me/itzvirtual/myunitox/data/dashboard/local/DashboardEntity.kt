@@ -1,7 +1,7 @@
 package me.itzvirtual.myunitox.data.dashboard.local
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 /** Singleton cache row for the dashboard data response. */
 @Entity(tableName = "dashboard_cache")

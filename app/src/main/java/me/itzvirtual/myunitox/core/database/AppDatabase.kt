@@ -1,10 +1,11 @@
 package me.itzvirtual.myunitox.core.database
 
-import androidx.room.AutoMigration
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room3.AutoMigration
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.agenda.local.AgendaEntity
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
@@ -52,7 +53,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 /** Preserves app_config (and thus the auth token) while adding new cache tables. */
 val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(database: SupportSQLiteDatabase) {
+    override suspend fun migrate(database: SQLiteConnection) {
         database.execSQL(
             """CREATE TABLE IF NOT EXISTS `agenda_cache` (
                 `dateRangeKey` TEXT NOT NULL PRIMARY KEY,
@@ -93,7 +94,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 
 val MIGRATION_2_3 = object : Migration(2, 3) {
-    override fun migrate(database: SupportSQLiteDatabase) {
+    override suspend fun migrate(database: SQLiteConnection) {
         database.execSQL(
             """CREATE TABLE IF NOT EXISTS `calendar_config` (
             `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

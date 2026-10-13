@@ -31,7 +31,7 @@ plugins {
     // Json
     kotlin("plugin.serialization") version "2.3.10"
 
-    id("androidx.room")
+    id("androidx.room3")
 }
 
 
@@ -73,7 +73,7 @@ android {
 }
 
 kotlin {
-    room {
+    room3 {
         schemaDirectory("$projectDir/schemas")
     }
 }
@@ -98,6 +98,7 @@ dependencies {
 }
 
 dependencies {
+    implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material.icons.core)
@@ -130,10 +131,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
 
     // Room
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    annotationProcessor(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room3.runtime)
+    ksp(libs.androidx.room3.compiler)
 
     implementation(libs.androidx.core.splashscreen)
 }

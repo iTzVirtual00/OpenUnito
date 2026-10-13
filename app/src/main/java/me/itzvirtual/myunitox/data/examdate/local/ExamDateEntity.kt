@@ -1,7 +1,7 @@
 package me.itzvirtual.myunitox.data.examdate.local
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 /** Singleton cache row for the upcoming exam dates list. */
 @Entity(tableName = "exam_date_cache")
