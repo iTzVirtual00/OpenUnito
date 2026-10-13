@@ -8,15 +8,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,37 +33,74 @@ import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.student.StudentCareer
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
 import me.itzvirtual.myunitox.ui.components.StdSurface
+import me.itzvirtual.myunitox.ui.feature_profile.ProfileViewModel
 import me.itzvirtual.myunitox.ui.shared.ErrorItem
 import me.itzvirtual.myunitox.ui.shared.StudentCareerCard
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    ProfileScreenContent(state, modifier)
+    ProfileScreenContent(
+        modifier = modifier,
+        state = state,
+        onBack = onBack,
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreenContent(
-    state: ProfileScreenState,
     modifier: Modifier = Modifier,
+    state: ProfileScreenState,
+    onBack: () -> Unit = {},
 ) {
     val careers = state.data?.careers ?: emptyList()
     val stateError = state.error
     val isLoading = state.isLoading
-    // column??
-    // Again, yes
-    Column(modifier = modifier) {
-        CareersSection(
-            careers = careers,
-            stateError = stateError,
-            isLoading = isLoading
-        )
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.careers_title),
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // column??
+            // Again, yes
+            Column(modifier = modifier) {
+                CareersSection(
+                    careers = careers,
+                    stateError = stateError,
+                    isLoading = isLoading
+                )
+            }
+        }
     }
 }
 
@@ -76,13 +120,13 @@ fun CareersSection(
                 .padding(bottom = 16.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            Text(
-                text = stringResource(R.string.careers_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+//            Text(
+//                text = stringResource(R.string.careers_title),
+//                style = MaterialTheme.typography.headlineSmall,
+//                fontWeight = FontWeight.Bold,
+//                color = MaterialTheme.colorScheme.onSurface,
+//                modifier = Modifier.padding(horizontal = 8.dp)
+//            )
             when {
                 isLoading -> {
                     CircularProgressIndicator()
