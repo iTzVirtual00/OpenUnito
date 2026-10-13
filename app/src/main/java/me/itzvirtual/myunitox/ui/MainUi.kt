@@ -235,10 +235,7 @@ fun MyUniTOXApp(
                             }
                         } else {
                             // Nested navigation push (e.g., Home -> Profile)
-                            slideIntoContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Start,
-                                animationSpec = tween(300)
-                            ) + fadeIn(animationSpec = tween(300))
+                            fadeIn(animationSpec = tween(300))
                         }
                     },
                     exitTransition = {
@@ -260,10 +257,7 @@ fun MyUniTOXApp(
                             }
                         } else {
                             // Nested navigation exit
-                            slideOutOfContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Start,
-                                animationSpec = tween(300)
-                            ) + fadeOut(animationSpec = tween(300))
+                            fadeOut(animationSpec = tween(300))
                         }
                     },
                     popEnterTransition = {
@@ -285,10 +279,7 @@ fun MyUniTOXApp(
                             }
                         } else {
                             // Nested pop back (e.g., Profile -> Home)
-                            slideIntoContainer(
-                                AnimatedContentTransitionScope.SlideDirection.End,
-                                animationSpec = tween(300)
-                            ) + fadeIn(animationSpec = tween(300))
+                            fadeIn(animationSpec = tween(300))
                         }
                     },
                     popExitTransition = {
@@ -310,10 +301,7 @@ fun MyUniTOXApp(
                             }
                         } else {
                             // Nested pop back exit
-                            slideOutOfContainer(
-                                AnimatedContentTransitionScope.SlideDirection.End,
-                                animationSpec = tween(300)
-                            ) + fadeOut(animationSpec = tween(300))
+                            fadeOut(animationSpec = tween(300))
                         }
                     }
                 ) {
