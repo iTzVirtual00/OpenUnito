@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
+import me.itzvirtual.myunitox.domain.examdate.examDateSample
 import me.itzvirtual.myunitox.ui.components.ListWrapper
 import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.components.StdTextButton
@@ -292,76 +293,7 @@ fun ProfileScreenPreview() {
                 modifier = Modifier.padding(innerPadding),
                 state = ExamDatesScreenState(
                     ExamDatesUiState(
-                        dates = mapOf<String, List<ExamDate>>(
-                            "mate" to List(2) {
-                                ExamDate(
-                                    title = "mate",
-                                    description = "cazzo ne so",
-                                    note = "",
-                                    adCode = "INF001",
-                                    adDescription = "",
-                                    appDescription = "",
-                                    date = Date(),
-                                    bookingStartDate = Date(),
-                                    bookingEndDate = Date(),
-                                    bookableExam = true,
-                                    bookingEnabled = true,
-                                    unbookingEnabled = true,
-                                    students = 0,
-                                    president = "Conti",
-                                )
-                                ExamDate(
-                                    "mate",
-                                    "cazzo ne so",
-                                    "",
-                                    "INF001",
-                                    "",
-                                    "",
-                                    Date(),
-                                    Date(),
-                                    Date(),
-                                    true,
-                                    true,
-                                    true,
-                                    0,
-                                    "Conti",
-                                )
-                            },
-                            "prog" to List(2) {
-                                ExamDate(
-                                    "prog",
-                                    "cazzo ne so",
-                                    "",
-                                    "INF001",
-                                    "",
-                                    "",
-                                    Date(),
-                                    Date(),
-                                    Date(),
-                                    true,
-                                    true,
-                                    true,
-                                    0,
-                                    "Conti",
-                                )
-                                ExamDate(
-                                    "prog",
-                                    "cazzo ne so",
-                                    "",
-                                    "INF001",
-                                    "",
-                                    "",
-                                    Date(),
-                                    Date(),
-                                    Date(),
-                                    true,
-                                    true,
-                                    true,
-                                    0,
-                                    "Conti",
-                                )
-                            }
-                        ) as HashMap
+                        dates = examDateSample
                     )
                 )
             )

@@ -6,11 +6,29 @@ import me.itzvirtual.myunitox.data.examdate.remote.ExamDateDto
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 
 fun ExamDateDto.toDomain() = ExamDate(
-    title = title, description = description, note = note,
-    adCode = adCode, adDescription = adDescription, appDescription = appDescription,
-    date = date, bookingStartDate = bookingStartDate, bookingEndDate = bookingEndDate,
-    bookableExam = bookableExam, bookingEnabled = bookingEnabled,
-    unbookingEnabled = unbookingEnabled, students = students, president = president,
+    adsceId = adsceId,
+    adId = adId,
+    activityCode = cod,
+    title = title,
+    description = description,
+    note = note,
+
+    date = date,
+    bookingStartDate = bookingStartDate,
+    bookingEndDate = bookingEndDate,
+
+    bookableExam = bookableExam,
+    bookingEnabled = bookingEnabled,
+    unbookingEnabled = unbookingEnabled,
+
+    cdsAppId = cdsAppId,
+    adAppId = adAppId,
+
+    subscribedStudents = students,
+
+    president = president,
+
+    questionnaire = statoQuest
 )
 
 fun List<ExamDateDto>.toEntity(json: Json) =
