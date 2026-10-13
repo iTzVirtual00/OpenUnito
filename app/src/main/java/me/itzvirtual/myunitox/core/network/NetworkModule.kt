@@ -2,59 +2,61 @@ package me.itzvirtual.myunitox.core.network
 
 import android.content.Context
 import android.util.Log
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import me.itzvirtual.myunitox.data.config.local.AppConfigDao
+import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
 import me.itzvirtual.myunitox.ui.shared.LocaleHelper
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Qualifier
 import org.koin.core.annotation.Single
-import org.koin.java.KoinJavaComponent
-import retrofit2.Retrofit
 
 const val API_URL = "https://unito.app.cineca.it/"
-private val careerInitMutex = Mutex()
 
 @Module
 class NetworkModule {
-
     @Single
     fun provideCurrentLanguage(context: Context): String =
         LocaleHelper.getLocale(context).language
 
     @Single
-    fun provideOkHttpClient(
+    fun provideHttpClient(
         currentLanguage: String,
-        appConfigDao: AppConfigDao,
-    ): OkHttpClient {
-        val logger = HttpLoggingInterceptor.Logger { message -> Log.i("UnitoAPI", message) }
-        val httpLogger = HttpLoggingInterceptor(logger).apply {
-            level = HttpLoggingInterceptor.Level.BODY
-            redactHeader("Authorization")
-            redactHeader("Cookie")
+        appConfigRepo: AppConfigRepository,
+        json: Json,
+    ): HttpClient = HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            json(json)
         }
-        return OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val token = appConfigDao.getTokenBlocking() // good idea?
-                val request = chain.request().newBuilder()
-                    .addHeader("ResultLang", currentLanguage)
-                    .addHeader("Authorization", token ?: "")
-                    .build()
-                chain.proceed(request)
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Log.i("UnitoAPI", message)
+                }
             }
-            .addInterceptor(httpLogger)
-            .build()
+            level = LogLevel.BODY
+        }
+        defaultRequest {
+            url(API_URL)
+            header("ResultLang", currentLanguage)
+            appConfigRepo.getTokenInMemory()?.let { token ->
+                if (token.isNotBlank()) {
+                    header("Authorization", token)
+                }
+            }
+        }
     }
 
     @Single
@@ -66,56 +68,9 @@ class NetworkModule {
 
     @Single
     fun provideUnitoApi(
-        client: OkHttpClient,
-        json: Json,
-    ): UnitoApi {
-        val unitoClient = client.newBuilder()
-            .addInterceptor { chain ->
-                val originalRequest = chain.request()
-                val originalUrl = originalRequest.url
-
-                val studentRepository: StudentRepository =
-                    KoinJavaComponent.get(StudentRepository::class.java)
-
-                val career = runBlocking {
-                    careerInitMutex.withLock {
-                        studentRepository.getCurrentCareer()
-                    }
-                }
-
-                val newUrl = originalUrl.newBuilder().apply {
-                    val pathSegments = originalUrl.pathSegments
-                    for (i in pathSegments.indices) {
-                        when (pathSegments[i]) {
-                            "{careerId}" -> setPathSegment(i, career.id.toString())
-                            "{registrationId}" -> setPathSegment(
-                                i,
-                                career.registrationId.toString()
-                            )
-                        }
-                    }
-                }.build()
-                chain.proceed(originalRequest.newBuilder().url(newUrl).build())
-            }
-            .ensureLoggingAtEnd()
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(API_URL)
-            .client(unitoClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
-            .create(UnitoApi::class.java)
-    }
-}
-
-fun OkHttpClient.Builder.ensureLoggingAtEnd(): OkHttpClient.Builder = apply {
-    val currentInterceptors = interceptors()
-    val logger = currentInterceptors.find { it is HttpLoggingInterceptor }
-    if (logger != null) {
-        currentInterceptors.remove(logger)
-        currentInterceptors.add(logger)
-    }
+        client: HttpClient,
+        studentRepository: StudentRepository,
+    ): UnitoApi = UnitoApi(client, studentRepository)
 }
 
 @Qualifier

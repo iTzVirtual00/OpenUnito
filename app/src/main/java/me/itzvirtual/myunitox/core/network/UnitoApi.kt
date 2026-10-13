@@ -1,37 +1,64 @@
 package me.itzvirtual.myunitox.core.network
 
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import me.itzvirtual.myunitox.data.agenda.remote.AgendaEntryDto
 import me.itzvirtual.myunitox.data.agenda.remote.PublicAgendaRequest
 import me.itzvirtual.myunitox.data.dashboard.remote.DashboardDataResponseDto
 import me.itzvirtual.myunitox.data.examdate.remote.ExamDateDto
 import me.itzvirtual.myunitox.data.examresult.remote.ExamResultDto
 import me.itzvirtual.myunitox.data.grade.remote.ExamGradeDto
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
-import retrofit2.http.Query
+import me.itzvirtual.myunitox.data.student.StudentRepository
+import me.itzvirtual.myunitox.domain.student.StudentCareer
 
-interface UnitoApi {
-    @GET("students/{careerId}/careers/{registrationId}/dashboard")
-    suspend fun getDashboardData(): DashboardDataResponseDto
+class UnitoApi(
+    private val client: HttpClient,
+    private val studentRepository: StudentRepository,
+) {
 
-    @GET("students/{registrationId}/exams/board")
-    suspend fun getExamBoard(): List<ExamResultDto>
+    private suspend fun getCareer(): StudentCareer = studentRepository.getCurrentCareer()
 
-    @GET("students/{careerId}/careers/{registrationId}/exams")
-    suspend fun getExamDates(): List<ExamDateDto>
+    suspend fun getDashboardData(): DashboardDataResponseDto {
+        val career = getCareer()
+        return client.get("students/${career.id}/careers/${career.registrationId}/dashboard").body()
+    }
 
-    @GET("students/{registrationId}/transcript")
-    suspend fun getTranscript(): List<ExamGradeDto>
+    suspend fun getExamBoard(): List<ExamResultDto> {
+        val career = getCareer()
+        return client.get("students/${career.registrationId}/exams/board").body()
+    }
 
-    @PUT("students/{registrationId}/exams/board/{gradeId}/acknowledgement")
+    suspend fun getExamDates(): List<ExamDateDto> {
+        val career = getCareer()
+        return client.get("students/${career.id}/careers/${career.registrationId}/exams").body()
+    }
+
+    suspend fun getTranscript(): List<ExamGradeDto> {
+        val career = getCareer()
+        return client.get("students/${career.registrationId}/transcript").body()
+    }
+
     suspend fun changeGradeStatus(
-        @Path("gradeId") gradeId: String,
-        @Query("presaVisione") gradeStatus: String,
-    ): ExamResultDto
+        gradeId: String,
+        gradeStatus: String,
+    ): ExamResultDto {
+        val career = getCareer()
+        return client.put("students/${career.registrationId}/exams/board/$gradeId/acknowledgement") {
+            parameter("presaVisione", gradeStatus)
+        }.body()
+    }
 
-    @POST("https://unito.prod.up.cineca.it/api/Impegni/getImpegniCalendarioPubblico")
-    suspend fun getPublicAgenda(@Body body: PublicAgendaRequest): List<AgendaEntryDto>
+    suspend fun getPublicAgenda(body: PublicAgendaRequest): List<AgendaEntryDto> {
+        return client.post("https://unito.prod.up.cineca.it/api/Impegni/getImpegniCalendarioPubblico") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }.body()
+    }
 }

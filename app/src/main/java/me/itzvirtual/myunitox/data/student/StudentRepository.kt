@@ -1,5 +1,8 @@
 package me.itzvirtual.myunitox.data.student
 
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -13,7 +16,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.itzvirtual.myunitox.core.cache.CacheConfig
-import me.itzvirtual.myunitox.core.network.API_URL
 import me.itzvirtual.myunitox.core.network.ApplicationScope
 import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.data.student.local.StudentDao
@@ -22,8 +24,6 @@ import me.itzvirtual.myunitox.data.student.mapper.toEntity
 import me.itzvirtual.myunitox.data.student.remote.AppInitDto
 import me.itzvirtual.myunitox.domain.student.StudentCareer
 import me.itzvirtual.myunitox.domain.student.StudentData
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
 
@@ -34,7 +34,7 @@ data class CachedStudentData(
 
 @Single
 class StudentRepository(
-    private val client: OkHttpClient,
+    private val client: HttpClient,
     private val dao: StudentDao,
     private val json: Json,
 
@@ -91,21 +91,14 @@ class StudentRepository(
         }
     }
 
+    // TODO: fix multiple requests to /init with cold cache
     suspend fun refresh(): Result<Unit> = runCatching {
         refreshMutex.withLock {
             withContext(ioDispatcher) {
-                val request = Request.Builder()
-                    .url("${API_URL}app/init?os=android&os_version=16&app_version=25.7.0.0.17")
-                    .build()
+                val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17").body<AppInitDto>()
+                val session = appInit.session ?: throw Exception("No auth session")
 
-                client.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) throw Exception("AppInit failed: ${response.code}")
-                    val body = response.body.string()
-                    val appInit = json.decodeFromString<AppInitDto>(body)
-                    val session = appInit.session ?: throw Exception("No auth session")
-
-                    dao.upsert(session.toEntity(json))
-                }
+                dao.upsert(session.toEntity(json))
             }
         }
     }
