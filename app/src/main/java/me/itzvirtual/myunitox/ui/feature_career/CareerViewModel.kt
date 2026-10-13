@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.feature_career
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,8 +11,8 @@ import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
+import org.koin.android.annotation.KoinViewModel
 import java.io.IOException
-import javax.inject.Inject
 
 inline fun <T1, T2, T3, T4, T5, T6, R> uberCombine(
     flow: Flow<T1>,
@@ -44,8 +43,8 @@ inline fun <T1, T2, T3, T4, T5, T6, R> uberCombine(
     }
 }
 
-@HiltViewModel
-class CareerViewModel @Inject constructor(
+@KoinViewModel
+class CareerViewModel(
     private val dashboardRepo: DashboardRepository,
     private val examResultRepo: ExamResultRepository,
     private val appConfigRepo: AppConfigRepository,

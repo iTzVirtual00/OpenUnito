@@ -5,11 +5,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.itzvirtual.myunitox.data.config.local.AppConfig
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Single
 
-@Singleton
-class AppConfigRepository @Inject constructor(
+@Single
+class AppConfigRepository(
     private val configDao: AppConfigDao,
 ) {
     val config: Flow<AppConfig?> = configDao.getConfig()

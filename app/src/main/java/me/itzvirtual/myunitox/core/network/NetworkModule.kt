@@ -3,12 +3,6 @@ package me.itzvirtual.myunitox.core.network
 import android.content.Context
 import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import dagger.Lazy
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,23 +17,23 @@ import me.itzvirtual.myunitox.ui.shared.LocaleHelper
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Qualifier
+import org.koin.core.annotation.Single
+import org.koin.java.KoinJavaComponent
 import retrofit2.Retrofit
-import javax.inject.Qualifier
-import javax.inject.Singleton
 
 const val API_URL = "https://unito.app.cineca.it/"
 private val careerInitMutex = Mutex()
 
 @Module
-@InstallIn(SingletonComponent::class)
-object NetworkModule {
-    @Provides
-    @Singleton
-    fun provideCurrentLanguage(@ApplicationContext context: Context): String =
+class NetworkModule {
+
+    @Single
+    fun provideCurrentLanguage(context: Context): String =
         LocaleHelper.getLocale(context).language
 
-    @Provides
-    @Singleton
+    @Single
     fun provideOkHttpClient(
         currentLanguage: String,
         appConfigDao: AppConfigDao,
@@ -63,29 +57,29 @@ object NetworkModule {
             .build()
     }
 
-    @Provides
-    @Singleton
+    @Single
     fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         coerceInputValues = true
     }
 
-    @Provides
-    @Singleton
+    @Single
     fun provideUnitoApi(
         client: OkHttpClient,
         json: Json,
-        studentRepository: Lazy<StudentRepository>,
     ): UnitoApi {
         val unitoClient = client.newBuilder()
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val originalUrl = originalRequest.url
 
+                val studentRepository: StudentRepository =
+                    KoinJavaComponent.get(StudentRepository::class.java)
+
                 val career = runBlocking {
                     careerInitMutex.withLock {
-                        studentRepository.get().getCurrentCareer()
+                        studentRepository.getCurrentCareer()
                     }
                 }
 
@@ -124,16 +118,14 @@ fun OkHttpClient.Builder.ensureLoggingAtEnd(): OkHttpClient.Builder = apply {
     }
 }
 
-@Retention(AnnotationRetention.RUNTIME)
 @Qualifier
+@Retention(AnnotationRetention.RUNTIME)
 annotation class ApplicationScope
 
 @Module
-@InstallIn(SingletonComponent::class)
-object CoroutineScopesModule {
+class CoroutineScopesModule {
 
-    @Provides
-    @Singleton
+    @Single
     @ApplicationScope
     fun provideApplicationScope(): CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -144,12 +136,9 @@ object CoroutineScopesModule {
 annotation class IoDispatcher
 
 @Module
-@InstallIn(SingletonComponent::class)
-object DispatchersModule {
+class DispatchersModule {
 
-    @Provides
-    @Singleton
+    @Single
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
-

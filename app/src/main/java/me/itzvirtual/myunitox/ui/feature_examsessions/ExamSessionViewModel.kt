@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.feature_examsessions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,11 +12,11 @@ import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.ui.feature_career.uberCombine
+import org.koin.android.annotation.KoinViewModel
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class ExamSessionViewModel @Inject constructor(
+@KoinViewModel
+class ExamSessionViewModel(
     private val examDateRepo: ExamDateRepository,
     private val examResultRepo: ExamResultRepository,
     private val appConfigRepo: AppConfigRepository,

@@ -62,3 +62,11 @@ Career:
 
     repositories: esporre Flow/StateFlow invece della cagata che c'è ora
         - no calendario -> calendario aggiunto => Home non visualizza i dati aggiornati
+
+
+MIGRATION:
+Retrofit -> Ktor
+Room -> Room KMP
+
+change module name
+Compose -> Compose Multiplatform

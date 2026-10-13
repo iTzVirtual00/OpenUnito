@@ -77,7 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
@@ -107,8 +107,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun CareerScreen(
     modifier: Modifier = Modifier,
-    viewModel: CareerViewModel = hiltViewModel(),
-    transcriptViewModel: TranscriptViewModel = hiltViewModel(),
+    viewModel: CareerViewModel = koinViewModel(),
+    transcriptViewModel: TranscriptViewModel = koinViewModel(),
     onOpenInvokes: () -> Unit = {}
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()

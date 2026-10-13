@@ -79,7 +79,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
@@ -159,7 +159,7 @@ fun AgendaEntry.getRoomDisplayName(): String {
 @Composable
 fun AgendaScreen(
     modifier: Modifier = Modifier,
-    viewModel: AgendaViewModel = hiltViewModel()
+    viewModel: AgendaViewModel = koinViewModel()
 ) {
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 

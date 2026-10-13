@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
@@ -61,7 +61,7 @@ import me.itzvirtual.myunitox.ui.themes.LocalCustomColorsPalette
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TranscriptSheet(
-    viewModel: TranscriptViewModel = hiltViewModel(),
+    viewModel: TranscriptViewModel = koinViewModel(),
     onDismiss: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()

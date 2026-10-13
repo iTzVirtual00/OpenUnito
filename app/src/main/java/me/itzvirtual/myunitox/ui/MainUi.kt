@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -57,7 +57,7 @@ import kotlin.reflect.KClass
 
 @Composable
 fun RootNavigation(
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = koinViewModel()
 ) {
     val navController = rememberNavController()
 
@@ -93,7 +93,7 @@ fun RootNavigation(
         // --- MAIN APP VIEW ---
         composable("main") {
             val scope = rememberCoroutineScope()
-            val model: MainViewModel = hiltViewModel()
+            val model: MainViewModel = koinViewModel()
             model.prefetchData(scope)
             val isOnline by model.isOnline.collectAsState(initial = true)
             MyUnitoXTheme {

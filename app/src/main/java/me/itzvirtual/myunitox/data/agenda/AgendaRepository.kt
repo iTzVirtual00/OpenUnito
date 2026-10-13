@@ -21,20 +21,19 @@ import me.itzvirtual.myunitox.data.agenda.mapper.toEntity
 import me.itzvirtual.myunitox.data.agenda.remote.PublicAgendaRequest
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
+import org.koin.core.annotation.Single
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedAgenda(
     val entries: List<AgendaEntry>,
     val isStale: Boolean
 )
 
-@Singleton
-class AgendaRepository @Inject constructor(
+@Single
+class AgendaRepository(
     private val api: UnitoApi,
     private val dao: AgendaDao,
     private val json: Json,
