@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Grant access to cache directory for APK installation -->
+    <cache-path
+        name="apk_cache"
+        path="/" />
+</paths>
+
