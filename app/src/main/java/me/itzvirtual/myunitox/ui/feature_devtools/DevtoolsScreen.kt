@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -79,7 +81,7 @@ fun DevtoolsScreen(
                 }
             },
             copyToken = { viewModel.copyTokenToClipboard(context) },
-            clearToken = { viewModel.clearToken { restartApp(context) } },
+            clearToken = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp(context) } } },
             purgeAllCaches = { viewModel.purgeAllCaches { restartApp(context) } }
         )
     }
@@ -105,13 +107,13 @@ fun DevtoolsPreview() {
 
 @Composable
 fun DevtoolsContent(modifier: Modifier = Modifier) {
-
     Scaffold(modifier = modifier) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             UpdateCard()
