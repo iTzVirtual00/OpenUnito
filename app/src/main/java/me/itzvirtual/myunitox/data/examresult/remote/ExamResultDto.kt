@@ -4,15 +4,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import me.itzvirtual.myunitox.core.network.GradeStatusSerializer
 import me.itzvirtual.myunitox.core.network.IntToBooleanSerializer
+import me.itzvirtual.myunitox.core.network.MicrosoftDateSerializer
 import me.itzvirtual.myunitox.core.network.SmartNumberSerializer
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import java.util.Date
 
 @Serializable
 data class ExamResultDto(
     @SerialName("applistaId") val id: String = "",
     @SerialName("adStuDes") val courseName: String = "",
     @SerialName("adStuCod") val courseCode: String = "",
-    @SerialName("dataEsa") val date: String = "",
+    @SerialName("dataOraTurno")
+    @Serializable(with = MicrosoftDateSerializer::class) val date: Date,
     @SerialName("pesoAd") val weight: Int = 0,
     @SerialName("dataRifEsitoStu") val editableUntil: String = "",
     @SerialName("gruppoVotoMaxPunti") @Serializable(with = SmartNumberSerializer::class) val maxGrade: String = "",

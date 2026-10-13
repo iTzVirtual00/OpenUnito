@@ -15,6 +15,7 @@ interface AppConfigDao {
 
     @Query("UPDATE app_config SET authToken = :token WHERE id = 0")
     suspend fun updateToken(token: String?)
+
     @Query("DELETE FROM app_config")
     suspend fun clearAll()
 

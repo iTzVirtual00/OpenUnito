@@ -1,58 +1,84 @@
 package me.itzvirtual.myunitox.data.grade
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import me.itzvirtual.myunitox.core.cache.CacheConfig
+import me.itzvirtual.myunitox.core.network.ApplicationScope
+import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.core.network.UnitoApi
 import me.itzvirtual.myunitox.data.grade.local.ExamGradeDao
 import me.itzvirtual.myunitox.data.grade.mapper.toDomain
 import me.itzvirtual.myunitox.data.grade.mapper.toEntity
 import me.itzvirtual.myunitox.domain.grade.ExamGrade
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class CachedGrades(
+    val grades: List<ExamGrade>,
+    val isStale: Boolean
+)
 
 @Singleton
 class GradeRepository @Inject constructor(
     private val api: UnitoApi,
     private val dao: ExamGradeDao,
     private val json: Json,
+
+    @param:ApplicationScope private val externalScope: CoroutineScope,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    val gradesFlow: Flow<List<ExamGrade>?> =
-        dao.get().map { entity -> entity?.toDomain(json) }
+    private val activeRefreshJob = AtomicReference<Job?>(null)
+    private val refreshMutex = Mutex()
 
-    val isStaleFlow: Flow<Boolean> =
-        dao.get().map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
-        }
+    val gradesFlow: Flow<CachedGrades?> = dao.get().map { entity ->
+        if (entity == null) {
+            triggerBackgroundRefresh()
+            null
+        } else {
+            val isStale = System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
 
-    suspend fun getCached(): List<ExamGrade>? {
-        return try {
-            val entity = dao.getOnce()
-            if (entity != null && System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS) {
-                dao.clearAll()
-                return null
+            if (isStale) {
+                triggerBackgroundRefresh()
             }
-            entity?.toDomain(json)
-        } catch (_: Exception) {
-            null
+
+            val domainList = entity.toDomain(json)
+                .sortedByDescending { it.score?.date }
+
+            CachedGrades(grades = domainList, isStale = isStale)
         }
     }
 
-    suspend fun isCacheStale(): Boolean {
-        val entity = try {
-            dao.getOnce()
-        } catch (_: Exception) {
-            null
+    private fun triggerBackgroundRefresh() {
+        val currentJob = activeRefreshJob.get()
+        if (currentJob?.isActive == true) return
+
+        val newJob = externalScope.launch(ioDispatcher) {
+            try {
+                refresh()
+            } catch (_: Exception) {
+                // TODO: notify something
+            } finally {
+                activeRefreshJob.compareAndSet(coroutineContext[Job], null)
+            }
         }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.GRADE_STALE_MS
+
+        if (!activeRefreshJob.compareAndSet(currentJob, newJob)) {
+            newJob.cancel()
+        }
     }
 
-    suspend fun refresh(): Result<Unit> = try {
-        val response = api.getTranscript()
-        dao.upsert(response.toEntity(json))
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+    suspend fun refresh(): Result<Unit> = runCatching {
+        refreshMutex.withLock {
+            val response = api.getTranscript()
+            dao.upsert(response.toEntity(json))
+        }
     }
 }

@@ -47,11 +47,10 @@ fun UniToLoginScreen(
                         val url = request?.url?.toString() ?: return false
                         if (url.startsWith("unito-prod://")) {
                             // Regex?
-                            val token = url.
-                                replace("unito-prod://", "").
-                                replace("?username=", "").
-                                replace("&password=", ":")
-                            val tokenb64 = Base64.encodeToString(token.toByteArray(), Base64.NO_WRAP)
+                            val token = url.replace("unito-prod://", "").replace("?username=", "")
+                                .replace("&password=", ":")
+                            val tokenb64 =
+                                Base64.encodeToString(token.toByteArray(), Base64.NO_WRAP)
                             onAuthSuccess("Basic $tokenb64")
                             return true
                         }

@@ -13,7 +13,7 @@
     <string name="credits_section_title">Crediti</string>
     <string name="grades_section_title">Voti</string>
     <string name="yearly_progress_title">Anno Accademico</string>
-    <string name="remaining_cfu_title">%1$d CFU rimanenti per la laurea</string>
+    <string name="remaining_cfu_title">%1$s CFU rimanenti per la laurea</string>
 
     <!-- Student Info Section TODO: annotate other strings -->
     <string name="student_id_label">Matricola</string>
@@ -42,6 +42,11 @@
     <string name="tomorrow_classes_title">Lezioni di domani</string>
     <string name="no_classes_tomorrow">Nessuna lezione programmata domani</string>
     <string name="careers_title">Carriere</string>
-    <string name="open_transcript">Vai al libretto</string>
+    <string name="open_credit_statistics">Apri statistiche</string>
     <string name="error_no_calendar_configured">Nessun calendario configurato.</string>
+    <string name="home_tab_title">Home</string>
+    <string name="career_tab_title">Carriera</string>
+    <string name="calendar_tab_title">Calendario</string>
+    <string name="dev_tab_title">Dev</string>
+    <string name="attendance_tracking_button_name">Rilevazione Frequenze</string>
 </resources>

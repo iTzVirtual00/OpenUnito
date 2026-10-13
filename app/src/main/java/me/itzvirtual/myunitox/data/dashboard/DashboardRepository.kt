@@ -1,10 +1,20 @@
 package me.itzvirtual.myunitox.data.dashboard
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import me.itzvirtual.myunitox.core.cache.CacheConfig
+import me.itzvirtual.myunitox.core.network.ApplicationScope
 import me.itzvirtual.myunitox.core.network.GradeStatusSerializer
+import me.itzvirtual.myunitox.core.network.IoDispatcher
 import me.itzvirtual.myunitox.core.network.UnitoApi
 import me.itzvirtual.myunitox.data.dashboard.local.DashboardDao
 import me.itzvirtual.myunitox.data.dashboard.mapper.toDomain
@@ -13,59 +23,88 @@ import me.itzvirtual.myunitox.data.examresult.mapper.toDomain
 import me.itzvirtual.myunitox.domain.dashboard.DashboardData
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class CachedDashboard(
+    val data: DashboardData?,
+    val isStale: Boolean
+)
 
 @Singleton
 class DashboardRepository @Inject constructor(
     private val api: UnitoApi,
     private val dao: DashboardDao,
     private val json: Json,
+
+    @param:ApplicationScope private val externalScope: CoroutineScope,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    val dashboardDataFlow: Flow<DashboardData?> =
-        dao.get().map { entity -> entity?.toDomain(json) }
+    private val activeRefreshJob = AtomicReference<Job?>(null)
+    private val refreshMutex = Mutex()
 
-    val isStaleFlow: Flow<Boolean> =
-        dao.get().map { entity ->
-            entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS
-        }
+    val dashboardCacheFlow: Flow<CachedDashboard?> = dao.get()
+        .map { entity ->
+            if (entity == null) {
+                triggerBackgroundRefresh()
+                null
+            } else {
+                val isStale =
+                    (System.currentTimeMillis() - entity.cachedAt) > CacheConfig.DASHBOARD_STALE_MS
 
-    suspend fun refresh(): Result<Unit> = try {
-        val response = api.getDashboardData()
-        dao.upsert(response.toEntity(json))
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
+                if (isStale) {
+                    triggerBackgroundRefresh()
+                }
 
-    suspend fun getCached(): DashboardData? {
-        return try {
-            val entity = dao.getOnce()
-            if (entity != null && System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS) {
-                dao.clearAll()
-                return null
+                val domainData = runCatching { entity.toDomain(json) }.getOrNull()
+                CachedDashboard(data = domainData, isStale = isStale)
             }
-            entity?.toDomain(json)
-        } catch (_: Exception) {
-            null
+        }
+        .distinctUntilChanged()
+        .flowOn(ioDispatcher)
+
+    private fun triggerBackgroundRefresh() {
+        val currentJob = activeRefreshJob.get()
+        if (currentJob?.isActive == true) return
+
+        val newJob = externalScope.launch(ioDispatcher) {
+            try {
+                refresh()
+            } catch (_: Exception) {
+                // TODO: notify something
+            } finally {
+                activeRefreshJob.compareAndSet(coroutineContext[Job], null)
+            }
+        }
+
+        // last race condition check to see if another job was registered in the meantime
+        // compareAndSet sets its value to newJob is the current is still currentJob
+        // returns false if that is not true
+        if (!activeRefreshJob.compareAndSet(currentJob, newJob)) {
+            // Another thread set a job in the meantime; cancel this one
+            newJob.cancel()
         }
     }
 
-    suspend fun isCacheStale(): Boolean {
-        val entity = try {
-            dao.getOnce()
-        } catch (_: Exception) {
-            null
+    suspend fun refresh(): Result<Unit> = runCatching {
+        refreshMutex.withLock {
+            val response = api.getDashboardData()
+            dao.upsert(response.toEntity(json))
         }
-        return entity == null || System.currentTimeMillis() - entity.cachedAt > CacheConfig.DASHBOARD_STALE_MS
     }
 
+    // Actions
     suspend fun changeGradeStatus(gradeId: String, gradeStatus: GradeStatus): Result<ExamResult> =
-        try {
+        runCatching {
             val result =
                 api.changeGradeStatus(gradeId, GradeStatusSerializer.serializeToString(gradeStatus))
-            Result.success(result.toDomain())
-        } catch (e: Exception) {
-            Result.failure(e)
+//        refresh()
+            result.toDomain()
         }
+
+    suspend fun clearCache() {
+        dao.clearAll()
+    }
 }
+

@@ -39,7 +39,8 @@ class DevtoolsViewModel @Inject constructor(
         viewModelScope.launch {
             val token = appConfigRepo.getToken()
             if (token != null) {
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard =
+                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(
                     android.content.ClipData.newPlainText(
                         "UnitoX Token",

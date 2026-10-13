@@ -1,7 +1,6 @@
 package me.itzvirtual.myunitox.ui.themes.main
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 @Immutable

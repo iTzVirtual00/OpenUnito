@@ -15,7 +15,7 @@
     <string name="credits_section_title">Credits</string>
     <string name="grades_section_title">Grades</string>
     <string name="yearly_progress_title">Yearly Progress</string>
-    <string name="remaining_cfu_title">%1$d CFU remaining for degree</string>
+    <string name="remaining_cfu_title">%1$s CFU remaining for degree</string>
 
     <!-- Student Info Section TODO: annotate other strings -->
     <string name="student_id_label">Student ID</string>
@@ -44,6 +44,11 @@
     <string name="tomorrow_classes_title">Tomorrow\'s classes</string>
     <string name="no_classes_tomorrow">No classes tomorrow</string>
     <string name="careers_title">Careers</string>
-    <string name="open_transcript">Go to transcript</string>
+    <string name="open_credit_statistics">Open statistics</string>
     <string name="error_no_calendar_configured">No calendars configured.</string>
+    <string name="home_tab_title">Home</string>
+    <string name="career_tab_title">Career</string>
+    <string name="calendar_tab_title">Calendar</string>
+    <string name="dev_tab_title">Dev</string>
+    <string name="attendance_tracking_button_name">Attendances Tracking</string>
 </resources>

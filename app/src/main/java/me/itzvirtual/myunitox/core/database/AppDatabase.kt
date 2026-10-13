@@ -1,5 +1,6 @@
 package me.itzvirtual.myunitox.core.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
@@ -32,8 +33,11 @@ import me.itzvirtual.myunitox.data.student.local.StudentEntity
         ExamDateEntity::class,
         ExamGradeEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(3, 4)
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun configDao(): AppConfigDao
@@ -90,10 +94,12 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("""CREATE TABLE IF NOT EXISTS `calendar_config` (
+        database.execSQL(
+            """CREATE TABLE IF NOT EXISTS `calendar_config` (
             `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             `name` TEXT NOT NULL,
-            `calendarLinkId` TEXT NOT NULL)""")
+            `calendarLinkId` TEXT NOT NULL)"""
+        )
         database.execSQL("ALTER TABLE `app_config` ADD COLUMN `selectedCalendarId` INTEGER")
         database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarClientId` INTEGER")
         database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarLinkId` INTEGER")

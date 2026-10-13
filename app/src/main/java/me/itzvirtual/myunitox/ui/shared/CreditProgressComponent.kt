@@ -46,9 +46,11 @@ fun CreditProgressIndicator(
     plannedProgressColor: Color = MaterialTheme.colorScheme.tertiary,
     backgroundTrackColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     animate: Boolean = !LocalInspectionMode.current,
-) {
-    val creditProgress = credits.toFloat() / totalCredits
-    val plannedCreditProgress = plannedCredits.toFloat() / totalCredits
+) {// TODO: make this better
+    val creditProgress = if (credits >= 0) credits.toFloat() / totalCredits else 0f
+
+    val plannedCreditProgress = if (credits >= 0) plannedCredits.toFloat() / totalCredits else 1f
+
 
     var animationPlayed by rememberSaveable { mutableStateOf(false) }
     val playAnimation = animate && !animationPlayed
@@ -118,15 +120,15 @@ fun CreditProgressIndicator(
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "$credits CFU",
+                text = "${if (credits >= 0) credits else "--"} CFU",
                 fontWeight = FontWeight.ExtraBold,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 fontSize = 16.sp,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "/ $totalCredits",
-                fontSize = 14.sp,
+                text = "/ ${if (credits >= 0) totalCredits else "--"}",
+                fontSize = 16.sp,
                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

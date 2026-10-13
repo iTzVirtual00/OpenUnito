@@ -1,6 +1,9 @@
 package me.itzvirtual.myunitox.data.calendar
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
@@ -14,9 +17,29 @@ class CalendarConfigRepository @Inject constructor(
 ) {
     val calendarsFlow: Flow<List<CalendarConfig>> = dao.getAllFlow()
 
+    fun getByIdFlow(id: Int): Flow<CalendarConfig?> = calendarsFlow
+        .map { list -> list.find { it.id == id } }
+        .distinctUntilChanged()
+
+    val selectedCalendarFlow: Flow<CalendarConfig?> = combine(
+        appConfigRepo.selectedCalendarIdFlow,
+        calendarsFlow
+    ) { selectedId, calendars ->
+        if (selectedId != null) {
+            calendars.find { it.id == selectedId } ?: calendars.firstOrNull()
+        } else {
+            calendars.firstOrNull()
+        }
+    }.distinctUntilChanged()
+
     suspend fun getAll(): List<CalendarConfig> = dao.getAll()
 
     suspend fun getById(id: Int): CalendarConfig? = dao.getById(id)
+
+    suspend fun getSelectedCalendar(): CalendarConfig? {
+        val selected = appConfigRepo.getSelectedCalendarId() ?: return null
+        return dao.getById(selected)
+    }
 
     suspend fun add(name: String, calendarLinkId: String): CalendarConfig {
         val config = CalendarConfig(name = name, calendarLinkId = calendarLinkId)
@@ -28,29 +51,18 @@ class CalendarConfigRepository @Inject constructor(
         val existing = dao.getById(id) ?: CalendarConfig(name = newName, calendarLinkId = newLink)
         val newConf = existing.copy(name = newName, calendarLinkId = newLink)
         dao.upsert(newConf)
-        //TODO: Invalidate calendar cache if newLink is different
+        // TODO: Invalidate calendar cache if newLink is different
         return newConf
     }
 
     suspend fun delete(id: Int) {
         dao.deleteById(id)
-        // If the deleted calendar was selected, clear the selection
         if (appConfigRepo.getSelectedCalendarId() == id) {
-            appConfigRepo.setSelectedCalendarId(null)
+            appConfigRepo.setSelectedCalendarId(dao.getAll().firstOrNull()?.id)
         }
     }
 
-    suspend fun getSelectedCalendar(): CalendarConfig? {
-        val selectedId = appConfigRepo.getSelectedCalendarId()
-        if (selectedId != null) {
-            val cal = dao.getById(selectedId)
-            if (cal != null) return cal
-        }
-        // Fall back to first available calendar
-        return dao.getAll().firstOrNull()
-    }
-
-    suspend fun setSelectedCalendarId(id: Int) {
+    suspend fun setSelectedCalendarId(id: Int?) {
         appConfigRepo.setSelectedCalendarId(id)
     }
 }

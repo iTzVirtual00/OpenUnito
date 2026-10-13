@@ -1,8 +1,10 @@
+import java.io.FileInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.Base64
+import java.util.Properties
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -10,6 +12,15 @@ import javax.net.ssl.SSLSession
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+
+val versionProps = Properties().apply {
+    val versionPropsFile = file(rootProject.file("version.properties"))
+    if (versionPropsFile.exists()) {
+        load(FileInputStream(versionPropsFile))
+    }
+}
+val appVersionCode: Int = versionProps.getProperty("versionCode")?.toIntOrNull() ?: 1
+val appVersionName: String = versionProps.getProperty("versionName") ?: "v0.0.1"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -36,8 +47,8 @@ android {
         applicationId = "me.itzvirtual.myunitox"
         minSdk = 28
         targetSdk = 36
-        versionCode = 15
-        versionName = "v0.3.1"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

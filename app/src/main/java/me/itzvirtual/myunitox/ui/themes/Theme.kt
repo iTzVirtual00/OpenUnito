@@ -1,11 +1,13 @@
 package me.itzvirtual.myunitox.ui.themes
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import me.itzvirtual.myunitox.ui.themes.simpleblue.*
+import me.itzvirtual.myunitox.ui.themes.simpleblue.AppTheme
+import me.itzvirtual.myunitox.ui.themes.simpleblue.CustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.simpleblue.DarkCustomColorsPalette
+import me.itzvirtual.myunitox.ui.themes.simpleblue.LightCustomColorsPalette
 
 
 val LocalCustomColorsPalette = staticCompositionLocalOf { CustomColorsPalette() }
@@ -22,6 +24,6 @@ fun MyUnitoXTheme(
     CompositionLocalProvider(
         LocalCustomColorsPalette provides customColorsPalette
     ) {
-        AppTheme(dynamicColor=dynamicColor, content = content)
+        AppTheme(dynamicColor = dynamicColor, content = content)
     }
 }

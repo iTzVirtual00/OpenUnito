@@ -1,6 +1,7 @@
 package me.itzvirtual.myunitox.ui.feature_home
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -17,18 +18,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,15 +44,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.agenda.ActivityType
@@ -53,261 +61,113 @@ import me.itzvirtual.myunitox.domain.agenda.AgendaEntry
 import me.itzvirtual.myunitox.domain.agenda.Professor
 import me.itzvirtual.myunitox.domain.agenda.RoomLocation
 import me.itzvirtual.myunitox.domain.student.sampleStudentData
+import me.itzvirtual.myunitox.ui.components.ListWrapper
+import me.itzvirtual.myunitox.ui.components.StdIconTextButton
 import me.itzvirtual.myunitox.ui.feature_agenda.EventDetailView
+import me.itzvirtual.myunitox.ui.feature_profile.ProfileScreen
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val sampleTodaysClasses = listOf(
-        AgendaEntry(
-            id = "0",
-            title = "Digital Thinking",
-            startDateTime = Instant.parse("2026-02-22T06:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
-            activityCode = "DT001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
-            ),
-            professors = listOf(
-                Professor("prof1", "Elena", "Galli")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "1",
-            title = "Digital Thinking",
-            startDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T10:00:00.000Z"),
-            activityCode = "DT001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
-            ),
-            professors = listOf(
-                Professor("prof1", "Elena", "Galli")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Computer Science",
-            startDateTime = Instant.parse("2026-02-22T11:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T13:00:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Kitchen",
-            startDateTime = Instant.parse("2026-02-22T19:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-22T23:30:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "2",
-            title = "Sleep",
-            startDateTime = Instant.parse("2026-02-22T23:40:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T07:40:00.000Z"),
-            activityCode = "CS001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
-            ),
-            professors = listOf(
-                Professor("prof2", "Marco", "Rossi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-    )
-    val sampleTomorrowClasses = listOf(
-        AgendaEntry(
-            id = "3",
-            title = "Mathematics",
-            startDateTime = Instant.parse("2026-02-23T08:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
-            activityCode = "MATH001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
-            ),
-            professors = listOf(
-                Professor("prof3", "Luca", "Bianchi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-        AgendaEntry(
-            id = "3",
-            title = "Mathematics",
-            startDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
-            endDateTime = Instant.parse("2026-02-23T12:00:00.000Z"),
-            activityCode = "MATH001",
-            courseYear = 1,
-            status = "P",
-            rooms = listOf(
-                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
-            ),
-            professors = listOf(
-                Professor("prof3", "Luca", "Bianchi")
-            ),
-            activityType = ActivityType("LEZ", "Lezione")
-        ),
-    )
-    MyUnitoXTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            HomeScreen(
-                state = HomeScreenState(
-                    studentState = StudentDataUiState(data = sampleStudentData),
-                    todaysClasses = DailyClassesUiState(classes = sampleTodaysClasses),
-                    tomorrowClasses = DailyClassesUiState(classes = sampleTomorrowClasses)
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
-        }
-    }
-
-}
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToSchedule: () -> Unit = {}
+    onNavigateToSchedule: () -> Unit = {},
+    onOpenProfile: () -> Unit = {}
 ) {
+    var showAttendancesTracking by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    if (showAttendancesTracking) {
+        //TODO: call attendance tracking
+        Toast.makeText(
+            context,
+            "WIP",
+            Toast.LENGTH_SHORT
+        ).show()
+        showAttendancesTracking = false
+    }
+
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    HomeScreen(state = state, modifier = modifier, onNavigateToSchedule = onNavigateToSchedule)
+
+    HomeScreenContent(
+        state = state,
+        modifier = modifier,
+        onNavigateToSchedule = onNavigateToSchedule,
+        onOpenProfile = onOpenProfile,
+        onClickAttendance = { showAttendancesTracking = true }
+    )
 }
 
 @Composable
-fun HomeScreen(
+fun HomeScreenContent(
     state: HomeScreenState,
     modifier: Modifier = Modifier,
-    onNavigateToSchedule: () -> Unit = {}
+    onNavigateToSchedule: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
+    onClickAttendance: () -> Unit = {}
 ) {
-    val studentState = state.studentState
-    val todaysClassesState = state.todaysClasses
+    val showAttendance = true // TODO: add this in settings
+
+    val todayClassesState = state.todaysClasses
     val tomorrowClassesState = state.tomorrowClasses
+
 
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-    Box(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            item {
-                when {
-                    studentState.isLoading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    studentState.error != null -> {
-                        Text(
-                            text = studentState.error,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    studentState.data != null -> {
-                        val now = LocalDateTime.now()
-                        var greeting = if (now.hour < 12) {
-                            stringResource(R.string.good_morning)
-                        } else if (now.hour < 18) {
-                            stringResource(R.string.good_afternoon)
-                        } else {
-                            stringResource(R.string.good_evening)
-                        }
-                        greeting += ","
-
-                        val name = studentState.data.firstname
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                val maxFontSize = 48.sp
-                                var syncedFontSize by remember { mutableStateOf(maxFontSize) }
-                                Text(
-                                    text = greeting,
-                                    style = MaterialTheme.typography.displayLarge.copy(
-                                        fontSize = syncedFontSize,
-                                        lineHeight = 52.sp
-                                    ),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    onTextLayout = { textLayoutResult ->
-                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                            syncedFontSize *= 0.9f
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.displayLarge.copy(
-                                        fontSize = syncedFontSize,
-                                        lineHeight = 52.sp
-                                    ),
-                                    fontWeight = FontWeight.ExtraBold,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    onTextLayout = { textLayoutResult ->
-                                        if (textLayoutResult.didOverflowWidth && syncedFontSize > 1.sp) {
-                                            syncedFontSize *= 0.9f
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            TodaysClassesSection(
-                                state = todaysClassesState,
-                                onOpenScheduleClick = onNavigateToSchedule,
-                                onEventClick = { event -> selectedEvent = event },
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            TomorrowClassesSection(
-                                state = tomorrowClassesState,
-                                onOpenScheduleClick = onNavigateToSchedule,
-                                onEventClick = { event -> selectedEvent = event },
-                            )
-                        }
-                    }
-                }
+            ProfileSection(
+                homeState = state,
+                modifier = Modifier.clickable { onOpenProfile() }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                ClassesSection(
+                    title = stringResource(R.string.todays_classes_title),
+                    classes = todayClassesState.classes,
+                    isLoading = todayClassesState.isLoading,
+                    stateError = todayClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = state.debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                ClassesSection(
+                    title = stringResource(R.string.tomorrow_classes_title),
+                    classes = tomorrowClassesState.classes,
+                    isLoading = tomorrowClassesState.isLoading,
+                    stateError = tomorrowClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = state.debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+            if (showAttendance) {
+                StdIconTextButton(
+                    icon = Icons.Default.HistoryEdu,
+                    text = stringResource(R.string.attendance_tracking_button_name),
+                    onClick = onClickAttendance,
+                    modifier = Modifier.padding(0.dp, 0.dp),
+                    height = 80f,
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+                )
             }
         }
-        // Event detail overlay
-        // Keep a reference to the event being displayed (for exit animation)
+
         var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
         if (selectedEvent != null) {
             displayedEvent = selectedEvent
@@ -318,7 +178,6 @@ fun HomeScreen(
             enter = slideInVertically(initialOffsetY = { it }),
             exit = slideOutVertically(targetOffsetY = { it })
         ) {
-            // Use displayedEvent which keeps the last non-null value during exit animation
             displayedEvent?.let { event ->
                 EventDetailView(
                     event = event,
@@ -329,23 +188,111 @@ fun HomeScreen(
     }
 }
 
-// TODO: generalize classes sections since today and tomorrow classes are almost identical
+
 @Composable
-fun TodaysClassesSection(
-    state: DailyClassesUiState,
-    onOpenScheduleClick: () -> Unit,
-    onEventClick: (AgendaEntry) -> Unit,
+fun UserInitialsIcon(
+    initials: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
+) {
+    Surface(
+        modifier = modifier.size(size),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileSection( //TODO: pull state to top level
+    homeState: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
+    val state = homeState.studentState
+    val debug = homeState.debug
+
+    val initials: String
+    val firstName: String
+    val lastName: String
+
+    if (state.data != null) {
+        val studentData = state.data
+        initials =
+            "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
+        firstName = studentData.firstname
+        lastName = studentData.lastname
+    } else {
+        initials = "/"
+        firstName = "Profile" //add translation
+        lastName = ""
+    }
+
+
+    Box(modifier = modifier) {
+        if (debug && state.error != null) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = state.error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        } else {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    UserInitialsIcon(initials)
+                    Text(
+                        text = "$firstName $lastName",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun ClassesSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    classes: List<AgendaEntry>,
+    isLoading: Boolean,
+    stateError: String?,
+    onOpenScheduleClick: () -> Unit,
+    onEventClick: (AgendaEntry) -> Unit,
+    debug: Boolean,
+) {
+
+
     Column(modifier = modifier.fillMaxWidth()) {
-        // Header row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.todays_classes_title),
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -367,73 +314,28 @@ fun TodaysClassesSection(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(12.dp))
-
         Surface(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Classes list
-                when {
-                    state.isLoading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                        }
-                    }
 
-                    state.error != null -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            val errMsg = if (state.error == "NO_CALENDAR") {
-                                stringResource(R.string.error_no_calendar_configured)
-                            } else {
-                                state.error
-                            }
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = errMsg,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-
-                    state.classes.isEmpty() -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.no_classes_today),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    else -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            state.classes.forEach { entry ->
-                                TodaysClassCard(
-                                    entry = entry,
-                                    onClick = { onEventClick(entry) }
-                                )
-                            }
+                ListWrapper(
+                    isEmpty = classes.isEmpty(),
+                    debug = debug,
+                    isLoading = isLoading,
+                    stateError =
+                        if (stateError == "NO_CALENDAR") stringResource(R.string.error_no_calendar_configured)
+                        else stateError
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        classes.forEach { entry ->
+                            ClassCard(
+                                entry = entry,
+                                onClick = { onEventClick(entry) }
+                            )
                         }
                     }
                 }
@@ -443,120 +345,7 @@ fun TodaysClassesSection(
 }
 
 @Composable
-fun TomorrowClassesSection(
-    state: DailyClassesUiState,
-    onOpenScheduleClick: () -> Unit,
-    onEventClick: (AgendaEntry) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Header row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.tomorrow_classes_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Row(
-                modifier = Modifier.clickable { onOpenScheduleClick() },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.open_schedule),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Classes list
-                when {
-                    state.isLoading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                        }
-                    }
-
-                    state.error != null -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                val errMsg = if (state.error == "NO_CALENDAR") {
-                                    stringResource(R.string.error_no_calendar_configured)
-                                } else {
-                                    state.error
-                                }
-                                Text(
-                                    text = errMsg,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-
-                    state.classes.isEmpty() -> {
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        ) {
-                            Row(modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.no_classes_tomorrow),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    else -> {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            state.classes.forEach { entry ->
-                                TodaysClassCard(
-                                    entry = entry,
-                                    onClick = { onEventClick(entry) }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TodaysClassCard(
+fun ClassCard(
     entry: AgendaEntry,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -701,6 +490,141 @@ fun TodaysClassCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    val sampleTodaysClasses = listOf(
+        AgendaEntry(
+            id = "0",
+            title = "Digital Thinking",
+            startDateTime = Instant.parse("2026-02-22T06:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
+            activityCode = "DT001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
+            ),
+            professors = listOf(
+                Professor("prof1", "Elena", "Galli")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "1",
+            title = "Digital Thinking",
+            startDateTime = Instant.parse("2026-02-22T08:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T10:00:00.000Z"),
+            activityCode = "DT001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room1", code = "MA", name = "Main auditorium")
+            ),
+            professors = listOf(
+                Professor("prof1", "Elena", "Galli")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Computer Science",
+            startDateTime = Instant.parse("2026-02-22T11:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T13:00:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Kitchen",
+            startDateTime = Instant.parse("2026-02-22T19:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-22T23:30:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "2",
+            title = "Sleep",
+            startDateTime = Instant.parse("2026-02-22T23:40:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T07:40:00.000Z"),
+            activityCode = "CS001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room2", code = "A2", name = "Aula 2")
+            ),
+            professors = listOf(
+                Professor("prof2", "Marco", "Rossi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+    )
+    val sampleTomorrowClasses = listOf(
+        AgendaEntry(
+            id = "3",
+            title = "Mathematics",
+            startDateTime = Instant.parse("2026-02-23T08:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
+            activityCode = "MATH001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
+            ),
+            professors = listOf(
+                Professor("prof3", "Luca", "Bianchi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+        AgendaEntry(
+            id = "3",
+            title = "Mathematics",
+            startDateTime = Instant.parse("2026-02-23T10:00:00.000Z"),
+            endDateTime = Instant.parse("2026-02-23T12:00:00.000Z"),
+            activityCode = "MATH001",
+            courseYear = 1,
+            status = "P",
+            rooms = listOf(
+                RoomLocation(id = "room3", code = "B1", name = "Aula B1")
+            ),
+            professors = listOf(
+                Professor("prof3", "Luca", "Bianchi")
+            ),
+            activityType = ActivityType("LEZ", "Lezione")
+        ),
+    )
+    MyUnitoXTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            HomeScreenContent(
+                state = HomeScreenState(
+                    studentState = StudentDataUiState(data = sampleStudentData),
+                    todaysClasses = DailyClassesUiState(classes = sampleTodaysClasses),
+                    tomorrowClasses = DailyClassesUiState(classes = sampleTomorrowClasses)
+                ),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
         }
     }
 }

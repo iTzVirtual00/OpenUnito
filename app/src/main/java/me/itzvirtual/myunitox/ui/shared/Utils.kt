@@ -43,8 +43,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
@@ -58,9 +56,11 @@ import java.util.Locale
 @Composable
 fun LoadingIconItem(modifier: Modifier) {
     Box(contentAlignment = Alignment.Center) {
-        LoadingIndicator(modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier))
+        LoadingIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(modifier)
+        )
     }
 }
 
@@ -197,42 +197,11 @@ fun restartApp(context: Context) {
 
 fun String.toClipEntry() = android.content.ClipData.newPlainText(this, this).toClipEntry()
 
-class MemoizedFetcher<K, V>(
-    private val ttlMillis: Long = 5 * 60 * 1000,
-    private val provider: suspend (K) -> V,
+fun cleanupLegacyStorage(
+    context: Context,
+    appConfigDao: AppConfigDao,
+    calendarConfigDao: CalendarConfigDao
 ) {
-    private val cache = mutableMapOf<K, CacheEntry<V>>()
-    private val cacheLock = Mutex()
-    private val argumentLocks = mutableMapOf<K, Mutex>()
-    private data class CacheEntry<V>(val data: V, val timestamp: Long)
-
-    suspend fun execute(key: K, skipCache: Boolean = false): V {
-        val now = System.currentTimeMillis()
-        if (!skipCache) {
-            cacheLock.withLock { cache[key] }?.let { entry ->
-                if (now - entry.timestamp <= ttlMillis) return entry.data
-            }
-        }
-        val keyMutex = cacheLock.withLock { argumentLocks.getOrPut(key) { Mutex() } }
-        return keyMutex.withLock {
-            if (!skipCache) {
-                cacheLock.withLock { cache[key] }?.let { entry ->
-                    if (System.currentTimeMillis() - entry.timestamp <= ttlMillis) return entry.data
-                }
-            }
-            val newData = provider(key)
-            val isFailure = (newData as? Result<*>)?.isFailure ?: false
-            if (!isFailure) cacheLock.withLock {
-                cache[key] = CacheEntry(newData, System.currentTimeMillis())
-            }
-            newData
-        }
-    }
-
-    suspend fun clear() = cacheLock.withLock { cache.clear(); argumentLocks.clear() }
-}
-
-fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarConfigDao: CalendarConfigDao) {
     val prefsFile = java.io.File(context.filesDir.parent, "shared_prefs/secure_auth_prefs.xml")
     if (!prefsFile.exists()) return
     try {
@@ -264,4 +233,13 @@ fun cleanupLegacyStorage(context: Context, appConfigDao: AppConfigDao, calendarC
         context.deleteSharedPreferences("secure_auth_prefs")
     }
     prefsFile.delete()
+}
+
+fun unShoutCourseName(input: String): String {
+    return input.lowercase().replace(Regex("""\b\w""")) { matchResult ->
+        matchResult.value.uppercase()
+    }
+        .replace("Ii", "II") // E E E EEE <3
+        .replace("Iii", "III") // EEE, La vendetta
+        .replace("Iv", "IV") // Just in case
 }

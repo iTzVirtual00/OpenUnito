@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +40,7 @@ import me.itzvirtual.myunitox.ui.shared.restartApp
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.io.File
 
+//TODO: move it somewhere else
 data class DevtoolsActions(
     val setToken: (String) -> Unit = { _ ->
         Log.d("DevtoolsActions", "setToken triggered")
@@ -57,6 +58,7 @@ data class DevtoolsActions(
 
 val LocalDevtoolsActions = compositionLocalOf { DevtoolsActions() }
 
+//TODO: add database dump feature
 @Composable
 fun DevtoolsScreen(
     modifier: Modifier = Modifier,
@@ -67,7 +69,15 @@ fun DevtoolsScreen(
     // Bind ViewModel logic to the Actions data class
     val actions = remember(viewModel, context) {
         DevtoolsActions(
-            setToken = { token -> viewModel.login(token) { restartApp(context) } },
+            setToken = { token ->
+                viewModel.login(token) {
+                    viewModel.purgeAllCaches {
+                        restartApp(
+                            context
+                        )
+                    }
+                }
+            },
             copyToken = { viewModel.copyTokenToClipboard(context) },
             clearToken = { viewModel.clearToken { restartApp(context) } },
             purgeAllCaches = { viewModel.purgeAllCaches { restartApp(context) } }
@@ -196,12 +206,15 @@ fun UpdateCard() {
                             when (val result = updater.checkForUpdates(currentVersionCode)) {
                                 is UpdateCheckResult.UpdateAvailable -> {
                                     availableVersion = result.versionInfo
-                                    updateStatus = "Update available: ${result.versionInfo.versionName} (Code: ${result.versionInfo.versionCode})"
+                                    updateStatus =
+                                        "Update available: ${result.versionInfo.versionName} (Code: ${result.versionInfo.versionCode})"
                                 }
+
                                 is UpdateCheckResult.NoUpdateAvailable -> {
                                     availableVersion = null
                                     updateStatus = "You're up to date!"
                                 }
+
                                 is UpdateCheckResult.Error -> {
                                     availableVersion = null
                                     updateStatus = "Error: ${result.message}"

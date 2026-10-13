@@ -3,20 +3,32 @@ package me.itzvirtual.myunitox.ui.feature_agenda
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
-import java.io.IOException
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
+data class WeekRange(
+    val start: LocalDate,
+    val end: LocalDate
+)
+
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AgendaViewModel @Inject constructor(
     private val agendaRepository: AgendaRepository,
@@ -24,42 +36,123 @@ class AgendaViewModel @Inject constructor(
     private val calendarConfigRepo: CalendarConfigRepository,
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(AgendaScreenState())
-    val screenState = _screenState.asStateFlow()
-
-    private var currentLoadJob: Job? = null
-
-    init {
-        viewModelScope.launch {
-            // Load calendars and selected calendar
-            val calendars = calendarConfigRepo.getAll()
-            val selected = calendarConfigRepo.getSelectedCalendar()
-            _screenState.update {
-                it.copy(
-                    calendars = calendars,
-                    selectedCalendar = selected,
-                )
-            }
-            val now = LocalDate.now()
-            loadAgendaForWeek(
-                startDate = now.with(java.time.DayOfWeek.MONDAY),
-                endDate = now.with(java.time.DayOfWeek.SUNDAY),
-            )
-        }
+    private val currentWeek = run {
+        val now = LocalDate.now()
+        WeekRange(
+            start = now.with(DayOfWeek.MONDAY),
+            end = now.with(DayOfWeek.SUNDAY)
+        )
     }
+
+    private val selectedWeekFlow = MutableStateFlow(currentWeek)
+
+    // This only populates AgendaUiData (internal structure)
+    private val agendaDataFlow = combine(
+        calendarConfigRepo.selectedCalendarFlow,
+        selectedWeekFlow
+    ) { selectedCalendar, week ->
+        selectedCalendar to week
+    }
+        .distinctUntilChanged()
+        // flatMapLatest automagically cancels the flow we were attached to if the tuple changes.
+        // DAMN
+        .flatMapLatest { (calendar, week) ->
+            if (calendar == null) {
+                flowOf(
+                    AgendaUiData(
+                        week = week,
+                        isLoading = false,
+                        agendaState = AgendaUiState(
+                            agendaEntries = emptyList(),
+                            error = "NO_CALENDAR"
+                        )
+                    )
+                )
+            } else {
+                val startInstant = week.start.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                val endInstant =
+                    week.end.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+                agendaRepository.getAgendaFlow(
+                    calendarLinkId = calendar.calendarLinkId,
+                    startDate = startInstant,
+                    endDate = endInstant
+                ).map { cachedAgenda ->
+                    val hasCachedData = cachedAgenda != null
+                    AgendaUiData(
+                        week = week,
+                        isLoading = !hasCachedData,
+                        agendaState = AgendaUiState(
+                            agendaEntries = cachedAgenda?.entries ?: emptyList(),
+                            isStale = cachedAgenda?.isStale ?: false,
+                            error = null
+                        )
+                    )
+                }
+            }
+        }
+
+    val screenState: StateFlow<AgendaScreenState> = combine(
+        calendarConfigRepo.calendarsFlow,
+        calendarConfigRepo.selectedCalendarFlow,
+        agendaDataFlow
+    ) { calendars, selectedCalendar, agendaData ->
+        AgendaScreenState(
+            calendars = calendars,
+            selectedCalendar = selectedCalendar,
+            // Applies AgendaUiData to the ui state
+            selectedStart = agendaData.week.start,
+            selectedEnd = agendaData.week.end,
+            isLoading = agendaData.isLoading,
+            agendaState = agendaData.agendaState
+        )
+    }.stateIn(
+        // stateIn is so cool (it's the single collector of the above flow,
+        // and it emits the latest value when someone subscribes
+        // (otherwise the above flow will run again every time someone subscribes)
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AgendaScreenState(
+            selectedStart = currentWeek.start,
+            selectedEnd = currentWeek.end,
+            isLoading = true
+        )
+    )
+
+    // --- Navigation ---
+
+    fun onNextWeek() {
+        selectWeek(selectedWeekFlow.value.start.plusWeeks(1))
+    }
+
+    fun onPreviousWeek() {
+        selectWeek(selectedWeekFlow.value.start.minusWeeks(1))
+    }
+
+    fun goToToday() {
+        selectWeek(LocalDate.now())
+    }
+
+    fun selectWeek(targetDate: LocalDate) {
+        val monday = targetDate.with(DayOfWeek.MONDAY)
+        val sunday = targetDate.with(DayOfWeek.SUNDAY)
+        selectedWeekFlow.value = WeekRange(start = monday, end = sunday)
+    }
+
+    // --- Calendar CRUD ---
 
     fun selectCalendar(calendar: CalendarConfig) {
         viewModelScope.launch {
             calendarConfigRepo.setSelectedCalendarId(calendar.id)
-            _screenState.update { it.copy(selectedCalendar = calendar) }
-            val state = _screenState.value
-            val start = state.selectedStart ?: LocalDate.now().with(java.time.DayOfWeek.MONDAY)
-            val end = state.selectedEnd ?: start.with(java.time.DayOfWeek.SUNDAY)
-            loadAgendaForWeek(start, end)
         }
     }
 
-    fun upsertCalendar(name: String, calendarLinkId: String, existingId: Int?, onResult: (Boolean, String) -> Unit) {
+    fun upsertCalendar(
+        name: String,
+        calendarLinkId: String,
+        existingId: Int?,
+        onResult: (Boolean, String) -> Unit
+    ) {
         viewModelScope.launch {
             val clientId = appConfigRepo.getCalendarClientId()
             val isValid = agendaRepository.validateCalendarLinkId(calendarLinkId, clientId)
@@ -68,131 +161,26 @@ class AgendaViewModel @Inject constructor(
                 return@launch
             }
 
-            var newCal: CalendarConfig
-            if(existingId!=null){
-                newCal = calendarConfigRepo.edit(existingId, name, calendarLinkId)
+            val savedCal = if (existingId != null) {
+                calendarConfigRepo.edit(existingId, name, calendarLinkId)
             } else {
-                newCal = calendarConfigRepo.add(name, calendarLinkId)
+                calendarConfigRepo.add(name, calendarLinkId)
             }
-            val calendars = calendarConfigRepo.getAll()
-            calendarConfigRepo.setSelectedCalendarId(newCal.id)
-            _screenState.update {
-                it.copy(calendars = calendars, selectedCalendar = newCal)
-            }
+
+            calendarConfigRepo.setSelectedCalendarId(savedCal.id)
             onResult(true, "")
-            // Load data for the newly added calendar
-            val state = _screenState.value
-            val start = state.selectedStart ?: LocalDate.now().with(java.time.DayOfWeek.MONDAY)
-            val end = state.selectedEnd ?: start.with(java.time.DayOfWeek.SUNDAY)
-            loadAgendaForWeek(start, end)
         }
     }
 
     fun deleteCalendar(id: Int) {
         viewModelScope.launch {
             calendarConfigRepo.delete(id)
-            val calendars = calendarConfigRepo.getAll()
-            val selected = calendarConfigRepo.getSelectedCalendar()
-            _screenState.update {
-                it.copy(calendars = calendars, selectedCalendar = selected)
-            }
-            if (selected != null) {
-                val state = _screenState.value
-                val start = state.selectedStart ?: LocalDate.now().with(java.time.DayOfWeek.MONDAY)
-                val end = state.selectedEnd ?: start.with(java.time.DayOfWeek.SUNDAY)
-                loadAgendaForWeek(start, end)
-            } else {
-                _screenState.update {
-                    it.copy(
-                        isLoading = false,
-                        agendaState = AgendaUiState(error = "NO_CALENDAR"),
-                    )
-                }
-            }
         }
     }
 
-    fun loadAgendaForWeek(startDate: LocalDate, endDate: LocalDate) {
-        currentLoadJob?.cancel()
-        currentLoadJob = viewModelScope.launch {
-            val adjustedStart = startDate.with(java.time.DayOfWeek.MONDAY)
-            val adjustedEnd = endDate.with(java.time.DayOfWeek.SUNDAY)
-            val startInstant = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            val endInstant = endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-
-            val selectedCalendar = _screenState.value.selectedCalendar
-            if (selectedCalendar == null) {
-                _screenState.update {
-                    it.copy(
-                        selectedStart = adjustedStart,
-                        selectedEnd = adjustedEnd,
-                        isLoading = false,
-                        agendaState = AgendaUiState(error = "NO_CALENDAR"),
-                    )
-                }
-                return@launch
-            }
-
-            val calendarLinkId = selectedCalendar.calendarLinkId
-
-            // Read cache BEFORE setting loading state — makes week scrolling instant
-            val cached = agendaRepository.getCached(calendarLinkId, startInstant, endInstant)
-            val isStale = agendaRepository.isCacheStale(calendarLinkId, startInstant, endInstant)
-
-            _screenState.update {
-                it.copy(
-                    selectedStart = adjustedStart,
-                    selectedEnd = adjustedEnd,
-                    isLoading = cached == null,
-                    agendaState = if (cached != null) {
-                        it.agendaState.copy(
-                            agendaEntries = cached,
-                            isStale = isStale,
-                            error = null,
-                        )
-                    } else {
-                        it.agendaState.copy(agendaEntries = emptyList(), error = null)
-                    },
-                )
-            }
-
-            // Skip network refresh if cache is recent (< 5 min)
-            if (agendaRepository.isCacheRecent(calendarLinkId, startInstant, endInstant)) {
-                _screenState.update { it.copy(isLoading = false) }
-                return@launch
-            }
-
-            val calendarClientId = appConfigRepo.getCalendarClientId()
-
-            val result =
-                agendaRepository.refresh(calendarLinkId, calendarClientId, startInstant, endInstant)
-            result.fold(
-                onSuccess = {
-                    val fresh = agendaRepository.getCached(calendarLinkId, startInstant, endInstant)
-                    if (fresh != null) {
-                        _screenState.update {
-                            it.copy(
-                                isLoading = false,
-                                agendaState = it.agendaState.copy(
-                                    agendaEntries = fresh,
-                                    isStale = false,
-                                    error = null,
-                                )
-                            )
-                        }
-                    }
-                },
-                onFailure = { err ->
-                    _screenState.update {
-                        it.copy(
-                            isLoading = cached == null,
-                            agendaState = it.agendaState.copy(
-                                error = if (err is IOException && cached != null) null else err.message,
-                            )
-                        )
-                    }
-                }
-            )
-        }
-    }
+    private data class AgendaUiData(
+        val week: WeekRange,
+        val isLoading: Boolean,
+        val agendaState: AgendaUiState
+    )
 }

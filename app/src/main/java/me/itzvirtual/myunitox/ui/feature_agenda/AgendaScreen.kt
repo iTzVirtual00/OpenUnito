@@ -79,7 +79,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.R
@@ -122,10 +122,10 @@ enum class AgendaFilter {
 fun AgendaEntry.getColor(): Color {
     val rand = Random(activityCode.hashCode())
 
-    val hue = rand.nextInt(0, 360/5) * 5f
+    val hue = rand.nextInt(0, 360 / 5) * 5f
     val sat = rand.nextDouble(0.65, 0.85).toFloat()
 
-    return Color.hsv(hue,sat,0.65f)
+    return Color.hsv(hue, sat, 0.65f)
 }
 
 /**
@@ -170,9 +170,9 @@ fun AgendaScreen(
             modifier = Modifier.fillMaxSize(),
             currentWeekStart = (screenState.selectedStart ?: LocalDate.now())
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-            onWeekChange = { startDate, endDate ->
-                viewModel.loadAgendaForWeek(startDate, endDate)
-            },
+            onNextWeek = { viewModel.onNextWeek() },
+            goToToday = { viewModel.goToToday() },
+            onPreviousWeek = { viewModel.onPreviousWeek() },
             calendars = screenState.calendars,
             selectedCalendar = screenState.selectedCalendar,
             onCalendarSelected = { viewModel.selectCalendar(it) },
@@ -187,7 +187,6 @@ fun AgendaScreen(
             onCalendarDelete = { viewModel.deleteCalendar(it) },
         )
 
-        // Loading overlay
         if (screenState.isLoading) {
             Box(
                 modifier = Modifier
@@ -197,10 +196,7 @@ fun AgendaScreen(
             ) {
                 LoadingIconItem(modifier = Modifier.size(64.dp))
             }
-        }
-
-        // Error message overlay
-        if (screenState.agendaState.error != null) {
+        } else if (screenState.agendaState.error != null) {
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -236,7 +232,9 @@ fun Agenda(
     modifier: Modifier = Modifier,
     currentWeekStart: LocalDate = LocalDate.now()
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-    onWeekChange: (LocalDate, LocalDate) -> Unit = { _, _ -> },
+    onNextWeek: () -> Unit = {},
+    goToToday: () -> Unit = {},
+    onPreviousWeek: () -> Unit = {},
     calendars: List<CalendarConfig> = emptyList(),
     selectedCalendar: CalendarConfig? = null,
     onCalendarSelected: (CalendarConfig) -> Unit = {},
@@ -245,7 +243,6 @@ fun Agenda(
 ) {
 
     var selectedFilter by remember { mutableStateOf(AgendaFilter.EVENTS) }
-    var showFilterDropdown by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
 
     val currentWeekEnd by remember(currentWeekStart) {
@@ -254,8 +251,8 @@ fun Agenda(
 
     val filteredEvents by remember(events, selectedFilter) {
         derivedStateOf {
-            when (selectedFilter) {
-                AgendaFilter.EVENTS -> events
+            when (selectedFilter) { // Future-proofing
+                AgendaFilter.EVENTS -> events // Always .EVENTS
                 AgendaFilter.LESSONS -> events.filter { it.activityType.code == "LEZ" }
                 AgendaFilter.EXAMS -> events.filter { it.activityType.code == "ESA" || it.activityType.code == "PRF" }
             }
@@ -278,22 +275,8 @@ fun Agenda(
             AgendaHeader(
                 currentWeekStart = currentWeekStart,
                 currentWeekEnd = currentWeekEnd,
-                selectedFilter = selectedFilter,
-                showFilterDropdown = showFilterDropdown,
-//                onFilterClick = { showFilterDropdown = true },
-//                onFilterDismiss = { showFilterDropdown = false },
-//                onFilterSelect = { filter ->
-//                    selectedFilter = filter
-//                    showFilterDropdown = false
-//                },
-                onPreviousWeek = {
-                    val newStart = currentWeekStart.minusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
-                onNextWeek = {
-                    val newStart = currentWeekStart.plusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
+                onNextWeek = onNextWeek,
+                onPreviousWeek = onPreviousWeek,
                 calendars = calendars,
                 selectedCalendar = selectedCalendar,
                 onCalendarSelected = onCalendarSelected,
@@ -308,17 +291,10 @@ fun Agenda(
             AgendaGrid(
                 events = filteredEvents,
                 startHour = startHour,
-//                endHour = endHour,
                 weekStartDate = currentWeekStart,
                 onEventClick = { event -> selectedEvent = event },
-                onPreviousWeek = {
-                    val newStart = currentWeekStart.minusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
-                onNextWeek = {
-                    val newStart = currentWeekStart.plusWeeks(1)
-                    onWeekChange(newStart, newStart.plusDays(6))
-                },
+                onNextWeek = onNextWeek,
+                onPreviousWeek = onPreviousWeek,
             )
         }
 
@@ -349,11 +325,6 @@ fun Agenda(
 private fun AgendaHeader(
     currentWeekStart: LocalDate,
     currentWeekEnd: LocalDate,
-    selectedFilter: AgendaFilter,
-    showFilterDropdown: Boolean,
-//    onFilterClick: () -> Unit,
-//    onFilterDismiss: () -> Unit,
-//    onFilterSelect: (AgendaFilter) -> Unit,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit,
     calendars: List<CalendarConfig>,
@@ -579,7 +550,7 @@ private fun UpsertCalendarDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isValidating) onDismiss() },
-        title = { Text(if(calendarEntryId==null) "Add Calendar" else "Edit Calendar") },
+        title = { Text(if (calendarEntryId == null) "Add Calendar" else "Edit Calendar") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -636,7 +607,7 @@ private fun UpsertCalendarDialog(
                 },
                 enabled = !isValidating,
             ) {
-                Text(if(calendarEntryId==null) "Add" else "Edit")
+                Text(if (calendarEntryId == null) "Add" else "Edit")
             }
         },
         dismissButton = {
@@ -1010,7 +981,7 @@ internal fun EventDetailView(
                 // Activity code
                 DetailRow(
                     label = "Codice Attività",
-                    value = event.activityCode.hashCode().toString()
+                    value = event.activityCode
                 )
 
                 // Date and time

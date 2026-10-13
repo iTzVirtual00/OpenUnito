@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
-import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import me.itzvirtual.myunitox.data.grade.GradeRepository
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
 import java.io.IOException
@@ -18,102 +19,66 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
-    private val examResultRepo: ExamResultRepository,
     private val gradeRepo: GradeRepository,
     private val dashboardRepo: DashboardRepository,
+    private val appConfigRepo: AppConfigRepository,
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(TranscriptScreenState())
-    val screenState = _screenState.asStateFlow()
+    private val manualError = MutableStateFlow<String?>(null)
+    private val isManualRefreshing = MutableStateFlow(false)
 
-    init {
-        load()
-    }
+    val screenState: StateFlow<TranscriptScreenState> = combine(
+        gradeRepo.gradesFlow,
+        manualError,
+        isManualRefreshing,
+        appConfigRepo.config
+    ) { cachedData, error, manualRefreshing, config ->
+        val isLoading = cachedData == null || manualRefreshing
 
-    fun load() {
+        TranscriptScreenState(
+            gradesState = GradesUiState(
+                grades = cachedData?.grades ?: emptyList(),
+                isStale = cachedData?.isStale ?: false,
+                isLoading = isLoading,
+                error = error
+            ),
+            debug = config?.debug ?: false,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = TranscriptScreenState(
+            gradesState = GradesUiState(isLoading = true),
+        )
+    )
+
+    fun refreshGrades() {
         viewModelScope.launch {
-            val examResultDeferred = async {
-                val cached = examResultRepo.getCached()
-                val isStale = examResultRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = cached,
-                                isStale = isStale
-                            )
-                        )
+            manualError.value = null
+            isManualRefreshing.value = true
+            try {
+                gradeRepo.refresh().onFailure { e ->
+                    val hasCachedGrades = screenState.value.gradesState.grades.isNotEmpty()
+                    val shouldSuppress = e is IOException && hasCachedGrades
+                    if (!shouldSuppress) {
+                        manualError.value = e.message ?: "Failed to refresh grades"
                     }
                 }
-                examResultRepo.refresh()
+            } finally {
+                isManualRefreshing.value = false
             }
-            val gradeDeferred = async {
-                val cached = gradeRepo.getCached()
-                val isStale = gradeRepo.isCacheStale()
-                if (cached != null) {
-                    _screenState.update { s ->
-                        s.copy(
-                            gradesState = GradesUiState(
-                                grades = cached,
-                                isStale = isStale
-                            )
-                        )
-                    }
-                }
-                gradeRepo.refresh()
-            }
-
-            examResultDeferred.await().fold(
-                onSuccess = {
-                    val fresh = examResultRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = ExamResultsUiState(
-                                results = fresh ?: emptyList()
-                            )
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            examResultsState = s.examResultsState.copy(
-                                error = if (e is IOException && s.examResultsState.results.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
-
-            gradeDeferred.await().fold(
-                onSuccess = {
-                    val fresh = gradeRepo.getCached()
-                    _screenState.update { s ->
-                        s.copy(
-                            gradesState = GradesUiState(
-                                grades = fresh ?: emptyList()
-                            )
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    _screenState.update { s ->
-                        s.copy(
-                            gradesState = s.gradesState.copy(
-                                error = if (e is IOException && s.gradesState.grades.isNotEmpty()) null else e.message,
-                                isLoading = false
-                            )
-                        )
-                    }
-                }
-            )
         }
     }
 
     fun changeGradeStatus(examId: String, newStatus: GradeStatus): Job =
         viewModelScope.launch {
+            manualError.value = null
             dashboardRepo.changeGradeStatus(examId, newStatus)
-                .onSuccess { load() }
+                .onSuccess {
+                    refreshGrades()
+                }
+                .onFailure { e ->
+                    manualError.value = e.message ?: "Failed to update grade status"
+                }
         }
 }

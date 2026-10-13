@@ -41,20 +41,28 @@ object DatabaseModule {
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
+
     @Provides
     fun provideConfigDao(db: AppDatabase): AppConfigDao = db.configDao()
+
     @Provides
     fun provideAgendaDao(db: AppDatabase): AgendaDao = db.agendaDao()
+
     @Provides
     fun provideCalendarConfigDao(db: AppDatabase): CalendarConfigDao = db.calendarConfigDao()
+
     @Provides
     fun provideDashboardDao(db: AppDatabase): DashboardDao = db.dashboardDao()
+
     @Provides
     fun provideStudentDao(db: AppDatabase): StudentDao = db.studentDao()
+
     @Provides
     fun provideExamResultDao(db: AppDatabase): ExamResultDao = db.examResultDao()
+
     @Provides
     fun provideExamDateDao(db: AppDatabase): ExamDateDao = db.examDateDao()
+
     @Provides
     fun provideExamGradeDao(db: AppDatabase): ExamGradeDao = db.examGradeDao()
 }
