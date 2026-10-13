@@ -26,7 +26,6 @@ fun StdSurface(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp)
             .padding(8.dp),
         shape = RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),

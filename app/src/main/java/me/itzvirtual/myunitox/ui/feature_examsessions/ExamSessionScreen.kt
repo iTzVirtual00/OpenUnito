@@ -213,7 +213,6 @@ fun ExamBookingCard(
     StdSurface(
         modifier = modifier
             .fillMaxWidth()
-            .height(250.dp)
     ) {
         Column(
             modifier = Modifier
@@ -242,42 +241,44 @@ fun ExamBookingCard(
 
 @Composable
 fun ExamSessionEntry(
+    modifier: Modifier = Modifier,
     date: Date,
     description: String,
     bookable: Boolean,
     bookingStartDate: Date,
     bookingEndDate: Date,
 ) {
-    Row {
-        Column {
-            Text(
-                text = date.toString(),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = description
-            )
-            Text(
-                text = "Pren from ${bookingStartDate} to ${bookingEndDate}"
-            )
-            Row(
+    Column (
+        modifier = modifier
+            .fillMaxWidth()
+    ){
+        Text(
+            text = date.toString(),
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = description
+        )
+        Text(
+            text = "Pren from ${bookingStartDate} to ${bookingEndDate}"
+        )
+        Row(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth()
+        ) {
+            StdTextButton(
                 modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth()
-            ) {
-                StdTextButton(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = "Prenot",
-                    onClick = {},
-                )
-                StdTextButton(
-                    modifier = Modifier
-                        .weight(1f),
-                    text = "CazzSacc",
-                    onClick = {},
-                )
-            }
+                    .weight(1f),
+                text = "Prenot",
+                onClick = {},
+            )
+            StdTextButton(
+                modifier = Modifier
+                    .weight(1f),
+                text = "CazzSacc",
+                onClick = {},
+            )
         }
     }
 }
