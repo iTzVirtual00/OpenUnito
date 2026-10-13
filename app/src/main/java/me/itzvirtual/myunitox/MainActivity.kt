@@ -9,8 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import me.itzvirtual.myunitox.core.network.NetworkMonitor
 import me.itzvirtual.myunitox.data.Prefetcher
@@ -19,17 +17,14 @@ import me.itzvirtual.myunitox.data.config.local.AppConfigDao
 import me.itzvirtual.myunitox.ui.RootNavigation
 import me.itzvirtual.myunitox.ui.shared.LocaleHelper
 import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.android.annotation.KoinViewModel
 
 //TODO: when switching tabs, it doesn't remember if profile or home tab was set
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var appConfigDao: AppConfigDao
-
-    @Inject
-    lateinit var calendarConfigDao: CalendarConfigDao
+    private val appConfigDao: AppConfigDao by inject()
+    private val calendarConfigDao: CalendarConfigDao by inject()
 
     override fun attachBaseContext(newBase: Context) {
         // This forces the saved language into the Activity's context
@@ -79,12 +74,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
+@KoinViewModel
+class MainViewModel(
     private val prefetcher: Prefetcher,
     networkMonitor: NetworkMonitor,
 ) : ViewModel() {
     val isOnline = networkMonitor.isOnline
     fun prefetchData(scope: CoroutineScope) = prefetcher.prefetchData(scope)
 }
-

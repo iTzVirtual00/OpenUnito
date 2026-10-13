@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.domain.examdate.examDateSample
@@ -88,7 +88,7 @@ lista materie (codice):
 @Composable
 fun InvokeScreen(
     modifier: Modifier = Modifier,
-    viewModel: ExamSessionViewModel = hiltViewModel()
+    viewModel: ExamSessionViewModel = koinViewModel()
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 

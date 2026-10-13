@@ -13,14 +13,13 @@ import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.examdate.ExamDateRepository
 import me.itzvirtual.myunitox.data.examresult.ExamResultRepository
 import me.itzvirtual.myunitox.data.grade.GradeRepository
+import org.koin.core.annotation.Single
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class Prefetcher @Inject constructor(
+@Single
+class Prefetcher(
     private val agendaRepo: AgendaRepository,
     private val dashboardRepo: DashboardRepository,
     private val examDateRepo: ExamDateRepository,

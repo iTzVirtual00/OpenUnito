@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.feature_agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,10 +17,10 @@ import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
+import org.koin.android.annotation.KoinViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.inject.Inject
 
 data class WeekRange(
     val start: LocalDate,
@@ -29,8 +28,8 @@ data class WeekRange(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class AgendaViewModel @Inject constructor(
+@KoinViewModel
+class AgendaViewModel(
     private val agendaRepository: AgendaRepository,
     private val appConfigRepo: AppConfigRepository,
     private val calendarConfigRepo: CalendarConfigRepository,

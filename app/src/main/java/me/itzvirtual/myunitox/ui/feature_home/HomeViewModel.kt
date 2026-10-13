@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.feature_home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,13 +15,13 @@ import me.itzvirtual.myunitox.data.agenda.AgendaRepository
 import me.itzvirtual.myunitox.data.calendar.CalendarConfigRepository
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
+import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+@KoinViewModel
+class HomeViewModel(
     private val studentRepo: StudentRepository,
     private val agendaRepo: AgendaRepository,
     private val calendarConfigRepo: CalendarConfigRepository,

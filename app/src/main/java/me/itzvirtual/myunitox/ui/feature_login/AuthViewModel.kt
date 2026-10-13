@@ -2,17 +2,16 @@ package me.itzvirtual.myunitox.ui.feature_login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.student.StudentRepository
-import javax.inject.Inject
+import org.koin.android.annotation.KoinViewModel
 
-@HiltViewModel
-class AuthViewModel @Inject constructor(
+@KoinViewModel
+class AuthViewModel(
     private val appConfigRepo: AppConfigRepository,
     private val studentRepo: StudentRepository,
 ) : ViewModel() {

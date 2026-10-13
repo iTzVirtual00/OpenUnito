@@ -5,7 +5,6 @@ import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
@@ -14,10 +13,10 @@ import me.itzvirtual.myunitox.data.examdate.local.ExamDateDao
 import me.itzvirtual.myunitox.data.examresult.local.ExamResultDao
 import me.itzvirtual.myunitox.data.grade.local.ExamGradeDao
 import me.itzvirtual.myunitox.data.student.local.StudentDao
-import javax.inject.Inject
+import org.koin.android.annotation.KoinViewModel
 
-@HiltViewModel
-class DevtoolsViewModel @Inject constructor(
+@KoinViewModel
+class DevtoolsViewModel(
     private val appConfigRepo: AppConfigRepository,
     private val agendaDao: AgendaDao,
     private val dashboardDao: DashboardDao,

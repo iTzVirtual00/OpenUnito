@@ -7,11 +7,10 @@ import kotlinx.coroutines.flow.map
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfig
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.AppConfigRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Single
 
-@Singleton
-class CalendarConfigRepository @Inject constructor(
+@Single
+class CalendarConfigRepository(
     private val dao: CalendarConfigDao,
     private val appConfigRepo: AppConfigRepository,
 ) {

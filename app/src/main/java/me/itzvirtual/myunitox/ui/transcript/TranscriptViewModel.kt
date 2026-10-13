@@ -2,7 +2,6 @@ package me.itzvirtual.myunitox.ui.transcript
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,11 +13,11 @@ import me.itzvirtual.myunitox.data.config.AppConfigRepository
 import me.itzvirtual.myunitox.data.dashboard.DashboardRepository
 import me.itzvirtual.myunitox.data.grade.GradeRepository
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import org.koin.android.annotation.KoinViewModel
 import java.io.IOException
-import javax.inject.Inject
 
-@HiltViewModel
-class TranscriptViewModel @Inject constructor(
+@KoinViewModel
+class TranscriptViewModel(
     private val gradeRepo: GradeRepository,
     private val dashboardRepo: DashboardRepository,
     private val appConfigRepo: AppConfigRepository,

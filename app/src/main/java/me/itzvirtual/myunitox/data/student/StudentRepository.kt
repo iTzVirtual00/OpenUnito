@@ -24,17 +24,16 @@ import me.itzvirtual.myunitox.domain.student.StudentCareer
 import me.itzvirtual.myunitox.domain.student.StudentData
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedStudentData(
     val data: StudentData,
     val isStale: Boolean
 )
 
-@Singleton
-class StudentRepository @Inject constructor(
+@Single
+class StudentRepository(
     private val client: OkHttpClient,
     private val dao: StudentDao,
     private val json: Json,

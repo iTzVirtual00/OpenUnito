@@ -23,17 +23,16 @@ import me.itzvirtual.myunitox.data.examresult.mapper.toDomain
 import me.itzvirtual.myunitox.domain.dashboard.DashboardData
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
 import me.itzvirtual.myunitox.domain.examresult.GradeStatus
+import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedDashboard(
     val data: DashboardData?,
     val isStale: Boolean
 )
 
-@Singleton
-class DashboardRepository @Inject constructor(
+@Single
+class DashboardRepository(
     private val api: UnitoApi,
     private val dao: DashboardDao,
     private val json: Json,
@@ -107,4 +106,3 @@ class DashboardRepository @Inject constructor(
         dao.clearAll()
     }
 }
-

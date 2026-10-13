@@ -19,17 +19,16 @@ import me.itzvirtual.myunitox.data.examdate.local.ExamDateDao
 import me.itzvirtual.myunitox.data.examdate.mapper.toDomain
 import me.itzvirtual.myunitox.data.examdate.mapper.toEntity
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
+import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedExamDates(
     val dates: List<ExamDate>,
     val isStale: Boolean
 )
 
-@Singleton
-class ExamDateRepository @Inject constructor(
+@Single
+class ExamDateRepository(
     private val api: UnitoApi,
     private val dao: ExamDateDao,
     private val json: Json,

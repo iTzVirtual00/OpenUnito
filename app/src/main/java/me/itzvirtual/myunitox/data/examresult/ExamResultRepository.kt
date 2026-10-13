@@ -19,17 +19,16 @@ import me.itzvirtual.myunitox.data.examresult.local.ExamResultDao
 import me.itzvirtual.myunitox.data.examresult.mapper.toDomain
 import me.itzvirtual.myunitox.data.examresult.mapper.toEntity
 import me.itzvirtual.myunitox.domain.examresult.ExamResult
+import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedExamResults(
     val results: List<ExamResult>?,
     val isStale: Boolean
 )
 
-@Singleton
-class ExamResultRepository @Inject constructor(
+@Single
+class ExamResultRepository(
     private val api: UnitoApi,
     private val dao: ExamResultDao,
     private val json: Json,

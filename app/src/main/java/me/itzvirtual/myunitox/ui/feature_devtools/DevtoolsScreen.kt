@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,7 +64,7 @@ val LocalDevtoolsActions = compositionLocalOf { DevtoolsActions() }
 @Composable
 fun DevtoolsScreen(
     modifier: Modifier = Modifier,
-    viewModel: DevtoolsViewModel = hiltViewModel()
+    viewModel: DevtoolsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
 

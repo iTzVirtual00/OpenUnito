@@ -17,17 +17,16 @@ import me.itzvirtual.myunitox.data.grade.local.ExamGradeDao
 import me.itzvirtual.myunitox.data.grade.mapper.toDomain
 import me.itzvirtual.myunitox.data.grade.mapper.toEntity
 import me.itzvirtual.myunitox.domain.grade.ExamGrade
+import org.koin.core.annotation.Single
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class CachedGrades(
     val grades: List<ExamGrade>,
     val isStale: Boolean
 )
 
-@Singleton
-class GradeRepository @Inject constructor(
+@Single
+class GradeRepository(
     private val api: UnitoApi,
     private val dao: ExamGradeDao,
     private val json: Json,

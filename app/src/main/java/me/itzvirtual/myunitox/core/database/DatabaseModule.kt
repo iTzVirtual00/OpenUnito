@@ -5,11 +5,6 @@ import android.util.Log
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import me.itzvirtual.myunitox.data.agenda.local.AgendaDao
 import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.myunitox.data.config.local.AppConfigDao
@@ -18,18 +13,19 @@ import me.itzvirtual.myunitox.data.examdate.local.ExamDateDao
 import me.itzvirtual.myunitox.data.examresult.local.ExamResultDao
 import me.itzvirtual.myunitox.data.grade.local.ExamGradeDao
 import me.itzvirtual.myunitox.data.student.local.StudentDao
-import javax.inject.Singleton
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
 private fun dbInitialize(db: SupportSQLiteDatabase) {
     db.execSQL("INSERT OR IGNORE INTO app_config (id) VALUES (0)")
 }
 
 @Module
-@InstallIn(SingletonComponent::class)
-object DatabaseModule {
-    @Provides
-    @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+class DatabaseModule {
+
+    @Single
+    fun provideDatabase(context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "my_unitox_db")
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
@@ -41,28 +37,27 @@ object DatabaseModule {
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
-
-    @Provides
+    @Factory
     fun provideConfigDao(db: AppDatabase): AppConfigDao = db.configDao()
 
-    @Provides
+    @Factory
     fun provideAgendaDao(db: AppDatabase): AgendaDao = db.agendaDao()
 
-    @Provides
+    @Factory
     fun provideCalendarConfigDao(db: AppDatabase): CalendarConfigDao = db.calendarConfigDao()
 
-    @Provides
+    @Factory
     fun provideDashboardDao(db: AppDatabase): DashboardDao = db.dashboardDao()
 
-    @Provides
+    @Factory
     fun provideStudentDao(db: AppDatabase): StudentDao = db.studentDao()
 
-    @Provides
+    @Factory
     fun provideExamResultDao(db: AppDatabase): ExamResultDao = db.examResultDao()
 
-    @Provides
+    @Factory
     fun provideExamDateDao(db: AppDatabase): ExamDateDao = db.examDateDao()
 
-    @Provides
+    @Factory
     fun provideExamGradeDao(db: AppDatabase): ExamGradeDao = db.examGradeDao()
 }
