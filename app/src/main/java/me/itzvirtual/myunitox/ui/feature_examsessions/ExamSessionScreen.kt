@@ -2,35 +2,59 @@ package me.itzvirtual.myunitox.ui.feature_examsessions
 
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.StampedPathEffectStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import me.itzvirtual.myunitox.R
 import me.itzvirtual.myunitox.domain.examdate.ExamDate
 import me.itzvirtual.myunitox.domain.examdate.examDateSample
 import me.itzvirtual.myunitox.ui.components.ListWrapper
+import me.itzvirtual.myunitox.ui.components.StdEntry
 import me.itzvirtual.myunitox.ui.components.StdSurface
 import me.itzvirtual.myunitox.ui.components.StdTextButton
+import me.itzvirtual.myunitox.ui.shared.formatDate
+import me.itzvirtual.myunitox.ui.shared.unShoutCourseName
 import me.itzvirtual.myunitox.ui.themes.MyUnitoXTheme
 import java.util.Date
 
@@ -95,10 +119,12 @@ fun InvokeScreen(
     InvokeScreenContent(modifier, state)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvokeScreenContent(
     modifier: Modifier = Modifier,
-    state: ExamDatesScreenState
+    state: ExamDatesScreenState,
+    onBack: () -> Unit = {},
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -107,65 +133,88 @@ fun InvokeScreenContent(
     val debug = state.debug
 
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .padding(0.dp),
-        ) {
-            StdTextButton(
-                modifier = Modifier
-                    .weight(1f),
-                onClick = { selectedTab = 0 },
-                text = "Bookable", //TODO: translation
-                shape = RectangleShape,
-                tonalElevation = when (selectedTab) {
-                    0 -> 2f.dp
-                    else -> 1f.dp
-                }
-            )
-            StdTextButton(
-                modifier = Modifier
-                    .weight(1f),
-                onClick = { selectedTab = 1 },
-                text = "Booked", //TODO: translation
-                shape = RectangleShape,
-                tonalElevation = when (selectedTab) {
-                    0 -> 1f.dp
-                    else -> 4f.dp
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Appelli", // TODO: add translation
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
                 }
             )
         }
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(0.dp),
-            tonalElevation = 2f.dp
-        ) {
-            when (selectedTab) {
-                0 -> {
-                    ExamBookingList(
-                        subjects = dates,
-                        isLoading = uiState.isLoading,
-                        stateError = uiState.error,
-                        debug = debug,
-                    )
-                }
 
-                1 -> {
-                    ExamBookingList(
-                        subjects = dates,
+    ) { paddingValues ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp)
+                    .padding(0.dp),
+            ) {
+                StdTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    onClick = { selectedTab = 0 },
+                    text = "Bookable", //TODO: translation
+                    shape = RectangleShape,
+                    tonalElevation = when (selectedTab) {
+                        0 -> 2f.dp
+                        else -> 0f.dp
+                    }
+                )
+                StdTextButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    onClick = { selectedTab = 1 },
+                    text = "Booked", //TODO: translation
+                    shape = RectangleShape,
+                    tonalElevation = when (selectedTab) {
+                        0 -> 0f.dp
+                        else -> 4f.dp
+                    }
+                )
+            }
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp),
+            ) {
+                when (selectedTab) {
+                    0 -> {
+                        ExamBookingList(
+                            subjects = dates,
+                            isLoading = uiState.isLoading,
+                            stateError = uiState.error,
+                            debug = debug,
+                        )
+                    }
+
+                    1 -> {
+                        ExamBookingList(
+                            subjects = dates,
 //                            dates = dates.filter {
 //                            //TODO: filter for booked
 //                        },
-                        isLoading = uiState.isLoading,
-                        stateError = uiState.error,
-                        debug = debug
-                    )
+                            isLoading = uiState.isLoading,
+                            stateError = uiState.error,
+                            debug = debug
+                        )
+                    }
                 }
             }
         }
@@ -188,14 +237,12 @@ fun ExamBookingList(
     ) {
         LazyColumn(
             modifier = modifier
-                .fillMaxSize()
-                .padding(8.dp, 0.dp)
+                .fillMaxSize(),
         ) {
-
-            subjects.forEach { string, subject ->
+            subjects.forEach { (string, subject) ->
                 item {
                     Spacer(
-                        modifier = Modifier.height(12.dp)
+                        modifier = Modifier.height(6.dp)
                     )
                     ExamBookingCard(
                         dates = subject
@@ -211,24 +258,57 @@ fun ExamBookingCard(
     modifier: Modifier = Modifier,
     dates: List<ExamDate>,
 ) {
+    val firstDate = dates.get(0)
+
     StdSurface(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        border = BorderStroke(
+            1.dp, MaterialTheme.colorScheme.primary
+        )
+
     ) {
         Column(
             modifier = Modifier
+                .padding(16.dp, 16.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+            Column(
             ) {
-                Text(
-                    text = dates.get(0).title
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    Text(
+                        text = unShoutCourseName(firstDate.title),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    Text(
+                        text = firstDate.activityCode,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             dates.forEach { date ->
-                ExamSessionEntry( //TODO: smthing doesn't work
+                Spacer(
+                    modifier = Modifier
+                        .height(8.dp)
+                )
+                HorizontalDivider()
+                Spacer(
+                    modifier = Modifier
+                        .height(8.dp)
+                )
+                ExamSessionEntry(
+                    modifier = Modifier,
                     date = date.date,
                     description = date.description,
                     bookable = date.bookableExam,
@@ -248,37 +328,22 @@ fun ExamSessionEntry(
     bookable: Boolean,
     bookingStartDate: Date,
     bookingEndDate: Date,
+    onClick: () -> Unit = {},
 ) {
-    Column (
-        modifier = modifier
-            .fillMaxWidth()
-    ){
-        Text(
-            text = date.toString(),
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = description
-        )
-        Text(
-            text = "Pren from ${bookingStartDate} to ${bookingEndDate}"
-        )
-        Row(
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth()
-        ) {
-            StdTextButton(
-                modifier = Modifier
-                    .weight(1f),
-                text = "Prenot",
-                onClick = {},
+    StdEntry(
+        modifier = modifier,
+        onClick = if (bookable) onClick else { {} }
+    ) {
+        Column {
+            Text(
+                text = unShoutCourseName(description)
             )
-            StdTextButton(
-                modifier = Modifier
-                    .weight(1f),
-                text = "CazzSacc",
-                onClick = {},
+            Text(
+                text = formatDate(date),
+                fontWeight = FontWeight.Bold
+            )
+            Text( // TODO: Add translation
+                text = "Open from ${formatDate(bookingStartDate)} to ${formatDate(bookingEndDate)}"
             )
         }
     }
