@@ -25,4 +25,4 @@ plugins {
 
 
 rootProject.name = "MyUniTOX"
-include(":appCommon")
+include(":app")
