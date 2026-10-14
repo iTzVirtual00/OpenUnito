@@ -53,38 +53,38 @@ abstract class AppDatabase : RoomDatabase() {
 
 /** Preserves app_config (and thus the auth token) while adding new cache tables. */
 val MIGRATION_1_2 = object : Migration(1, 2) {
-    override suspend fun migrate(database: SQLiteConnection) {
-        database.execSQL(
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `agenda_cache` (
                 `dateRangeKey` TEXT NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
-        database.execSQL(
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `dashboard_cache` (
                 `id` INTEGER NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
-        database.execSQL(
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `student_cache` (
                 `id` INTEGER NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
-        database.execSQL(
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `exam_result_cache` (
                 `id` INTEGER NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
-        database.execSQL(
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `exam_date_cache` (
                 `id` INTEGER NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
                 `cachedAt` INTEGER NOT NULL)"""
         )
-        database.execSQL(
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `exam_grade_cache` (
                 `id` INTEGER NOT NULL PRIMARY KEY,
                 `data` TEXT NOT NULL,
@@ -94,15 +94,15 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 
 val MIGRATION_2_3 = object : Migration(2, 3) {
-    override suspend fun migrate(database: SQLiteConnection) {
-        database.execSQL(
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
             """CREATE TABLE IF NOT EXISTS `calendar_config` (
             `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             `name` TEXT NOT NULL,
             `calendarLinkId` TEXT NOT NULL)"""
         )
-        database.execSQL("ALTER TABLE `app_config` ADD COLUMN `selectedCalendarId` INTEGER")
-        database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarClientId` INTEGER")
-        database.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarLinkId` INTEGER")
+        connection.execSQL("ALTER TABLE `app_config` ADD COLUMN `selectedCalendarId` INTEGER")
+        connection.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarClientId` INTEGER")
+        connection.execSQL("ALTER TABLE `app_config` DROP COLUMN `calendarLinkId` INTEGER")
     }
 }
