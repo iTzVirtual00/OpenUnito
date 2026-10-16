@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlin.compose) apply true
 
-    alias(libs.plugins.atomicfu)
 }
 
 compose.resources {
@@ -37,6 +36,10 @@ kotlin {
             version = release(37)
         }
         minSdk = 24
+
+        androidResources {
+            enable = true
+        }
 
         withHostTestBuilder {
         }
