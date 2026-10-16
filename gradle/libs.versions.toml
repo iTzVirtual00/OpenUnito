@@ -139,3 +139,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
 
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

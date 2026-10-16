@@ -11,7 +11,7 @@ plugins {
 
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlin.compose) apply true
-
+    alias(libs.plugins.kotlin.serialization)
 }
 
 compose.resources {
