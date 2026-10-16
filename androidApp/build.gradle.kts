@@ -25,26 +25,19 @@ val appVersionName: String = versionProps.getProperty("versionName") ?: "v0.0.1"
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-
-    id("com.google.devtools.ksp")
-
-    // Json
-    kotlin("plugin.serialization") version "2.3.10"
-
-    id("androidx.room3")
 }
 
 
 android {
-    namespace = "me.itzvirtual.openunito"
+    namespace = "me.itzvirtual.openunito.android"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "me.itzvirtual.openunito"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
 
@@ -72,67 +65,17 @@ android {
     }
 }
 
-kotlin {
-    room3 {
-        schemaDirectory("$projectDir/schemas")
-    }
-    compilerOptions {
-        optIn.add("kotlin.time.ExperimentalTime")
-    }
-}
-
 dependencies {
     implementation(project(":shared"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.koin.android)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugRuntimeOnly(libs.androidx.compose.ui.test.manifest)
-}
-
-dependencies {
-    implementation(libs.androidx.sqlite.bundled)
-    implementation(libs.androidx.compose.animation.core)
-    implementation(libs.androidx.compose.animation)
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.logging)
-    runtimeOnly(libs.kotlinx.coroutines.android)
-
-    implementation(libs.androidx.lifecycle.viewmodel.compose.old)
-    implementation(libs.androidx.navigation.compose)
-
-    // koin stuff
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
-    implementation(libs.koin.annotations)
-    ksp(libs.koin.ksp.compiler)
-
-    // Json
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.androidx.security.crypto)
-    implementation(libs.androidx.compose.material.icons.extended)
-
-    // Room
-    implementation(libs.androidx.room3.runtime)
-    ksp(libs.androidx.room3.compiler)
-
-    implementation(libs.androidx.core.splashscreen)
 }
 
 // Generate version.json alongside the release APK
