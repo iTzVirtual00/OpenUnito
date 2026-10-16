@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">OpenUnito</string>
+
+    <string name="no_data">No data available</string>
+
+    <string name="exam_results_title">Exam Results</string>
+    <string name="date">%1$s</string>
+    <string name="editable_until">Editable until</string>
+
+    <string name="exam_dates_title">Exam Dates</string>
+    <string name="booking_period">Booking: %1$s - %2$s</string>
+    <string name="students_enrolled">Students: %1$d</string>
+    <string name="booking_open">Booking Open</string>
+    <string name="booking_closed">Booking Closed</string>
+    <string name="credits_section_title">Credits</string>
+    <string name="grades_section_title">Grades</string>
+    <string name="yearly_progress_title">Yearly Progress</string>
+    <string name="remaining_cfu_title">%1$s CFU remaining for degree</string>
+
+    <!-- Student Info Section TODO: annotate other strings -->
+    <string name="student_id_label">Student ID</string>
+    <string name="course_year_label">Year</string>
+    <string name="cohort_label">Cohort</string>
+    <string name="regulation_year_label">Regulation</string>
+    <string name="class_label">Class</string>
+    <string name="location_label">Location</string>
+    <string name="normativa_label">Framework</string>
+    <string name="percorso_label">Track</string>
+    <string name="copied_label">Copied!</string>
+
+    <!-- Agenda Section -->
+    <string name="nearest_agenda_title">Coming Up</string>
+    <string name="next_day_plan_title">Tomorrow\'s Schedule</string>
+    <string name="no_agenda_tomorrow">No classes scheduled for tomorrow</string>
+    <string name="no_upcoming_events">No upcoming events</string>
+    <string name="in_progress">In Progress</string>
+    <string name="remote_class">Remote</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="todays_classes_title">Today\'s classes</string>
+    <string name="open_schedule">Open schedule</string>
+    <string name="no_classes_today">No classes today</string>
+    <string name="tomorrow_classes_title">Tomorrow\'s classes</string>
+    <string name="no_classes_tomorrow">No classes tomorrow</string>
+    <string name="careers_title">Careers</string>
+    <string name="open_credit_statistics">Open statistics</string>
+    <string name="error_no_calendar_configured">No calendars configured.</string>
+    <string name="home_tab_title">Home</string>
+    <string name="career_tab_title">Career</string>
+    <string name="calendar_tab_title">Calendar</string>
+    <string name="dev_tab_title">Dev</string>
+    <string name="attendance_tracking_button_name">Attendances Tracking</string>
+</resources>

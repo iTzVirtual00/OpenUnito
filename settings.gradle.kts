@@ -24,5 +24,6 @@ plugins {
 }
 
 
-rootProject.name = "MyUniTOX"
-include(":appCommon")
+rootProject.name = "OpenUnito"
+include(":androidApp")
+include(":shared")
