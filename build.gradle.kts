@@ -4,6 +4,13 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
 
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("com.google.devtools.ksp") version "2.3.6" apply false
-    id("androidx.room3") version "3.0.3" apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.androidx.room3) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.android.lint) apply false
+
+    alias(libs.plugins.composeMultiplatform) apply false
+
+//    alias(libs.plugins.koin.compiler) apply false
 }

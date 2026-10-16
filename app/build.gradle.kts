@@ -76,9 +76,14 @@ kotlin {
     room3 {
         schemaDirectory("$projectDir/schemas")
     }
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
 }
 
 dependencies {
+    implementation(project(":shared"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -108,7 +113,7 @@ dependencies {
     implementation(libs.ktor.client.logging)
     runtimeOnly(libs.kotlinx.coroutines.android)
 
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose.old)
     implementation(libs.androidx.navigation.compose)
 
     // koin stuff

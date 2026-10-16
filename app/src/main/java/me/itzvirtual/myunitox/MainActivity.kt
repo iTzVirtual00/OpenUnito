@@ -1,3 +1,4 @@
+// MainActivity.kt
 package me.itzvirtual.myunitox
 
 import android.content.Context
@@ -10,13 +11,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
-import me.itzvirtual.myunitox.core.network.NetworkMonitor
-import me.itzvirtual.myunitox.data.Prefetcher
-import me.itzvirtual.myunitox.data.calendar.local.CalendarConfigDao
-import me.itzvirtual.myunitox.data.config.local.AppConfigDao
-import me.itzvirtual.myunitox.ui.RootNavigation
-import me.itzvirtual.myunitox.ui.shared.LocaleHelper
-import me.itzvirtual.myunitox.ui.shared.cleanupLegacyStorage
+import me.itzvirtual.openunito.core.network.NetworkMonitor
+import me.itzvirtual.openunito.data.Prefetcher
+import me.itzvirtual.openunito.data.calendar.local.CalendarConfigDao
+import me.itzvirtual.openunito.data.config.local.AppConfigDao
+import me.itzvirtual.openunito.ui.shared.LocaleHelper
 import org.koin.android.ext.android.inject
 import org.koin.android.annotation.KoinViewModel
 
@@ -35,7 +34,7 @@ class MainActivity : ComponentActivity() {
         val currentLang = resources.configuration.locales[0].language
 
         if (currentLang != newLang) {
-            LocaleHelper.setLocale(this, newLang)
+            _root_ide_package_.me.itzvirtual.openunito.ui.shared.LocaleHelper.setLocale(this, newLang)
             finish()
 
             val refreshIntent = Intent(this, MainActivity::class.java).apply {
@@ -63,13 +62,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         updateAppLanguage("it")
-        cleanupLegacyStorage(
-            context = this,
-            appConfigDao = appConfigDao,
-            calendarConfigDao = calendarConfigDao
-        )
         setContent {
-            RootNavigation()
+            _root_ide_package_.me.itzvirtual.openunito.ui.RootNavigation()
         }
     }
 }
