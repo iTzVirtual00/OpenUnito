@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +33,7 @@ import me.itzvirtual.openunito.resources.no_data
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import me.itzvirtual.openunito.ui.shared.StudentCareerCard
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -163,7 +162,7 @@ fun CareersSection(
 @Composable
 @Preview(showBackground = true)
 fun ProfileScreenPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             ProfileScreenContent(
                 state = ProfileScreenState(

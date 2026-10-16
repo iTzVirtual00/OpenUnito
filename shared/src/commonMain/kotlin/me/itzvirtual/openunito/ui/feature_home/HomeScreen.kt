@@ -61,7 +61,7 @@ import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -480,7 +480,7 @@ fun ClassCard(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             HomeScreenContent(
                 state = HomeScreenState(

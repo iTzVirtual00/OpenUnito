@@ -13,7 +13,7 @@ import me.itzvirtual.openunito.ui.themes.simpleblue.LightCustomColorsPalette
 val LocalCustomColorsPalette = staticCompositionLocalOf { CustomColorsPalette() }
 
 @Composable
-fun MyUnitoXTheme(
+fun OpenUnitoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit

@@ -1,7 +1,6 @@
 package me.itzvirtual.openunito.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -27,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.navigation.NavBackStackEntry
@@ -51,7 +49,7 @@ import me.itzvirtual.openunito.ui.feature_login.AuthViewModel
 import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.openunito.ui.feature_profile.ProfileScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.StringResource
 import kotlin.reflect.KClass
 
@@ -78,7 +76,7 @@ fun RootNavigation(
             }
             UniToLoginScreen(
                 onAuthSuccess = { token ->
-                    Logger.d(tag = "MyUnitoX") { "Received token: $token" }
+                    Logger.d(tag = "OpenUnito") { "Received token: $token" }
                     authViewModel.login(token) {
                         navController.navigate("main") {
                             popUpTo("login") { inclusive = true } // it destroys
@@ -97,8 +95,8 @@ fun RootNavigation(
             val model: MainViewModel = koinViewModel()
             model.prefetchData(scope)
             val isOnline by model.isOnline.collectAsState(initial = true)
-            MyUnitoXTheme {
-                MyUniTOXApp(
+            OpenUnitoTheme {
+                OpenUnitoApp(
                     isOnline = isOnline,
                     onSessionExpired = {
                         authViewModel.clearToken {
@@ -122,11 +120,11 @@ private fun NavBackStackEntry.getTabOrdinal(): Int {
 }
 
 @Composable
-fun MyUniTOXApp(
+fun OpenUnitoApp(
     isOnline: Boolean = true,
     onSessionExpired: () -> Unit = {},
 ) {
-//    Log.d("MyUnitoX", "Current locale: ${LocalConfiguration.current.locales[0].language}")
+//    Log.d("OpenUnito", "Current locale: ${LocalConfiguration.current.locales[0].language}")
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()

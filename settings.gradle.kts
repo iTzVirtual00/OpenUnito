@@ -25,5 +25,5 @@ plugins {
 
 
 rootProject.name = "MyUniTOX"
-include(":app")
+include(":androidApp")
 include(":shared")

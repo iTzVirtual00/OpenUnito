@@ -17,7 +17,7 @@ object LocaleHelper {
      */
     fun onAttach(context: Context): Context {
         val lang = getSavedLanguage(context)
-        Log.i("MyUnitoX", "LocaleHelper saved locale: $lang")
+        Log.i("OpenUnito", "LocaleHelper saved locale: $lang")
         return updateResources(context, lang)
     }
 
@@ -65,7 +65,7 @@ object LocaleHelper {
 
     private fun updateResources(context: Context, language: String): Context {
         // 1. Use forLanguageTag instead of the Locale(language) constructor
-        Log.i("MyUnitoX", "LocaleHelper updating resource to: $language")
+        Log.i("OpenUnito", "LocaleHelper updating resource to: $language")
         val locale = java.util.Locale.forLanguageTag(language)
         java.util.Locale.setDefault(locale)
 

@@ -1,4 +1,4 @@
-package me.itzvirtual.myunitox
+package me.itzvirtual.openunito
 
 import org.junit.Test
 

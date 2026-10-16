@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MyUniTOX" parent="android:Theme.Material.Light.NoActionBar" >
+    <style name="Theme.OpenUnito" parent="android:Theme.Material.Light.NoActionBar" >
         <!-- Needed because of the delay between the start of onCreate and setContent -->
         <item name="android:windowBackground">#111318</item>
     </style>
 
-    <style name="Theme.MyUniTOX.Starting" parent="Theme.SplashScreen">
+    <style name="Theme.OpenUnito.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#111318</item> <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
 
         <item name="windowSplashScreenAnimationDuration">200</item>
 
-        <item name="postSplashScreenTheme">@style/Theme.MyUniTOX</item>
+        <item name="postSplashScreenTheme">@style/Theme.OpenUnito</item>
     </style>
 </resources>

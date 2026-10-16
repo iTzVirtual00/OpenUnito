@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.datetime.LocalDate
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.ui.components.ListWrapper
@@ -45,7 +44,7 @@ import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.shared.formatDate
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import kotlin.time.Instant
 
 //Maybe call it ExamSession or just Session
@@ -342,7 +341,7 @@ fun ExamSessionEntry(
 @Composable
 @Preview(showBackground = true)
 fun ProfileScreenPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             InvokeScreenContent(
                 modifier = Modifier.padding(innerPadding),

@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -139,7 +139,7 @@ fun CreditProgressIndicator(
 @Preview
 @Composable
 fun CreditProgressIndicatorPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         ElevatedCard(modifier = Modifier.padding(16.dp)) {
             CreditProgressIndicator(
                 credits = 16,

@@ -36,13 +36,13 @@ plugins {
 
 
 android {
-    namespace = "me.itzvirtual.myunitox"
+    namespace = "me.itzvirtual.openunito"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "me.itzvirtual.myunitox"
+        applicationId = "me.itzvirtual.openunito"
         minSdk = 28
         targetSdk = 36
         versionCode = appVersionCode

@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 
 @Composable
 fun StdButtonEmpty(
@@ -186,7 +186,7 @@ fun StdArrowButton(
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CareerScreenPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
             Column {
                 Row(

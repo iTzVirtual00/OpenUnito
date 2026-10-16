@@ -106,7 +106,7 @@ import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.toLocalDate
 import me.itzvirtual.openunito.domain.toLocalTime
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Instant
@@ -1238,7 +1238,7 @@ private val sampleEvents = listOf(
 @Composable
 @Preview(showBackground = true)
 fun AgendaPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Agenda(
                 events = sampleEvents,
@@ -1252,7 +1252,7 @@ fun AgendaPreview() {
 @Composable
 @Preview(showBackground = true)
 fun EventDetailPreview() {
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         EventDetailView(
             event = sampleEvents[0],
             onDismiss = {}

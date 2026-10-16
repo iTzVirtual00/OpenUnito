@@ -92,7 +92,7 @@ import me.itzvirtual.openunito.ui.shared.ErrorItem
 import me.itzvirtual.openunito.ui.shared.formatDate
 import me.itzvirtual.openunito.ui.shared.toColor
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import me.itzvirtual.openunito.ui.transcript.GradeWrapper
 import me.itzvirtual.openunito.ui.transcript.LocalTranscriptActions
 import me.itzvirtual.openunito.ui.transcript.TranscriptActions
@@ -780,7 +780,7 @@ fun CareerScreenPreview() {
         )
     }
 
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
                 CareerScreenContent(

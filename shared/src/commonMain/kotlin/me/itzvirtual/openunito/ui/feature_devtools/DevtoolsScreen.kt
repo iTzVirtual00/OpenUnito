@@ -29,15 +29,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.domain.rememberAppClipboard
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
-import me.itzvirtual.openunito.ui.themes.MyUnitoXTheme
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 //TODO: move it somewhere else
@@ -90,7 +88,7 @@ fun DevtoolsScreen(
     }
 
     CompositionLocalProvider(LocalDevtoolsActions provides actions) {
-        MyUnitoXTheme {
+        OpenUnitoTheme {
             DevtoolsContent(modifier = modifier)
         }
     }
@@ -101,7 +99,7 @@ fun DevtoolsScreen(
 fun DevtoolsPreview() {
     val mockActions = DevtoolsActions()
 
-    MyUnitoXTheme {
+    OpenUnitoTheme {
         CompositionLocalProvider(LocalDevtoolsActions provides mockActions) {
             DevtoolsContent()
         }
