@@ -54,11 +54,6 @@ android {
             )
         }
     }
-    compileOptions {
-        // switched from 11 to 1_8 for hilt
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -68,14 +63,15 @@ android {
 dependencies {
     implementation(project(":shared"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    // NOTE: stripped down after KMP migration, leaving commented
+//    implementation(libs.androidx.core.ktx)
+//    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.koin.android)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.junit)
 }
 
 // Generate version.json alongside the release APK
