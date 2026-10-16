@@ -22,6 +22,7 @@ import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.StudentRepository
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Qualifier
 import org.koin.core.annotation.Single
 
@@ -90,7 +91,7 @@ annotation class ApplicationScope
 class CoroutineScopesModule {
 
     @Single
-    @ApplicationScope
+    @Named("ApplicationScope")
     fun provideApplicationScope(): CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
 }
@@ -103,6 +104,6 @@ annotation class IoDispatcher
 class DispatchersModule {
 
     @Single
-    @IoDispatcher
+    @Named("IoDispatcher")
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

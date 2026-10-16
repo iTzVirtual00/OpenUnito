@@ -12,7 +12,7 @@ import me.itzvirtual.openunito.core.network.isNetworkError
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.dashboard.DashboardRepository
 import me.itzvirtual.openunito.data.examresult.ExamResultRepository
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 inline fun <T1, T2, T3, T4, T5, T6, R> uberCombine(
     flow: Flow<T1>,

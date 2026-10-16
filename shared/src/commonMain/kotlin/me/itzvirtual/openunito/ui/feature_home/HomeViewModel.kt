@@ -20,9 +20,7 @@ import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.StudentRepository
 import me.itzvirtual.openunito.domain.getCurrentTimeZone
 import me.itzvirtual.openunito.domain.getToday
-import org.koin.core.annotation.KoinViewModel
-import java.time.LocalDate
-import java.time.ZoneId
+import org.koin.android.annotation.KoinViewModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel

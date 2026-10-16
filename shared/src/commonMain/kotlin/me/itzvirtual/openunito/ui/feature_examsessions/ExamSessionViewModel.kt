@@ -13,7 +13,7 @@ import me.itzvirtual.openunito.data.examdate.ExamDateRepository
 import me.itzvirtual.openunito.data.examresult.ExamResultRepository
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.ui.feature_career.uberCombine
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 
 @KoinViewModel

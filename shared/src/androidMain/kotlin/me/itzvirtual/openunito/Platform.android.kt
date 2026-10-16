@@ -12,7 +12,7 @@ import org.koin.core.annotation.Single
 actual fun platform() = "Android"
 
 @Module
-actual class PlatformModule {
+class AndroidPlatformModule {
     @Single
     fun databaseBuilder(@Provided context: Context): RoomDatabase.Builder<AppDatabase>{
         val dbFile = context.getDatabasePath("app.db")

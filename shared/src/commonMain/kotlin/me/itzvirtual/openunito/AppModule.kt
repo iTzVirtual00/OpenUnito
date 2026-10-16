@@ -9,7 +9,6 @@ import org.koin.core.annotation.Module
 
 @Module(
     includes = [
-        PlatformModule::class,
         DatabaseModule::class,
         NetworkModule::class,
         CoroutineScopesModule::class,

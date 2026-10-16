@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import me.itzvirtual.openunito.core.network.NetworkMonitor
 import me.itzvirtual.openunito.data.Prefetcher
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class MainViewModel(

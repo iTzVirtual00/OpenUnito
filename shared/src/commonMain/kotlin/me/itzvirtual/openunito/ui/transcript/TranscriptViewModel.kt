@@ -14,7 +14,7 @@ import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.dashboard.DashboardRepository
 import me.itzvirtual.openunito.data.grade.GradeRepository
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class TranscriptViewModel(

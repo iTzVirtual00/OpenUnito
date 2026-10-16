@@ -13,8 +13,6 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply true
 
     alias(libs.plugins.atomicfu)
-
-    alias(libs.plugins.koin.compiler)
 }
 
 compose.resources {
@@ -189,8 +187,21 @@ dependencies {
     add("kspCommonMainMetadata", libs.koin.ksp.compiler)
     add("kspAndroid", libs.koin.ksp.compiler)
     add("kspWasmJs", libs.koin.ksp.compiler)
+
+    add("kspAndroid", libs.androidx.room3.compiler)
+    add("kspWasmJs", libs.androidx.room3.compiler)
 }
 
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")
+}
+
+// TODO: Verify this AI fix:
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "io.insert-koin" && requested.name.startsWith("koin-annotations")) {
+            useVersion(libs.versions.koinAnnotations.get())
+            because("koin-ksp-compiler requires matching koin-annotations")
+        }
+    }
 }

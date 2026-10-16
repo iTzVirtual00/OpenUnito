@@ -10,7 +10,7 @@ import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
 import me.itzvirtual.openunito.data.examresult.local.ExamResultDao
 import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
 import me.itzvirtual.openunito.data.student.local.StudentDao
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class DevtoolsViewModel(

@@ -25,7 +25,7 @@ import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.domain.atStartOfDay
 import me.itzvirtual.openunito.domain.getDayOfWeek
 import me.itzvirtual.openunito.domain.getToday
-import org.koin.core.annotation.KoinViewModel
+import org.koin.android.annotation.KoinViewModel
 
 data class WeekRange(
     val start: LocalDate,

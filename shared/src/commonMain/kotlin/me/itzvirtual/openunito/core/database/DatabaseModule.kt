@@ -15,6 +15,7 @@ import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
 import me.itzvirtual.openunito.data.student.local.StudentDao
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 
 private fun dbInitialize(db: SQLiteConnection) {
@@ -25,7 +26,7 @@ private fun dbInitialize(db: SQLiteConnection) {
 class DatabaseModule {
 
     @Single
-    fun provideDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase =
+    fun provideDatabase(@Provided builder: RoomDatabase.Builder<AppDatabase>): AppDatabase =
         builder
             .addCallback(object : RoomDatabase.Callback() {
                 override suspend fun onCreate(db: SQLiteConnection) {

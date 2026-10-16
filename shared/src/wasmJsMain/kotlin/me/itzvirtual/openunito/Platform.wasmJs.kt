@@ -12,7 +12,7 @@ import org.w3c.dom.Worker
 actual fun platform(): String = "wasmjs"
 
 @Module
-actual class PlatformModule {
+class WasmPlatformModule {
 
     @Single
     fun databaseBuilder(): RoomDatabase.Builder<AppDatabase> {
