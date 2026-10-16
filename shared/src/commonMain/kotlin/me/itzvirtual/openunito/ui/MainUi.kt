@@ -1,6 +1,5 @@
 package me.itzvirtual.openunito.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -36,6 +35,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import co.touchlab.kermit.Logger
 import kotlinx.serialization.Serializable
 import me.itzvirtual.openunito.MainViewModel
@@ -166,19 +168,23 @@ fun OpenUnitoApp(
     }
 
     // Only step through the LRU tabHistory if:
-    BackHandler(enabled = isCurrentTabAtRoot && (canPopHistory || shouldFallbackToHome)) {
-        if (canPopHistory) {
-            // Normal LRU pop
-            tabHistory.removeAt(tabHistory.lastIndex)
-            val previousTab = tabHistory.last()
-            navigateToTab(previousTab, isBackNav = true)
-        } else {
-            // Fallback to Home if we are not at home and stack is empty (more natural)
-            tabHistory.clear()
-            tabHistory.add(AppDestinations.HOME)
-            navigateToTab(AppDestinations.HOME, isBackNav = true)
+    NavigationBackHandler(
+        state = rememberNavigationEventState(NavigationEventInfo.None),
+        isBackEnabled = isCurrentTabAtRoot && (canPopHistory || shouldFallbackToHome),
+        onBackCompleted = {
+            if (canPopHistory) {
+                // Normal LRU pop
+                tabHistory.removeAt(tabHistory.lastIndex)
+                val previousTab = tabHistory.last()
+                navigateToTab(previousTab, isBackNav = true)
+            } else {
+                // Fallback to Home if we are not at home and stack is empty (more natural)
+                tabHistory.clear()
+                tabHistory.add(AppDestinations.HOME)
+                navigateToTab(AppDestinations.HOME, isBackNav = true)
+            }
         }
-    }
+    )
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {

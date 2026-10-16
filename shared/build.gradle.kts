@@ -106,6 +106,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies herewe
+                implementation(libs.compose.navigationevent)
                 implementation(libs.navigation.compose)
                 implementation(libs.material3.adaptive.navigation.suite)
 

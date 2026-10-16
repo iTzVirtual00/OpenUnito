@@ -1,7 +1,6 @@
 package me.itzvirtual.openunito.ui.feature_agenda
 
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
@@ -68,7 +67,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,8 +76,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
@@ -88,7 +88,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.format
 import kotlinx.datetime.plus
-import me.itzvirtual.openunito.resources.*
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfig
 import me.itzvirtual.openunito.domain.HHMMFormat
 import me.itzvirtual.openunito.domain.agenda.ActivityType
@@ -105,8 +104,12 @@ import me.itzvirtual.openunito.domain.getDayOfWeek
 import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.toLocalDate
 import me.itzvirtual.openunito.domain.toLocalTime
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Instant
@@ -857,7 +860,12 @@ internal fun EventDetailView(
     onDismiss: () -> Unit
 ) {
     // Handle back button press to dismiss the detail view
-    BackHandler(onBack = onDismiss)
+    NavigationBackHandler(
+        state = rememberNavigationEventState(NavigationEventInfo.None),
+        isBackEnabled = true,
+        onBackCompleted = onDismiss
+    )
+
 
     val scope = rememberCoroutineScope()
     // tack vertical offset
