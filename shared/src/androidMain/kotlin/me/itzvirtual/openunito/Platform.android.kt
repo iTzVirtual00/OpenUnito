@@ -3,7 +3,6 @@ package me.itzvirtual.openunito
 import android.content.Context
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import me.itzvirtual.openunito.core.database.AppDatabase
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
@@ -19,6 +18,6 @@ class AndroidPlatformModule {
         return Room.databaseBuilder<AppDatabase>(
             context = context.applicationContext,
             name = dbFile.absolutePath
-        ).setDriver(BundledSQLiteDriver())
+        )
     }
 }

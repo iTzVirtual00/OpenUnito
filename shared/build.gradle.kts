@@ -120,9 +120,8 @@ kotlin {
 
                 implementation(libs.kotlinx.serialization.json)
 
+                implementation(libs.androidx.sqlite)
                 implementation(libs.androidx.room3.runtime)
-//                implementation(libs.androidx.sqlite.bundled)
-                implementation("androidx.sqlite:sqlite:2.7.1")
 
                 implementation(libs.touchlab.kermit)
 
@@ -165,8 +164,6 @@ kotlin {
                 implementation(libs.koin.android)
 
                 implementation(libs.androidx.core.splashscreen)
-
-                implementation("androidx.sqlite:sqlite-bundled:2.7.1")
             }
         }
 
@@ -181,8 +178,8 @@ kotlin {
         wasmJsMain {
             dependencies {
                 // wasmjs specific libraries
-                implementation("io.ktor:ktor-client-js:3.6.0")
-                implementation("androidx.sqlite:sqlite-web:2.7.1")
+                implementation(libs.ktor.client.js)
+                implementation(libs.androidx.sqlite.web)
             }
         }
 

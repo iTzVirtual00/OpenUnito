@@ -2,7 +2,6 @@ package me.itzvirtual.openunito.core.database
 
 import co.touchlab.kermit.Logger
 import androidx.room3.RoomDatabase
-import androidx.room3.RoomDatabaseConstructor
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import me.itzvirtual.openunito.data.agenda.local.AgendaDao
