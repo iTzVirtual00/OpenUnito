@@ -13,5 +13,5 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.kotlin.serialization) apply false
 
-//    alias(libs.plugins.koin.compiler) apply false
+    alias(libs.plugins.buildkonfig) apply false
 }

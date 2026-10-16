@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.INT
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -12,11 +14,21 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlin.compose) apply true
     alias(libs.plugins.kotlin.serialization)
+
+    alias(libs.plugins.buildkonfig)
 }
 
 compose.resources {
     packageOfResClass = "me.itzvirtual.openunito.resources"
     generateResClass = always
+}
+
+buildkonfig {
+    packageName = "me.itzvirtual.openunito"
+    defaultConfigs {
+        buildConfigField(STRING, "VERSION_NAME", "v0.4.0")
+        buildConfigField(INT, "VERSION_CODE", "33")
+    }
 }
 
 kotlin {

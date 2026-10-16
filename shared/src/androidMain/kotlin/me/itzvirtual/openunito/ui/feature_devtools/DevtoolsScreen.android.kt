@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.BuildKonfig
 import java.io.File
 
 @Composable
@@ -32,10 +33,8 @@ actual fun UpdateCard() {
     val context = LocalContext.current
     val updater = remember { HTTPUpdater(context) }
     
-    // TODO:
-    val currentVersionCode = 1
-    val currentVersionName = "TODO"
-
+    val currentVersionCode = BuildKonfig.VERSION_CODE
+    val currentVersionName = BuildKonfig.VERSION_NAME
 
     var updateStatus by remember { mutableStateOf("No updates checked") }
     var availableVersion by remember { mutableStateOf<VersionInfo?>(null) }
