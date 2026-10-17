@@ -25,8 +25,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Qualifier
 import org.koin.core.annotation.Single
 
-//const val API_URL = "https://unito.app.cineca.it/"
-const val API_URL = "REDACTED_PROXY_URL"
+expect val API_URL: String
 
 expect fun getSystemLanguage(): String
 

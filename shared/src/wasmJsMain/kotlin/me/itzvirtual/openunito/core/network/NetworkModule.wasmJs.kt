@@ -9,3 +9,4 @@ actual fun getSystemLanguage(): String {
 }
 
 actual val platformIoDispatcher: CoroutineDispatcher = Dispatchers.Default
+actual val API_URL: String = "REDACTED_PROXY_URL"
