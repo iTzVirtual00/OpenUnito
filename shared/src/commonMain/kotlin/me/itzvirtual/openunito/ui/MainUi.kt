@@ -332,7 +332,7 @@ fun OpenUnitoApp(
                             CareerScreen(onOpenInvokes = { navController.navigate(InvokeRoute) })
                         }
                         composable<InvokeRoute> {
-                            InvokeScreen()
+                            InvokeScreen(onBack = { navController.popBackStack() })
                         }
                     }
 

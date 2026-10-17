@@ -1,9 +1,9 @@
 package me.itzvirtual.openunito.core.database
 
-import co.touchlab.kermit.Logger
 import androidx.room3.RoomDatabase
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.execSQL
+import androidx.sqlite.async.executeSQL
+import co.touchlab.kermit.Logger
 import me.itzvirtual.openunito.data.agenda.local.AgendaDao
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.openunito.data.config.local.AppConfigDao
@@ -17,8 +17,8 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 
-private fun dbInitialize(db: SQLiteConnection) {
-    db.execSQL("INSERT OR IGNORE INTO app_config (id) VALUES (0)")
+private suspend fun dbInitialize(connection: SQLiteConnection) {
+    connection.executeSQL("INSERT OR IGNORE INTO app_config (id) VALUES (0)")
 }
 
 @Module
@@ -28,10 +28,10 @@ class DatabaseModule {
     fun provideDatabase(@Provided builder: RoomDatabase.Builder<AppDatabase>): AppDatabase =
         builder
             .addCallback(object : RoomDatabase.Callback() {
-                override suspend fun onCreate(db: SQLiteConnection) {
-                    super.onCreate(db)
+                override suspend fun onCreate(connection: SQLiteConnection) {
+                    super.onCreate(connection)
                     Logger.i(tag = "Database") { "Pre-populating database with initial data" }
-                    dbInitialize(db)
+                    dbInitialize(connection)
                 }
             })
             .addMigrations(MIGRATION_1_2, MIGRATION_2_3)

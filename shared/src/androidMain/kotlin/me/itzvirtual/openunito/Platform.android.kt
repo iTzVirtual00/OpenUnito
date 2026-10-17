@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import me.itzvirtual.openunito.core.database.AppDatabase
+import me.itzvirtual.openunito.domain.AndroidClipboardManagerImpl
+import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
@@ -20,4 +22,8 @@ class AndroidPlatformModule {
             name = dbFile.absolutePath
         )
     }
+
+    @Single
+    fun clipboardManager(context: Context): PlatformClipboardManager =
+        AndroidClipboardManagerImpl(context)
 }

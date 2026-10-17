@@ -2,7 +2,6 @@ package me.itzvirtual.openunito.core.network
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
@@ -26,7 +25,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Qualifier
 import org.koin.core.annotation.Single
 
-const val API_URL = "https://unito.app.cineca.it/"
+expect val API_URL: String
 
 expect fun getSystemLanguage(): String
 
@@ -46,7 +45,7 @@ class NetworkModule {
         currentLanguage: String,
         appConfigRepo: AppConfigRepository,
         json: Json,
-    ): HttpClient = HttpClient(OkHttp) {
+    ): HttpClient = HttpClient {
         install(ContentNegotiation) {
             json(json)
         }
@@ -100,10 +99,20 @@ class CoroutineScopesModule {
 @Retention(AnnotationRetention.BINARY)
 annotation class IoDispatcher
 
+expect val platformIoDispatcher: CoroutineDispatcher
+
 @Module
 class DispatchersModule {
 
     @Single
     @Named("IoDispatcher")
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+    fun provideIoDispatcher(): CoroutineDispatcher = platformIoDispatcher
+
+    @Single
+    @Named("DefaultDispatcher")
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Single
+    @Named("MainDispatcher")
+    fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 }

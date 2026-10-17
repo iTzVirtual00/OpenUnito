@@ -38,22 +38,8 @@ class ExamSessionViewModel(
         val isDatesLoading = cachedDates == null
         val isResultsLoading = cachedResults == null
 
-        var datesMap: HashMap<String, List<ExamDate>> = HashMap<String, List<ExamDate>>()
         val sortedDates = cachedDates?.dates?.sortedByDescending { it.title } ?: emptyList()
-        sortedDates.forEach { date ->
-            val title = date.title
-
-            val el = datesMap.putIfAbsent(
-                title,
-                List(1) {
-                    date
-                }
-            )
-
-            if (el != null) {
-                el.plus(date)
-            }
-        }
+        val datesMap: Map<String, List<ExamDate>> = sortedDates.groupBy { it.title }
 
         val examDatesUiState = ExamDatesUiState(
             dates = datesMap,

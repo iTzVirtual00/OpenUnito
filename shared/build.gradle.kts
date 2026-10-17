@@ -121,8 +121,8 @@ kotlin {
 
                 implementation(libs.kotlinx.serialization.json)
 
-                implementation(libs.androidx.sqlite)
                 implementation(libs.androidx.room3.runtime)
+                implementation(libs.androidx.sqlite.async)
 
                 implementation(libs.touchlab.kermit)
 
@@ -180,7 +180,7 @@ kotlin {
             dependencies {
                 // wasmjs specific libraries
                 implementation(libs.ktor.client.js)
-                implementation(libs.androidx.sqlite.web)
+                api(libs.androidx.sqlite.web)
             }
         }
 

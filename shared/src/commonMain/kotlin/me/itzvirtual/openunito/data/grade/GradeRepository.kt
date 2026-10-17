@@ -18,13 +18,15 @@ import me.itzvirtual.openunito.domain.getNowMillis
 import me.itzvirtual.openunito.domain.grade.ExamGrade
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 data class CachedGrades(
     val grades: List<ExamGrade>,
     val isStale: Boolean
 )
 
+@OptIn(ExperimentalAtomicApi::class)
 @Single
 class GradeRepository(
     private val api: UnitoApi,
@@ -56,7 +58,7 @@ class GradeRepository(
     }
 
     private fun triggerBackgroundRefresh() {
-        val currentJob = activeRefreshJob.get()
+        val currentJob = activeRefreshJob.load()
         if (currentJob?.isActive == true) return
 
         val newJob = externalScope.launch(ioDispatcher) {

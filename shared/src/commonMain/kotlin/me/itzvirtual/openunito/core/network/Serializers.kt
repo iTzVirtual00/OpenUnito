@@ -25,7 +25,7 @@ object MicrosoftDateSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("CinecaDate", PrimitiveKind.STRING)
 
     private val regex = Regex("""/Date\((\d+)([+-]\d+)?\)/""")
-    private val offsetFormat = TimeZone.of("America/New_York")
+    private val fixedOffset = UtcOffset(hours = 1) // TODO: think about this
 
     override fun deserialize(decoder: Decoder): Instant = deserializeString(decoder.decodeString())
 
@@ -38,11 +38,8 @@ object MicrosoftDateSerializer : KSerializer<Instant> {
             Instant.fromEpochMilliseconds(0L)
         }
     }
-
     override fun serialize(encoder: Encoder, value: Instant) {
-        // Reconstructs: /Date(1707920400000+0100)/
-        val offset = offsetFormat.offsetAt(value)
-        val offsetString = offset.format(UtcOffset.Formats.FOUR_DIGITS)
+        val offsetString = fixedOffset.format(UtcOffset.Formats.FOUR_DIGITS)
         encoder.encodeString("/Date(${value.toEpochMilliseconds()}$offsetString)/")
     }
 }

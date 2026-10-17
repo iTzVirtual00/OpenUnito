@@ -20,6 +20,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.math.PI
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -110,20 +111,10 @@ fun Instant.toLocalTime(timeZone: TimeZone = getCurrentTimeZone()): LocalTime =
 
 
 // CLIPBOARD
-expect fun plainTextClipEntry(text: String, sensitive: Boolean = false): ClipEntry
-
-//expect fun ClipEntry.plainTextOrNull(): String?
-
-class AppClipboard(private val clipboard: Clipboard) {
-    suspend fun copyText(text: String, sensitive: Boolean = false) {
-        clipboard.setClipEntry(plainTextClipEntry(text, sensitive))
-    }
-//    suspend fun pasteText(): String? = clipboard.getClipEntry()?.plainTextOrNull()
+interface PlatformClipboardManager {
+    fun setText(text: String, label: String = "", sensitive: Boolean = false)
 }
 
-// ai-suggested shit
-@Composable
-fun rememberAppClipboard(): AppClipboard {
-    val clipboard = LocalClipboard.current
-    return remember(clipboard) { AppClipboard(clipboard) }
-}
+// MATH
+fun Double.toRadians(): Double = this * PI / 180.0
+fun Float.toRadians(): Float = (this * PI / 180f).toFloat()

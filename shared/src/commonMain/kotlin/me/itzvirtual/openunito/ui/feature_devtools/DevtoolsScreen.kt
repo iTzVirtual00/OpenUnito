@@ -33,9 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
-import me.itzvirtual.openunito.domain.rememberAppClipboard
+import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 //TODO: move it somewhere else
@@ -64,7 +65,7 @@ fun DevtoolsScreen(
 ) {
     // I can do WHAT??
     val restartApp = rememberRestartApp()
-    val clipboard = rememberAppClipboard()
+    val clipboard = koinInject<PlatformClipboardManager>()
     val scope = rememberCoroutineScope()
 
     // Bind ViewModel logic to the Actions data class
@@ -79,7 +80,7 @@ fun DevtoolsScreen(
             },
             copyToken = {
                 viewModel.copyTokenToClipboard { token ->
-                    scope.launch { clipboard.copyText(token) }
+                    scope.launch { clipboard.setText(token) }
                 }
             },
             clearToken = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp() } } },

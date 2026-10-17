@@ -31,7 +31,7 @@ data class ExamDate(
     val questionnaire: Int
 )
 
-val examDateSample: HashMap<String, List<ExamDate>> = hashMapOf(
+val examDateSample: Map<String, List<ExamDate>> = hashMapOf(
     "INF0328" to listOf(
         ExamDate(
             adsceId = 23948175L,

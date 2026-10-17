@@ -101,11 +101,12 @@ lista materie (codice):
 @Composable
 fun InvokeScreen(
     modifier: Modifier = Modifier,
-    viewModel: ExamSessionViewModel = koinViewModel()
+    viewModel: ExamSessionViewModel = koinViewModel(),
+    onBack: () -> Unit = {}
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    InvokeScreenContent(modifier, state)
+    InvokeScreenContent(modifier, state, onBack=onBack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -213,7 +214,7 @@ fun InvokeScreenContent(
 @Composable
 fun ExamBookingList(
     modifier: Modifier = Modifier,
-    subjects: HashMap<String, List<ExamDate>>,
+    subjects: Map<String, List<ExamDate>>,
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean,

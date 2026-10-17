@@ -38,17 +38,26 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalHapticFeedback
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.itzvirtual.openunito.domain.rememberAppClipboard
-import me.itzvirtual.openunito.resources.*
+import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.domain.student.StudentCareer
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.class_label
+import me.itzvirtual.openunito.resources.cohort_label
+import me.itzvirtual.openunito.resources.copied_label
+import me.itzvirtual.openunito.resources.course_year_label
+import me.itzvirtual.openunito.resources.location_label
+import me.itzvirtual.openunito.resources.normativa_label
+import me.itzvirtual.openunito.resources.percorso_label
+import me.itzvirtual.openunito.resources.regulation_year_label
+import me.itzvirtual.openunito.resources.student_id_label
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 @Composable
 fun StudentCareerCard(career: StudentCareer) {
@@ -199,7 +208,7 @@ private fun CopyableText(
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     color: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val clipboard = rememberAppClipboard()
+    val clipboard = koinInject<PlatformClipboardManager>()
     val haptics = LocalHapticFeedback.current
     var showCopied by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -208,7 +217,7 @@ private fun CopyableText(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
             .clickable {
-                scope.launch { clipboard.copyText(text) }
+                scope.launch { clipboard.setText(text) }
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 showCopied = true
             }
