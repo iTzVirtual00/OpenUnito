@@ -1,4 +1,4 @@
-package openunito.example.openunito
+package me.itzvirtual.openunito
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
