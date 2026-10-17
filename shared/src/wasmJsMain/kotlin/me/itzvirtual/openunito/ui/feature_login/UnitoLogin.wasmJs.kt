@@ -17,6 +17,7 @@ import me.itzvirtual.openunito.ui.feature_devtools.DevtoolsActions
 import me.itzvirtual.openunito.ui.feature_devtools.LocalDevtoolsActions
 import me.itzvirtual.openunito.ui.feature_devtools.PurgeCachesCard
 import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 
 @Composable
 actual fun UniToLoginScreen(
@@ -29,18 +30,19 @@ actual fun UniToLoginScreen(
             setToken = onAuthSuccess,
         )
     }
-
-    CompositionLocalProvider(LocalDevtoolsActions provides actions) {
-        Scaffold(modifier = modifier) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(16.dp)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                AuthDebuggerCard()
+    OpenUnitoTheme {
+        CompositionLocalProvider(LocalDevtoolsActions provides actions) {
+            Scaffold(modifier = modifier) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(16.dp)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AuthDebuggerCard()
+                }
             }
         }
     }
