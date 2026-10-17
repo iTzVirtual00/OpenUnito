@@ -30,7 +30,7 @@
 
     <!-- Agenda Section -->
     <string name="nearest_agenda_title">Coming Up</string>
-    <string name="next_day_plan_title">Tomorrow\'s Schedule</string>
+    <string name="next_day_plan_title">Tomorrow's Schedule</string>
     <string name="no_agenda_tomorrow">No classes scheduled for tomorrow</string>
     <string name="no_upcoming_events">No upcoming events</string>
     <string name="in_progress">In Progress</string>
@@ -38,10 +38,10 @@
     <string name="good_morning">Good morning</string>
     <string name="good_afternoon">Good afternoon</string>
     <string name="good_evening">Good evening</string>
-    <string name="todays_classes_title">Today\'s classes</string>
+    <string name="todays_classes_title">Today's classes</string>
     <string name="open_schedule">Open schedule</string>
     <string name="no_classes_today">No classes today</string>
-    <string name="tomorrow_classes_title">Tomorrow\'s classes</string>
+    <string name="tomorrow_classes_title">Tomorrow's classes</string>
     <string name="no_classes_tomorrow">No classes tomorrow</string>
     <string name="careers_title">Careers</string>
     <string name="open_credit_statistics">Open statistics</string>
