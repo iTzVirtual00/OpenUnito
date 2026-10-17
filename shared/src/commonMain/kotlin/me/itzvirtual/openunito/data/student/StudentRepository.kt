@@ -25,13 +25,15 @@ import me.itzvirtual.openunito.domain.student.StudentCareer
 import me.itzvirtual.openunito.domain.student.StudentData
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 data class CachedStudentData(
     val data: StudentData,
     val isStale: Boolean
 )
 
+@OptIn(ExperimentalAtomicApi::class)
 @Single
 class StudentRepository(
     private val client: HttpClient,
@@ -73,7 +75,7 @@ class StudentRepository(
         .distinctUntilChanged()
 
     private fun triggerBackgroundRefresh() {
-        val currentJob = activeRefreshJob.get()
+        val currentJob = activeRefreshJob.load()
         if (currentJob?.isActive == true) return
 
         val newJob = externalScope.launch(ioDispatcher) {

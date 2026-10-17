@@ -20,13 +20,15 @@ import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.getNowMillis
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 data class CachedExamDates(
     val dates: List<ExamDate>,
     val isStale: Boolean
 )
 
+@OptIn(ExperimentalAtomicApi::class)
 @Single
 class ExamDateRepository(
     private val api: UnitoApi,
@@ -64,7 +66,7 @@ class ExamDateRepository(
         .flowOn(ioDispatcher)
 
     private fun triggerBackgroundRefresh() {
-        val currentJob = activeRefreshJob.get()
+        val currentJob = activeRefreshJob.load()
         if (currentJob?.isActive == true) return
 
         val newJob = externalScope.launch(ioDispatcher) {

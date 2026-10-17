@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.itzvirtual.openunito.domain.toRadians
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import kotlin.math.cos
 import kotlin.math.sin
@@ -100,19 +101,19 @@ fun CreditProgressIndicator(
 
             if (currentPlannedCreditProgress > 0f) {
                 val plannedAngle =
-                    Math.toRadians((-90f + currentPlannedCreditProgress * 360f).toDouble())
+                    (-90f + currentPlannedCreditProgress * 360f).toRadians()
                 val markerLength = strokeWidth.toPx() * 1.5f
                 val innerRadius = radius - markerLength / 2
                 val outerRadius = radius + markerLength / 2
                 drawLine(
                     color = plannedProgressColor,
                     start = Offset(
-                        center.x + innerRadius * cos(plannedAngle).toFloat(),
-                        center.y + innerRadius * sin(plannedAngle).toFloat()
+                        center.x + innerRadius * cos(plannedAngle),
+                        center.y + innerRadius * sin(plannedAngle)
                     ),
                     end = Offset(
-                        center.x + outerRadius * cos(plannedAngle).toFloat(),
-                        center.y + outerRadius * sin(plannedAngle).toFloat()
+                        center.x + outerRadius * cos(plannedAngle),
+                        center.y + outerRadius * sin(plannedAngle)
                     ),
                     strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round
                 )

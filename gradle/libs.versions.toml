@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.1"
+agp = "9.1.0"
 coreSplashscreen = "1.2.0"
 koin = "4.2.2"
 koinAnnotations = "2.3.1" # koinAnnotations and koinKspCompiler seems to break if they are in different versions

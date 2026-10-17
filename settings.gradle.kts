@@ -12,7 +12,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
@@ -26,4 +26,5 @@ plugins {
 
 rootProject.name = "OpenUnito"
 include(":androidApp")
+include(":webApp")
 include(":shared")
