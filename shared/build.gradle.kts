@@ -1,6 +1,18 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.INT
+import java.io.FileInputStream
+import java.util.Properties
+import kotlin.apply
+
+val versionProps = Properties().apply {
+    val versionPropsFile = file(rootProject.file("version.properties"))
+    if (versionPropsFile.exists()) {
+        load(FileInputStream(versionPropsFile))
+    }
+}
+val appVersionCode: Int = versionProps.getProperty("versionCode")?.toIntOrNull() ?: 1
+val appVersionName: String = versionProps.getProperty("versionName") ?: "v0.0.1"
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -26,8 +38,8 @@ compose.resources {
 buildkonfig {
     packageName = "me.itzvirtual.openunito"
     defaultConfigs {
-        buildConfigField(STRING, "VERSION_NAME", "v0.4.0")
-        buildConfigField(INT, "VERSION_CODE", "33")
+        buildConfigField(STRING, "VERSION_NAME", appVersionName)
+        buildConfigField(INT, "VERSION_CODE", appVersionCode.toString())
     }
 }
 
