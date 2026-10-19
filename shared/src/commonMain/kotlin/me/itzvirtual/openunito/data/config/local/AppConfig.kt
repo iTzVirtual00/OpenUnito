@@ -11,4 +11,8 @@ data class AppConfig(
     val authToken: String? = null,
     val selectedCalendarId: Int? = null,
     @ColumnInfo(defaultValue = "0") val debug: Boolean = false,
+    // TODO: Add "selectedProfile", default value 0,
+    // They give us careers in a list so why not use the index to select it
+    // worst case they change smthing and user selects again.
+    // It sucks but should never happen
 )

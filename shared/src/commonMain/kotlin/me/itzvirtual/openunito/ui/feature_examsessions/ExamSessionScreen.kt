@@ -5,19 +5,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,9 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -316,24 +317,6 @@ fun SingleExamSessionCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-//                    Row(
-//                        horizontalArrangement = Arrangement.Start
-//                    ){
-//                        Text(
-//                            text = "Open from ",
-//                            color = MaterialTheme.colorScheme.outline
-//                        )
-//                        Text( // TODO: Add translation
-//                            text = formatDate(exam.bookingStartDate)
-//                        )
-//                        Text(
-//                            text = " to ",
-//                            color = MaterialTheme.colorScheme.outline
-//                        )
-//                        Text( // TODO: Add translation
-//                            text = formatDate(exam.bookingEndDate)
-//                        )
-//                    }
                 }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -343,26 +326,195 @@ fun SingleExamSessionCard(
                         .rotate(90f)
                 )
             }
+/*
+Corso
+    Prog 2
+Presidente
+    Barbieri
+Dal al
+Sessioni:
+    2025/2026 - SESSIONE
+Note appello?
+
+ADD TO CALENDAR!!
+ */
+
             Column () {
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider()
+                Spacer(Modifier.height(8.dp))
+                InfoSection(
+                    president = exam.president,
+                    note = exam.note
+                )
+                BookingEndStartRow(exam.bookingStartDate, exam.bookingEndDate)
+                Spacer(Modifier.height(8.dp))
+
+                PrenotButton()
+            }
+        }
+    }
+}
+
+@Composable
+fun InfoSection(
+    president: String,
+    note: String,
+) {
+    val weakColor = MaterialTheme.colorScheme.outline
+    val weakWeight = FontWeight.Medium
+
+    val strongColor = MaterialTheme.colorScheme.outline
+    val strongWeight = FontWeight.Medium
+
+    val size = 13.sp
+    Column {
+        //President
+        Row {
+            Text(
+                text = "President: ",
+                color = weakColor,
+                fontWeight = weakWeight,
+                fontSize = size,
+                lineHeight = size.times(1.4f),
+            )
+            Text(
+                text = unShoutCourseName(president),
+                fontWeight = strongWeight,
+                fontSize = size,
+                lineHeight = size.times(1.4f),
+            )
+        }
+        Spacer(
+            modifier = Modifier.height(4.dp),
+        )
+        //Notes
+        Row (
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = "Notes: ",
+                color = weakColor,
+                fontWeight = weakWeight,
+                fontSize = size,
+                lineHeight = size.times(1.4f),
+            )
+            Text(
+                text = note,
+                fontWeight = strongWeight,
+                fontSize = size,
+                lineHeight = size.times(1.4f),
+            )
+        }
+    }
+
+}
+
+@Composable
+fun BookingEndStartRow(
+    startDate: Instant,
+    endDate: Instant,
+) {
+    // TODO: Add translation
+    val weakColor = MaterialTheme.colorScheme.outline
+    val weakWeight = FontWeight.Light
+
+    val strongColor = MaterialTheme.colorScheme.outline
+    val strongWeight = FontWeight.Medium
+
+    val size = 12.sp
+    Row(
+        horizontalArrangement = Arrangement.Start
+    ){
+        Text(
+            text = "Open from ",
+            color = weakColor,
+            fontWeight = weakWeight,
+            fontSize = size,
+        )
+        Text(
+            text = formatDate(startDate),
+            color = strongColor,
+            fontWeight = strongWeight,
+            fontSize = size,
+        )
+        Text(
+            text = " to ",
+            color = weakColor,
+            fontWeight = weakWeight,
+            fontSize = size,
+        )
+        Text(
+            text = formatDate(endDate),
+            color = strongColor,
+            fontWeight = strongWeight,
+            fontSize = size,
+        )
+    }
+}
+
+// Copy-pasted from stackOverflow
+@Composable
+fun MeasureUnconstrainedViewWidth(
+    viewToMeasure: @Composable () -> Unit,
+    content: @Composable (measuredWidth: Dp) -> Unit,
+) {
+    SubcomposeLayout { constraints ->
+        val measuredWidth = subcompose("viewToMeasure", viewToMeasure)[0]
+            .measure(Constraints()).width.toDp()
+
+        val contentPlaceable = subcompose("content") {
+            content(measuredWidth)
+        }[0].measure(constraints)
+        layout(contentPlaceable.width, contentPlaceable.height) {
+            contentPlaceable.place(0, 0)
+        }
+    }
+}
+
+@Composable
+fun PrenotButton() {
+
+    val book = "PRENOT"
+    val revoke = "UNPRENOT"
+
+    val goodRedColor = Color(217f/256f, 85f/256f, 85f/256f) // TODO: Make this into fkn error color, now it sucks
+
+    Row (
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        // Ensure that Prenot button is large enough to contain both strings
+        MeasureUnconstrainedViewWidth (
+            viewToMeasure = {
+                StdButtonEmpty() {
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 9.dp),
+                        text = if (book.length > revoke.length) book else revoke,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        ) { measuredWidth ->
+            StdButtonEmpty(
+                modifier = Modifier
+                    .width(measuredWidth),
+                border = BorderStroke(1.5.dp, goodRedColor),
+                onClick = {} // TODO: Add onclick prenot
+            ) {
                 Row (
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    StdButtonEmpty(
-                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 9.dp),
-                            text = "PRENOT",
-                            fontWeight = FontWeight.Bold
-
-                        )
-                    }
-
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 9.dp),
+                        text = "PRENOT",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
