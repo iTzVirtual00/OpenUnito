@@ -10,31 +10,31 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.domain.student.StudentCareer
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.careers_title
-import me.itzvirtual.openunito.resources.no_data
-import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.shared.ErrorItem
+import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.shared.StudentCareerCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -44,11 +44,16 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val clipboard = koinInject<PlatformClipboardManager>()
+    val scope = rememberCoroutineScope()
 
     ProfileScreenContent(
         modifier = modifier,
         state = state,
         onBack = onBack,
+        onCopy = { text ->
+            scope.launch { clipboard.setText(text) }
+        }
     )
 }
 
@@ -57,6 +62,7 @@ fun ProfileScreenContent(
     modifier: Modifier = Modifier,
     state: ProfileScreenState,
     onBack: () -> Unit = {},
+    onCopy: (text: String) -> Unit = {},
 ) {
     val careers = state.data?.careers ?: emptyList()
     val stateError = state.error
@@ -94,7 +100,8 @@ fun ProfileScreenContent(
                 CareersSection(
                     careers = careers,
                     stateError = stateError,
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    onCopy = onCopy,
                 )
             }
         }
@@ -108,8 +115,9 @@ fun CareersSection(
     careers: List<StudentCareer>,
     stateError: String?,
     isLoading: Boolean,
+    onCopy: (text: String) -> Unit = {},
 ) {
-    val debug = false
+    val debug = false // TODO pass with viewModel
 
     Box(modifier = modifier) {
         Column(
@@ -117,41 +125,19 @@ fun CareersSection(
                 .padding(bottom = 16.dp)
                 .padding(horizontal = 8.dp)
         ) {
-//            Text(
-//                text = stringResource(Res.string.careers_title),
-//                style = MaterialTheme.typography.headlineSmall,
-//                fontWeight = FontWeight.Bold,
-//                color = MaterialTheme.colorScheme.onSurface,
-//                modifier = Modifier.padding(horizontal = 8.dp)
-//            )
-            when {
-                isLoading -> {
-                    CircularProgressIndicator()
-                }
-
-                stateError != null || careers.isEmpty() -> {
-                    StdSurface {
-                        if (debug) {
-                            val msg = stateError
-                                ?: "List is empty" //If state error is null, no error has occurred and list is empty
-                            ErrorItem(
-                                errorMessage = msg,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        } else {
-                            ErrorItem(stringResource(Res.string.no_data), Color.Gray)
-                        }
-                    }
-                }
-
-                else -> {
-                    LazyColumn {
-                        items(careers) { career ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            StudentCareerCard(
-                                career = career,
-                            )
-                        }
+            ListWrapper(
+                isEmpty = careers.isEmpty(),
+                debug = debug,
+                isLoading = isLoading,
+                stateError = stateError
+            ) {
+                LazyColumn {
+                    items(careers) { career ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        StudentCareerCard(
+                            career = career,
+                            onCopy = onCopy,
+                        )
                     }
                 }
             }
@@ -160,7 +146,7 @@ fun CareersSection(
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 fun ProfileScreenPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

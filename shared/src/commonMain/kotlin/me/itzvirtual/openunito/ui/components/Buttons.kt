@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,6 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 fun StdButtonEmpty(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    height: Float = 90f,
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
     tonalElevation: Dp = 2.dp,
@@ -45,8 +45,7 @@ fun StdButtonEmpty(
     Surface(
         shape = shape,
         onClick = onClick,
-        modifier = modifier
-            .height(Dp(height)),
+        modifier = modifier,
         tonalElevation = tonalElevation,
         border = border,
     ) {
@@ -60,7 +59,6 @@ fun StdTextButton(
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    height: Float = 90f,
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
     tonalElevation: Dp = 2.dp,
@@ -68,7 +66,6 @@ fun StdTextButton(
     StdButtonEmpty(
         modifier = modifier,
         onClick = onClick,
-        height = height,
         shape = shape,
         tonalElevation = tonalElevation,
         border = border,
@@ -97,7 +94,6 @@ fun StdIconTextButton(
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    height: Float = 90f,
     shape: Shape = RoundedCornerShape(25f),
     tonalElevation: Dp = 2.dp,
     border: BorderStroke? = null,
@@ -105,7 +101,6 @@ fun StdIconTextButton(
     StdButtonEmpty(
         modifier = modifier,
         onClick = onClick,
-        height = height,
         shape = shape,
         tonalElevation = tonalElevation,
         border = border,
@@ -125,7 +120,7 @@ fun StdIconTextButton(
                     .aspectRatio(1f)
             )
             Spacer(
-                modifier = Modifier.width((height * 0.25).dp)
+                modifier = Modifier.width(18.dp)
             )
             Text(
                 text = text,
@@ -133,6 +128,7 @@ fun StdIconTextButton(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )
+
         }
     }
 }
@@ -143,7 +139,6 @@ fun StdArrowButton(
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    height: Float = 90f,
     shape: Shape = RoundedCornerShape(25f),
     tonalElevation: Dp = 2.dp,
     border: BorderStroke? = null,
@@ -151,7 +146,6 @@ fun StdArrowButton(
     StdButtonEmpty(
         modifier = modifier,
         onClick = onClick,
-        height = height,
         shape = shape,
         tonalElevation = tonalElevation,
         border = border,
@@ -182,7 +176,7 @@ fun StdArrowButton(
 }
 
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CareerScreenPreview() {
@@ -194,23 +188,31 @@ fun CareerScreenPreview() {
                 ) {
                     StdIconTextButton(
                         icon = Icons.Default.Home,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(90.dp),
                         text = "SUCA",
                         onClick = {}
                     )
                     Spacer(Modifier.width(4.dp))
                     StdIconTextButton(
                         icon = Icons.Default.Home,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(90.dp),
                         text = "SUCA3",
                         onClick = {}
                     )
                 }
                 StdTextButton(
-                    text = "Suca"
+                    text = "Suca",
+                    modifier = Modifier
+                        .height(90.dp),
                 )
                 StdArrowButton(
-                    "Sucamela"
+                    "Sucamela",
+                    modifier = Modifier
+                        .height(90.dp),
                 )
             }
         }

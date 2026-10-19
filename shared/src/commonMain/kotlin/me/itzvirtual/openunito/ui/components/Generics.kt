@@ -34,8 +34,7 @@ fun StdSurface(
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp),//TODO: remove these
+            .fillMaxWidth(), //TODO: remove these
         shape = RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
         border = border
@@ -46,6 +45,7 @@ fun StdSurface(
 
 @Composable
 fun ListWrapper(
+    modifier: Modifier = Modifier,
     isEmpty: Boolean,
     debug: Boolean,
     isLoading: Boolean,
@@ -53,18 +53,29 @@ fun ListWrapper(
     content: @Composable () -> Unit,
 ) {
     if (isEmpty || stateError != null || isLoading) {
-        StdSurface {
+        StdSurface (
+            modifier = modifier,
+        ) {
             if (debug) {
                 val msg =
                     if (isLoading) "Loading"
-                    else stateError ?: "Empty List"
+                    else stateError ?: "EmptyList"
+
                 ErrorItem(msg)
             } else {
-                ErrorItem(stringResource(Res.string.no_data), Color.Gray)
+                val msg =
+                    if (isEmpty) stringResource(Res.string.empty_list)
+                    else stringResource(Res.string.no_data)
+
+                ErrorItem(msg, Color.Gray)
             }
         }
     } else {
-        content()
+        Box (
+            modifier = modifier,
+        ) {
+            content()
+        }
     }
 }
 

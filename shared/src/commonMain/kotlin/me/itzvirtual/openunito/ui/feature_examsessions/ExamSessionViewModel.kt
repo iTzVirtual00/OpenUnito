@@ -38,11 +38,10 @@ class ExamSessionViewModel(
         val isDatesLoading = cachedDates == null
         val isResultsLoading = cachedResults == null
 
-        val sortedDates = cachedDates?.dates?.sortedByDescending { it.title } ?: emptyList()
-        val datesMap: Map<String, List<ExamDate>> = sortedDates.groupBy { it.title }
+        val sortedDates = cachedDates?.dates?.sortedBy { it.date } ?: emptyList()
 
         val examDatesUiState = ExamDatesUiState(
-            dates = datesMap,
+            dates = sortedDates,
             isStale = cachedDates?.isStale ?: false,
             isLoading = isDatesLoading,
             error = datesError

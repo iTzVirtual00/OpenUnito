@@ -1,10 +1,11 @@
 package me.itzvirtual.openunito.ui.feature_examsessions
 
 
-
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,23 +32,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.koin.compose.viewmodel.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.shared.formatDate
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
 //Maybe call it ExamSession or just Session
@@ -106,7 +115,7 @@ fun InvokeScreen(
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    InvokeScreenContent(modifier, state, onBack=onBack)
+    InvokeScreenContent(modifier, state, onBack = onBack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,7 +167,8 @@ fun InvokeScreenContent(
             ) {
                 StdTextButton(
                     modifier = Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .height(80.dp),
                     onClick = { selectedTab = 0 },
                     text = "Bookable", //TODO: translation
                     shape = RectangleShape,
@@ -169,7 +179,8 @@ fun InvokeScreenContent(
                 )
                 StdTextButton(
                     modifier = Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .height(80.dp),
                     onClick = { selectedTab = 1 },
                     text = "Booked", //TODO: translation
                     shape = RectangleShape,
@@ -187,7 +198,9 @@ fun InvokeScreenContent(
                 when (selectedTab) {
                     0 -> {
                         ExamBookingList(
-                            subjects = dates,
+                            modifier = Modifier
+                                .padding(8.dp),
+                            exams = dates,
                             isLoading = uiState.isLoading,
                             stateError = uiState.error,
                             debug = debug,
@@ -196,7 +209,9 @@ fun InvokeScreenContent(
 
                     1 -> {
                         ExamBookingList(
-                            subjects = dates,
+                            modifier = Modifier
+                                .padding(8.dp),
+                            exams = dates,
 //                            dates = dates.filter {
 //                            //TODO: filter for booked
 //                        },
@@ -214,28 +229,28 @@ fun InvokeScreenContent(
 @Composable
 fun ExamBookingList(
     modifier: Modifier = Modifier,
-    subjects: Map<String, List<ExamDate>>,
+    exams: List<ExamDate>,
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean,
 ) {
     ListWrapper(
-        isEmpty = subjects.isEmpty(),
+        modifier = modifier,
+        isEmpty = exams.isEmpty(),
         debug = debug,
         isLoading = isLoading,
         stateError = stateError
     ) {
         LazyColumn(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize(),
         ) {
-            subjects.forEach { (string, subject) ->
+            exams.forEach { exam ->
                 item {
-                    Spacer(
-                        modifier = Modifier.height(6.dp)
-                    )
-                    ExamBookingCard(
-                        dates = subject
+                    SingleExamSessionCard(
+                        modifier = Modifier
+                            .padding(bottom = 10.dp),
+                        exam = exam
                     )
                 }
             }
@@ -243,6 +258,120 @@ fun ExamBookingList(
     }
 }
 
+@Composable
+fun SingleExamSessionCard(
+    modifier: Modifier = Modifier,
+    exam: ExamDate,
+    onClick: () -> Unit = {}
+) {
+    var expanded = true
+
+    StdSurface(
+        modifier = modifier
+            .fillMaxWidth(),
+//        border = BorderStroke( // with or without border?
+//            0.dp, Color.Transparent
+//        )
+    ) {
+        // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
+        // yellow: prenotable but not prenoted
+        //  green: prenoted
+        //   grey: unprenotable
+        // italien!
+        val arrowWeight = 0.12f
+
+        Column (
+            modifier = Modifier
+
+                .padding(16.dp, 12.dp),
+            ) {
+            Row(
+                modifier = Modifier
+                    .clickable(
+                        onClick = onClick
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1 - arrowWeight)
+                ) {
+                    val a = 12.sp
+                    Text(
+                        text = exam.activityCode,
+                        fontSize = a,
+                        fontWeight = FontWeight.Light,
+                        color = MaterialTheme.colorScheme.outline,
+                        lineHeight = a.times(1.4f),
+                    )
+                    Text(
+                        text = unShoutCourseName(exam.title),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = unShoutCourseName(exam.description)
+                    )
+                    Text(
+                        text = formatDate(exam.date),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+//                    Row(
+//                        horizontalArrangement = Arrangement.Start
+//                    ){
+//                        Text(
+//                            text = "Open from ",
+//                            color = MaterialTheme.colorScheme.outline
+//                        )
+//                        Text( // TODO: Add translation
+//                            text = formatDate(exam.bookingStartDate)
+//                        )
+//                        Text(
+//                            text = " to ",
+//                            color = MaterialTheme.colorScheme.outline
+//                        )
+//                        Text( // TODO: Add translation
+//                            text = formatDate(exam.bookingEndDate)
+//                        )
+//                    }
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .weight(arrowWeight)
+                        .rotate(90f)
+                )
+            }
+            Column () {
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider()
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    StdButtonEmpty(
+                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 9.dp),
+                            text = "PRENOT",
+                            fontWeight = FontWeight.Bold
+
+                        )
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+//--------------------
+//------ Legacy ------
+//--------------------
 @Composable
 fun ExamBookingCard(
     modifier: Modifier = Modifier,
@@ -322,7 +451,9 @@ fun ExamSessionEntry(
 ) {
     StdEntry(
         modifier = modifier,
-        onClick = if (bookable) onClick else { {} }
+        onClick = if (bookable) onClick else {
+            {}
+        }
     ) {
         Column {
             Text(
@@ -339,8 +470,10 @@ fun ExamSessionEntry(
     }
 }
 
+
+// PREVIEW
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 fun ProfileScreenPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

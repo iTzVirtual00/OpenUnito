@@ -72,6 +72,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -83,7 +84,13 @@ import me.itzvirtual.openunito.domain.dashboard.dashboardDataSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.examresult.examResultsDataSample
-import me.itzvirtual.openunito.resources.*
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.date
+import me.itzvirtual.openunito.resources.editable_until
+import me.itzvirtual.openunito.resources.exam_results_title
+import me.itzvirtual.openunito.resources.open_credit_statistics
+import me.itzvirtual.openunito.resources.remaining_cfu_title
+import me.itzvirtual.openunito.resources.yearly_progress_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
@@ -176,8 +183,9 @@ fun CareerScreenContent(
             icon = Icons.Default.Book,
             text = "Libretto",
             onClick = onClickTranscript,
-            modifier = Modifier.padding(8.dp, 0.dp),
-            height = 80f,
+            modifier = Modifier
+                .padding(8.dp, 0.dp)
+                .height(80.dp),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(Modifier.height(8.dp))
@@ -185,8 +193,9 @@ fun CareerScreenContent(
             icon = Icons.Default.AccountBalance,
             text = "Appelli",
             onClick = onClickInvoke,
-            modifier = Modifier.padding(8.dp, 0.dp),
-            height = 80f,
+            modifier = Modifier
+                .padding(8.dp, 0.dp)
+                .height(80.dp),
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(Modifier.height(16.dp))
@@ -401,7 +410,9 @@ fun ExamResultsSection(
     val cornerRadius = 16.dp
 
     ListWrapper(
-        results.isEmpty(),
+        modifier = Modifier
+            .padding(8.dp),
+        isEmpty = results.isEmpty(),
         debug = debug,
         isLoading = isLoading,
         stateError = stateError
@@ -738,7 +749,7 @@ fun ExamResultRow(result: ExamResult) {
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 fun CareerScreenPreview() {
     var previewState by remember {
         mutableStateOf(

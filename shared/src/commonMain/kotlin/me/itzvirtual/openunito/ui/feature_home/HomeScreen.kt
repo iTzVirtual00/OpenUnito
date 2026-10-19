@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -151,8 +152,9 @@ fun HomeScreenContent(
                     icon = Icons.Default.HistoryEdu,
                     text = stringResource(Res.string.attendance_tracking_button_name),
                     onClick = onClickAttendance,
-                    modifier = Modifier.padding(0.dp, 0.dp),
-                    height = 80f,
+                    modifier = Modifier
+                        .padding(0.dp, 0.dp)
+                        .height(90.dp),
                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
                 )
             }
@@ -477,7 +479,7 @@ fun ClassCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun HomeScreenPreview() {
     OpenUnitoTheme {

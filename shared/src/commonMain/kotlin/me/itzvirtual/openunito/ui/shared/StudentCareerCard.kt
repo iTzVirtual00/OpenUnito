@@ -60,7 +60,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
-fun StudentCareerCard(career: StudentCareer) {
+fun StudentCareerCard(
+    career: StudentCareer,
+    onCopy: (text: String) -> Unit = {}
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
@@ -93,7 +96,8 @@ fun StudentCareerCard(career: StudentCareer) {
                         CopyableText(
                             text = career.studentId,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            onCopy = onCopy,
                         )
                     }
                 }
@@ -207,17 +211,16 @@ private fun CopyableText(
     modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     color: Color = MaterialTheme.colorScheme.onSurface,
+    onCopy: (text: String) -> Unit,
 ) {
-    val clipboard = koinInject<PlatformClipboardManager>()
     val haptics = LocalHapticFeedback.current
     var showCopied by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
             .clickable {
-                scope.launch { clipboard.setText(text) }
+                onCopy(text)
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 showCopied = true
             }

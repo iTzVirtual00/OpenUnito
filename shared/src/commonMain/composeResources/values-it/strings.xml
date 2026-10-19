@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">OpenUnito</string>
     <string name="no_data">Nessun dato disponibile</string>
+    <string name="empty_list">Nessun elemento presente</string>
+
     <string name="exam_results_title">Esito Esami</string>
     <string name="date">%1$s</string>
     <string name="editable_until">Modificabile entro</string>
