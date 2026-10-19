@@ -11,7 +11,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import me.itzvirtual.openunito.ui.RootNavigation
 import me.itzvirtual.openunito.ui.shared.LocaleHelper
 
-//TODO: when switching tabs, it doesn't remember if profile or home tab was set
 class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
         // This forces the saved language into the Activity's context
