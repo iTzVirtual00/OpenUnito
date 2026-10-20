@@ -68,7 +68,7 @@ fun TranscriptSheet(
     onDismiss: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Expanded)
 
     val actions = TranscriptActions(
         changeGradeStatus = { gradeId, newStatus ->
