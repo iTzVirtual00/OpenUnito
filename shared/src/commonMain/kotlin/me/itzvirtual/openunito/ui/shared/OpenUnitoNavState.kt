@@ -58,21 +58,28 @@ class OpenUnitoNavState(
         targetTab: AppDestinations,
         isBackNav: Boolean = false
     ) {
-        if (targetTab == activeTab && isCurrentTabAtRoot && !isBackNav) return
-
-        navController.navigate(targetTab.route) {
-            // Pop the currently active tab graph and snapshot its state
-            popUpTo(activeTab.route) {
-                saveState = true
-                inclusive = true
+        if (targetTab != activeTab) {
+            navController.navigate(targetTab.route) {
+                // save activeTab's graph before switching to another tab
+                popUpTo(activeTab.route) {
+                    saveState = true
+                    inclusive = true
+                }
+                restoreState = true
+                launchSingleTop = true
             }
-            restoreState = true
-            launchSingleTop = true
-        }
 
-        if (!isBackNav) {
-            tabHistory.remove(targetTab)
-            tabHistory.add(targetTab)
+            if (!isBackNav) {
+                tabHistory.remove(targetTab)
+                tabHistory.add(targetTab)
+            }
+        } else if (!isCurrentTabAtRoot) {
+            // close all graph's children if target tab is the same as the current tab
+            // targetTab == activeTab && !isCurrentTabAtRoot == false
+            navController.popBackStack(
+                route = targetTab.rootRouteClass,
+                inclusive = false
+            )
         }
     }
 
