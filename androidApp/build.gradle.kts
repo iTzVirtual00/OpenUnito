@@ -41,6 +41,8 @@ android {
         versionCode = appVersionCode
         versionName = appVersionName
         manifestPlaceholders["appName"] = "OpenUnito"
+        manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
+        manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +52,8 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             manifestPlaceholders["appName"] = "OpenUnitoDev"
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_dev"
+            manifestPlaceholders["appIconRound"] = "@mipmap/ic_launcher_dev"
         }
         release {
             isMinifyEnabled = true
