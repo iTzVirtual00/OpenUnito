@@ -46,12 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.examDateSample
+import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
-import me.itzvirtual.openunito.ui.shared.formatDate
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -313,7 +313,7 @@ fun SingleExamSessionCard(
                         text = unShoutCourseName(exam.description)
                     )
                     Text(
-                        text = formatDate(exam.date),
+                        text = exam.date.formatDate(),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -433,7 +433,7 @@ fun BookingEndStartRow(
             fontSize = size,
         )
         Text(
-            text = formatDate(startDate),
+            text = startDate.formatDate(),
             color = strongColor,
             fontWeight = strongWeight,
             fontSize = size,
@@ -445,7 +445,7 @@ fun BookingEndStartRow(
             fontSize = size,
         )
         Text(
-            text = formatDate(endDate),
+            text = endDate.formatDate(),
             color = strongColor,
             fontWeight = strongWeight,
             fontSize = size,
@@ -612,11 +612,11 @@ fun ExamSessionEntry(
                 text = unShoutCourseName(description)
             )
             Text(
-                text = formatDate(date),
+                text = date.formatDate(),
                 fontWeight = FontWeight.Bold
             )
             Text( // TODO: Add translation
-                text = "Open from ${formatDate(bookingStartDate)} to ${formatDate(bookingEndDate)}"
+                text = "Open from ${bookingStartDate.formatDate()} to ${bookingEndDate.formatDate()}"
             )
         }
     }

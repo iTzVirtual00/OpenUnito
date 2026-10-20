@@ -155,6 +155,10 @@ kotlin {
                 implementation(libs.material.icons.extended)
 
                 implementation(libs.atomicfu)
+
+                implementation(libs.locale.core)
+                implementation(libs.locale.platform)
+                implementation(libs.locale.datetime.cldr.skeletons)
             }
         }
 

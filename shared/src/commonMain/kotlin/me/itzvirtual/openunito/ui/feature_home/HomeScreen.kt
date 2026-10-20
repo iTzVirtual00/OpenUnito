@@ -48,9 +48,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import me.itzvirtual.openunito.domain.HHMMFormat
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
-import me.itzvirtual.openunito.domain.formatTime
+import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getNowInstant
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.Res
@@ -411,8 +410,8 @@ fun ClassCard(
                             tint = secondaryContentColor
                         )
                         Text(
-                            text = "${formatTime(entry.startDateTime, HHMMFormat)} - ${
-                                formatTime(entry.endDateTime, HHMMFormat)
+                            text = "${entry.startDateTime.formatFriendlyTime()} - ${
+                                entry.endDateTime.formatFriendlyTime()
                             }",
                             style = MaterialTheme.typography.bodySmall,
                             color = secondaryContentColor
@@ -437,8 +436,8 @@ fun ClassCard(
                         tint = secondaryContentColor
                     )
                     Text(
-                        text = "${formatTime(entry.startDateTime, HHMMFormat)} - ${
-                            formatTime(entry.endDateTime, HHMMFormat)
+                        text = "${entry.startDateTime.formatFriendlyTime()} - ${
+                            entry.endDateTime.formatFriendlyTime()
                         }",
                         style = MaterialTheme.typography.bodySmall,
                         color = secondaryContentColor

@@ -37,16 +37,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.format
-import kotlinx.datetime.toLocalDateTime
-import me.itzvirtual.openunito.domain.DDMMYYYYFormat
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
-import me.itzvirtual.openunito.domain.getCurrentTimeZone
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import kotlin.math.PI
-import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -109,18 +102,6 @@ fun Modifier.shimmerEffect(
         )
     ).onGloballyPositioned { size = it.size }
 }
-
-fun formatDate(
-    date: Instant,
-    timeZone: TimeZone = getCurrentTimeZone(),
-): String = date.toLocalDateTime(timeZone).date.format(DDMMYYYYFormat)
-
-fun parseDate(
-    dateStr: String,
-    timeZone: TimeZone = getCurrentTimeZone(),
-): Instant = DDMMYYYYFormat.parseOrNull(dateStr)
-    ?.atStartOfDayIn(timeZone)
-    ?: Instant.fromEpochMilliseconds(0) // like Date(0)
 
 @Composable
 fun GradeStatus.toColor(): Color = when (this) {

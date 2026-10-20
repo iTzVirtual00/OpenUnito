@@ -84,6 +84,7 @@ import me.itzvirtual.openunito.domain.dashboard.dashboardDataSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.examresult.examResultsDataSample
+import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
@@ -96,7 +97,6 @@ import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.CreditProgressIndicator
 import me.itzvirtual.openunito.ui.shared.ErrorItem
-import me.itzvirtual.openunito.ui.shared.formatDate
 import me.itzvirtual.openunito.ui.shared.toColor
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -513,7 +513,7 @@ fun ExamResultRow(result: ExamResult) {
                             text = "${
                                 stringResource(
                                     Res.string.date,
-                                    formatDate(result.date)
+                                    result.date.formatDate()
                                 )
                             } \u2022 ${result.weight} CFU",
                             style = MaterialTheme.typography.bodySmall

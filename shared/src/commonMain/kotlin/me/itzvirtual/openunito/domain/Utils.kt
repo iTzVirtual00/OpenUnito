@@ -1,21 +1,18 @@
+@file:OptIn(FormatStringsInDatetimeFormats::class)
+
 package me.itzvirtual.openunito.domain
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.Clipboard
-import androidx.compose.ui.platform.LocalClipboard
+import dev.carcara.kotlinx.locale.Locale
+import dev.carcara.kotlinx.locale.datetime.FormatStyle
+import dev.carcara.kotlinx.locale.datetime.cldr.format
+import dev.carcara.kotlinx.locale.datetime.cldr.skeletons.format
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.format
-import kotlinx.datetime.format.DateTimeFormat
-import kotlinx.datetime.format.DayOfWeekNames
-import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.format.Padding
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
@@ -40,11 +37,6 @@ fun getCurrentTimeZone(): TimeZone {
     return TimeZone.currentSystemDefault()
 }
 
-val HHMMFormat = LocalTime.Format {
-    hour()
-    char(':')
-    minute()
-}
 val DDMMYYYYFormat = LocalDate.Format {
     day()
     char('/')
@@ -53,48 +45,40 @@ val DDMMYYYYFormat = LocalDate.Format {
     year()
 }
 
-// TODO: localize
-private val italianShortMonths = MonthNames(
-    "gen", "feb", "mar", "apr", "mag", "giu",
-    "lug", "ago", "set", "ott", "nov", "dic",
-)
-val dayMonthFormatter = LocalDate.Format {
-    day(Padding.NONE)
-    char(' ')
-    monthName(italianShortMonths)
-}
-private val italianShortDays = DayOfWeekNames(
-    "lun", "mar", "mer", "gio", "ven", "sab", "dom",
-)
-val dayFormatter = LocalDate.Format {
-    dayOfWeek(italianShortDays)
-    char(' ')
-    day(padding = Padding.NONE)
-}
+// TODO: replace Locale.current with actual selected app locale (and reactive)
 
-private val italianFullDays = DayOfWeekNames(
-    "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica",
-)
+// 12 Oct
+fun LocalDate.formatFriendlyDayMonth(
+    locale: Locale = Locale.current
+): String = this.format("dMMM", locale)
 
-private val italianFullMonths = MonthNames(
-    "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
-    "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre",
-)
-val dateFormat1 = LocalDate.Format {
-    dayOfWeek(italianFullDays)
-    char(' ')
-    day(padding = Padding.NONE)
-    char(' ')
-    monthName(italianFullMonths)
-    char(' ')
-    year()
-}
+// Mon 12
+fun LocalDate.formatFriendlyDayOfWeek(
+    locale: Locale = Locale.current
+): String = this.format("Ed", locale)
 
-fun formatTime(
-    instant: Instant,
-    format: DateTimeFormat<LocalTime>,
+// Monday 12 October 2026
+fun LocalDate.formatFriendlyFullDate(
+    locale: Locale = Locale.current
+): String = this.format("yMMMMEEEEd", locale)
+
+// "14:30" or "2:30 PM"
+fun Instant.formatFriendlyTime(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
-): String = instant.toLocalDateTime(timeZone).time.format(format)
+    locale: Locale = Locale.current,
+): String = this.toLocalDateTime(timeZone).time.formatFriendlyTime(locale)
+fun LocalTime.formatFriendlyTime(
+    locale: Locale = Locale.current,
+): String = this.format(FormatStyle.SHORT, locale)
+
+// "21/10/2026" or "10/21/2026"
+fun Instant.formatDate(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = Locale.current,
+): String = this.toLocalDateTime(timeZone).date.formatDate(locale)
+fun LocalDate.formatDate(
+    locale: Locale = Locale.current,
+): String = this.format(FormatStyle.SHORT, locale)
 
 fun getDayOfWeek(
     day: DayOfWeek,

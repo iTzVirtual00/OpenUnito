@@ -86,10 +86,8 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.format
 import kotlinx.datetime.plus
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfig
-import me.itzvirtual.openunito.domain.HHMMFormat
 import me.itzvirtual.openunito.domain.agenda.ActivityType
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.agenda.Building
@@ -97,9 +95,10 @@ import me.itzvirtual.openunito.domain.agenda.Coordinates
 import me.itzvirtual.openunito.domain.agenda.Floor
 import me.itzvirtual.openunito.domain.agenda.Professor
 import me.itzvirtual.openunito.domain.agenda.RoomLocation
-import me.itzvirtual.openunito.domain.dateFormat1
-import me.itzvirtual.openunito.domain.dayFormatter
-import me.itzvirtual.openunito.domain.dayMonthFormatter
+import me.itzvirtual.openunito.domain.formatFriendlyDayMonth
+import me.itzvirtual.openunito.domain.formatFriendlyDayOfWeek
+import me.itzvirtual.openunito.domain.formatFriendlyFullDate
+import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getDayOfWeek
 import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.toLocalDate
@@ -465,8 +464,8 @@ private fun AgendaHeader(
             }
 
             Text(
-                text = "${currentWeekStart.format(dayMonthFormatter)} - ${
-                    currentWeekEnd.format(dayMonthFormatter)
+                text = "${currentWeekStart.formatFriendlyDayMonth()} - ${
+                    currentWeekEnd.formatFriendlyDayMonth()
                 }",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
@@ -644,7 +643,7 @@ private fun WeekDaysHeader(weekStartDate: LocalDate) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = date.format(dayFormatter),
+                    text = date.formatFriendlyDayOfWeek(),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                     color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
@@ -1006,15 +1005,15 @@ internal fun EventDetailView(
                     )
                     Column {
                         Text(
-                            text = event.getLocalDate().format(dateFormat1)
+                            text = event.getLocalDate().formatFriendlyFullDate()
                                 .replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = "${
-                                event.getStartTime().format(HHMMFormat)
-                            } - ${event.getEndTime().format(HHMMFormat)}",
+                                event.getStartTime().formatFriendlyTime()
+                            } - ${event.getEndTime().formatFriendlyTime()}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
