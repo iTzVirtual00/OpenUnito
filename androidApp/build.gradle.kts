@@ -40,11 +40,17 @@ android {
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName
+        manifestPlaceholders["appName"] = "OpenUnito"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "OpenUnitoDev"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
