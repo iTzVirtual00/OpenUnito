@@ -37,14 +37,6 @@ fun getCurrentTimeZone(): TimeZone {
     return TimeZone.currentSystemDefault()
 }
 
-val DDMMYYYYFormat = LocalDate.Format {
-    day()
-    char('/')
-    monthNumber()
-    char('/')
-    year()
-}
-
 // TODO: replace Locale.current with actual selected app locale (and reactive)
 
 // 12 Oct
