@@ -94,7 +94,6 @@ class StudentRepository(
         }
     }
 
-    // TODO: fix multiple requests to /init with cold cache
     suspend fun refresh(): Result<StudentEntity> = runCatching {
         withContext(ioDispatcher) {
             val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17").body<AppInitDto>()
@@ -121,7 +120,7 @@ class StudentRepository(
 
     suspend fun getCurrentCareer(): StudentCareer =
         getStudentData().careers.firstOrNull {
-            it.id != 0/*REDACTED*/ // TODO: tf is this + add career selection
+            it.id != 0/*REDACTED*/ // TODO: remove after career selection feature
         }
             ?: throw IllegalStateException("No careers found for student")
 
