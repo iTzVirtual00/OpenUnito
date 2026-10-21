@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.feature_examsessions
 
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +57,7 @@ import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
+import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -270,7 +272,7 @@ fun ExamSessionCard(
     exam: ExamDate,
     onClick: () -> Unit = {}
 ) {
-    var expanded = true
+    var expanded = false
 
     val bookingEnabled = exam.bookingEnabled
     val booked = true
@@ -306,12 +308,18 @@ fun ExamSessionCard(
                     .padding(horizontal = horizontalPadding, vertical = 12.dp),
             ) {
                 ExamSessionCardHeader(
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     exam = exam,
                 )
 
-                ExamSessionCardExpandedContent(
-                    exam = exam,
-                )
+                AnimatedVisibility(
+                    visible = expanded,
+                ) {
+                    ExamSessionCardExpandedContent(
+                        exam = exam,
+                    )
+                }
             }
             MeasureHeight(
                 viewToMeasure = {
@@ -323,9 +331,13 @@ fun ExamSessionCard(
                             exam = exam,
                         )
 
-                        ExamSessionCardExpandedContent(
-                            exam = exam,
-                        )
+                        AnimatedVisibility(
+                            visible = expanded,
+                        ) {
+                            ExamSessionCardExpandedContent(
+                                exam = exam,
+                            )
+                        }
                     }
                 }
             ) { measuredHeight ->
