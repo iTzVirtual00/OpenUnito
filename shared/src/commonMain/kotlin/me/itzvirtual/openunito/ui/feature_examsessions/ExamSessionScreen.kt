@@ -4,9 +4,12 @@ package me.itzvirtual.openunito.ui.feature_examsessions
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,11 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
@@ -53,6 +57,7 @@ import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
@@ -248,7 +253,7 @@ fun ExamBookingList(
         ) {
             exams.forEach { exam ->
                 item {
-                    SingleExamSessionCard(
+                    ExamSessionCard(
                         modifier = Modifier
                             .padding(bottom = 10.dp),
                         exam = exam
@@ -260,106 +265,185 @@ fun ExamBookingList(
 }
 
 @Composable
-fun SingleExamSessionCard(
+fun ExamSessionCard(
     modifier: Modifier = Modifier,
     exam: ExamDate,
     onClick: () -> Unit = {}
 ) {
     var expanded = true
 
+    val bookingEnabled = exam.bookingEnabled
+    val booked = true
+
+    val sideColor = when {
+        !bookingEnabled -> Color.Gray
+        bookingEnabled && !booked -> Color.Yellow
+        booked -> LocalCustomColorsPalette.current.gradePassed
+        else -> Color.DarkGray
+    }
+
+    val horizontalPadding = 18.dp
+
     StdSurface(
         modifier = modifier
-            .fillMaxWidth(),
-//        border = BorderStroke( // with or without border?
-//            0.dp, Color.Transparent
-//        )
+            .fillMaxWidth()
+            .clickable(
+                onClick = onClick
+            ),
     ) {
         // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
         // yellow: prenotable but not prenoted
         //  green: prenoted
         //   grey: unprenotable
         // italien!
-        val arrowWeight = 0.12f
-
-        Column (
+        Box (
             modifier = Modifier
-
-                .padding(16.dp, 12.dp),
-            ) {
-            Row(
+                .fillMaxWidth(),
+            contentAlignment = Alignment.TopEnd,
+        ) {
+            Column(
                 modifier = Modifier
-                    .clickable(
-                        onClick = onClick
-                    ),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = horizontalPadding, vertical = 12.dp),
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1 - arrowWeight)
-                ) {
-                    val a = 12.sp
-                    Text(
-                        text = exam.activityCode,
-                        fontSize = a,
-                        fontWeight = FontWeight.Light,
-                        color = MaterialTheme.colorScheme.outline,
-                        lineHeight = a.times(1.4f),
-                    )
-                    Text(
-                        text = unShoutCourseName(exam.title),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = unShoutCourseName(exam.description)
-                    )
-                    Text(
-                        text = exam.date.formatDate(),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                ExamSessionCardHeader(
+                    exam = exam,
+                )
+
+                ExamSessionCardExpandedContent(
+                    exam = exam,
+                )
+            }
+            MeasureHeight(
+                viewToMeasure = {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = horizontalPadding, vertical = 12.dp),
+                    ) {
+                        ExamSessionCardHeader(
+                            exam = exam,
+                        )
+
+                        ExamSessionCardExpandedContent(
+                            exam = exam,
+                        )
+                    }
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
+            ) { measuredHeight ->
+                Surface (
                     modifier = Modifier
-                        .weight(arrowWeight)
-                        .rotate(90f)
-                )
+                        .width(horizontalPadding)
+                        .height(measuredHeight),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    color = sideColor
+                ) {}
             }
-/*
-Corso
-    Prog 2
-Presidente
-    Barbieri
-Dal al
-Sessioni:
-    2025/2026 - SESSIONE
-Note appello?
 
-ADD TO CALENDAR!!
- */
+        }
+    }
+}
 
-            Column () {
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider()
-                Spacer(Modifier.height(8.dp))
-                InfoSection(
-                    president = exam.president,
-                    note = exam.note
-                )
-                BookingEndStartRow(exam.bookingStartDate, exam.bookingEndDate)
-                Spacer(Modifier.height(8.dp))
+@Composable
+fun MeasureHeight(
+    viewToMeasure: @Composable () -> Unit,
+    content: @Composable (measuredWidth: Dp) -> Unit,
+) {
+    SubcomposeLayout { constraints ->
+        val measuredComponent = subcompose("viewToMeasure", viewToMeasure)[0]
+            .measure(Constraints())
 
-                PrenotButton()
-            }
+        val contentPlaceable = subcompose("content") {
+            content(measuredComponent.height.toDp())
+        }[0].measure(constraints)
+        layout(contentPlaceable.width, contentPlaceable.height) {
+            contentPlaceable.place(0,0)
+        }
+    }
+}
+
+@Composable
+fun ExamSessionCardHeader(
+    modifier: Modifier = Modifier,
+    exam: ExamDate,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = exam.date.formatDate(),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = unShoutCourseName(exam.title),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = unShoutCourseName(exam.description)
+            )
+        }
+    }
+}
+
+@Composable
+fun ExamSessionCardExpandedContent(
+    modifier: Modifier = Modifier,
+    exam: ExamDate,
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+        InfoSection(
+            activityCode = exam.activityCode,
+            president = exam.president,
+            subscribedStudents = exam.subscribedStudents,
+            note = exam.note,
+            startDate = exam.bookingStartDate,
+            endDate = exam.bookingEndDate,
+        )
+        Spacer(Modifier.height(6.dp))
+        BookingStartEndRow(exam.bookingStartDate, exam.bookingEndDate)
+
+        Spacer(Modifier.height(4.dp))
+
+        // Buttons
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Spacer(
+                modifier = Modifier.weight(0.1f)
+            )
+
+            AddCalendarButton()
+
+            Spacer(
+                modifier = Modifier.weight(0.15f)
+            )
+
+            PrenotButton(
+                modifier = Modifier,
+            )
+
+            Spacer(
+                modifier = Modifier.weight(0.1f)
+            )
         }
     }
 }
 
 @Composable
 fun InfoSection(
+    activityCode: String,
     president: String,
+    subscribedStudents: Int,
     note: String,
+    startDate: Instant,
+    endDate: Instant,
 ) {
     val weakColor = MaterialTheme.colorScheme.outline
     val weakWeight = FontWeight.Medium
@@ -369,27 +453,106 @@ fun InfoSection(
 
     val size = 13.sp
     Column {
-        //President
-        Row {
-            Text(
-                text = "President: ",
-                color = weakColor,
-                fontWeight = weakWeight,
-                fontSize = size,
-                lineHeight = size.times(1.4f),
-            )
-            Text(
-                text = unShoutCourseName(president),
-                fontWeight = strongWeight,
-                fontSize = size,
-                lineHeight = size.times(1.4f),
-            )
+        // Activity code, sessions
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Text(
+                    text = "Activity Code: ",
+                    color = weakColor,
+                    fontWeight = weakWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+                Text(
+                    text = activityCode,
+                    fontWeight = strongWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Text(
+                    text = "Sessions: ",
+                    color = weakColor,
+                    fontWeight = weakWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+                Text(
+                    text = "Placeholder",
+                    fontWeight = strongWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+            }
         }
+
         Spacer(
             modifier = Modifier.height(4.dp),
         )
-        //Notes
+
+        // President, Subscribed
         Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Text(
+                    text = "President: ",
+                    color = weakColor,
+                    fontWeight = weakWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+                Text(
+                    text = unShoutCourseName(president),
+                    fontWeight = strongWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Text(
+                    text = "Subscribed: ",
+                    color = weakColor,
+                    fontWeight = weakWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+                Text(
+                    text = subscribedStudents.toString(),
+                    fontWeight = strongWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(4.dp),
+        )
+
+        // Session Notes
+        Row(
             verticalAlignment = Alignment.Top
         ) {
             Text(
@@ -407,11 +570,10 @@ fun InfoSection(
             )
         }
     }
-
 }
 
 @Composable
-fun BookingEndStartRow(
+fun BookingStartEndRow(
     startDate: Instant,
     endDate: Instant,
 ) {
@@ -425,7 +587,7 @@ fun BookingEndStartRow(
     val size = 12.sp
     Row(
         horizontalArrangement = Arrangement.Start
-    ){
+    ) {
         Text(
             text = "Open from ",
             color = weakColor,
@@ -473,49 +635,105 @@ fun MeasureUnconstrainedViewWidth(
 }
 
 @Composable
-fun PrenotButton() {
-
+fun PrenotButton(
+    modifier: Modifier = Modifier,
+) {
     val book = "PRENOT"
     val revoke = "UNPRENOT"
 
-    val goodRedColor = Color(217f/256f, 85f/256f, 85f/256f) // TODO: Make this into fkn error color, now it sucks
+    val goodRedColor = Color(
+        217f / 256f,
+        85f / 256f,
+        85f / 256f
+    ) // TODO: Make this into fkn error color, now it sucks
 
-    Row (
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        // Ensure that Prenot button is large enough to contain both strings
-        MeasureUnconstrainedViewWidth (
-            viewToMeasure = {
-                StdButtonEmpty() {
-                    Text(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 9.dp),
-                        text = if (book.length > revoke.length) book else revoke,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        ) { measuredWidth ->
+    // Ensure that Prenot button is large enough to contain both strings
+    MeasureUnconstrainedViewWidth(
+        viewToMeasure = {
             StdButtonEmpty(
-                modifier = Modifier
-                    .width(measuredWidth),
-                border = BorderStroke(1.5.dp, goodRedColor),
-                onClick = {} // TODO: Add onclick prenot
+                modifier = modifier
             ) {
-                Row (
+                Text(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                        .padding(horizontal = 8.dp, vertical = 9.dp),
+                    text = if (book.length > revoke.length) book else revoke,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    ) { measuredWidth ->
+        StdButtonEmpty(
+            modifier = modifier
+                .width(measuredWidth),
+            border = BorderStroke(1.5.dp, goodRedColor),
+            onClick = {} // TODO: Add onclick prenot
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 9.dp),
+                    text = "PRENOT",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AddCalendarButton(
+    modifier: Modifier = Modifier,
+) {
+
+    val add = "Add"
+    val remove = "Remove"
+
+    val goodRedColor = Color(
+        217f / 256f,
+        85f / 256f,
+        85f / 256f
+    ) // TODO: Make this into fkn error color, now it sucks
+
+    // Ensure that Prenot button is large enough to contain both strings
+    MeasureUnconstrainedViewWidth(
+        viewToMeasure = {
+            Text(
+                modifier = Modifier,
+                text = if (add.length > remove.length) add else remove,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    ) { measuredWidth ->
+        StdButtonEmpty(
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
+            onClick = {} // TODO: Add onclick addToCalendar
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 9.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+
                 ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 9.dp),
-                        text = "PRENOT",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Icon(
+                    modifier = Modifier,
+                    imageVector = Icons.Default.EditCalendar,
+                    contentDescription = "suca",
+                )
+                Spacer(
+                    modifier = Modifier.width(4.dp),
+                )
+                Text(
+                    modifier = Modifier
+                        .width(measuredWidth),
+                    text = add, // TODO: Switch to remove when clicked
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
