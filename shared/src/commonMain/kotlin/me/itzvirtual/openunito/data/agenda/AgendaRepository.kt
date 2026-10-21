@@ -48,8 +48,6 @@ class AgendaRepository(
     // refreshes deduplication
     private val activeRefreshes = mutableMapOf<String, Job>()
     private val jobsMutex = Mutex()
-    private val refreshMutex = Mutex()
-
 
     fun buildKey(calendarLinkId: String, startDate: Instant, endDate: Instant): String =
         "${calendarLinkId}_${startDate}_${endDate}"
@@ -63,7 +61,7 @@ class AgendaRepository(
         return dao.getByKeyFlow(key)
             .map { entity ->
                 if (entity == null) {
-                    backgroundRefresh(
+                    triggerBackgroundRefresh(
                         calendarLinkId,
                         appConfigRepo.getCalendarClientId(),
                         startDate,
@@ -75,7 +73,7 @@ class AgendaRepository(
                         getNowMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
 
                     if (isStale) {
-                        backgroundRefresh(
+                        triggerBackgroundRefresh(
                             calendarLinkId,
                             appConfigRepo.getCalendarClientId(),
                             startDate,
@@ -94,8 +92,7 @@ class AgendaRepository(
             .flowOn(ioDispatcher)
     }
 
-    // TODO: verify this works
-    private fun backgroundRefresh(
+    private fun triggerBackgroundRefresh(
         calendarLinkId: String,
         clientId: String,
         startDate: Instant,
@@ -104,57 +101,45 @@ class AgendaRepository(
         val key = buildKey(calendarLinkId, startDate, endDate)
 
         externalScope.launch(ioDispatcher) {
-            val shouldStart = jobsMutex.withLock {
-                val currentJob = activeRefreshes[key]
-                if (currentJob?.isActive == true) {
-                    false
-                } else {
-                    // Placeholder job or register directly
-                    true
+            jobsMutex.withLock {
+                val shouldStart = let {
+                    val currentJob = activeRefreshes[key]
+                    currentJob?.isActive != true
                 }
-            }
+                if (!shouldStart) return@launch
 
-            if (!shouldStart) return@launch
-
-            val job = launch {
-                try {
-                    refresh(calendarLinkId, clientId, startDate, endDate)
-                } catch (_: Exception) {
-                    // TODO: notify something
-                } finally {
-                    jobsMutex.withLock {
-                        activeRefreshes.remove(key)
+                val job = launch {
+                    try {
+                        refresh(calendarLinkId, clientId, startDate, endDate)
+                    } catch (_: Exception) {
+                        // TODO: notify something
+                    } finally {
+                        jobsMutex.withLock {
+                            if(activeRefreshes[key] === coroutineContext[Job]) activeRefreshes.remove(key)
+                        }
                     }
                 }
-            }
-
-            jobsMutex.withLock {
                 activeRefreshes[key] = job
             }
         }
     }
 
-    // Prevents concurrent network calls and ensures an out-of-order,
-    // slower response never overwrites newer Room data.
-    // TODO: needed? (also used in all the other repos)
-    suspend fun refresh(
+    private suspend fun refresh(
         calendarLinkId: String,
         clientId: String,
         startDate: Instant,
         endDate: Instant,
     ): Result<Unit> = runCatching {
-        refreshMutex.withLock {
-            val response = api.getPublicAgenda(
-                PublicAgendaRequest(
-                    calendarLinkId,
-                    clientId,
-                    startDate.toString(),
-                    endDate.toString()
-                )
+        val response = api.getPublicAgenda(
+            PublicAgendaRequest(
+                calendarLinkId,
+                clientId,
+                startDate.toString(),
+                endDate.toString()
             )
-            val key = buildKey(calendarLinkId, startDate, endDate)
-            dao.upsert(response.toEntity(key, json))
-        }
+        )
+        val key = buildKey(calendarLinkId, startDate, endDate)
+        dao.upsert(response.toEntity(key, json))
     }
 
     suspend fun validateCalendarLinkId(calendarLinkId: String, clientId: String): Boolean {
