@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import me.itzvirtual.openunito.data.agenda.AgendaRepository
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfig
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.openunito.data.config.AppConfigRepository
@@ -13,6 +14,7 @@ import org.koin.core.annotation.Single
 class CalendarConfigRepository(
     private val dao: CalendarConfigDao,
     private val appConfigRepo: AppConfigRepository,
+    private val agendaRepo: AgendaRepository,
 ) {
     val calendarsFlow: Flow<List<CalendarConfig>> = dao.getAllFlow()
 
@@ -50,7 +52,6 @@ class CalendarConfigRepository(
         val existing = dao.getById(id) ?: CalendarConfig(name = newName, calendarLinkId = newLink)
         val newConf = existing.copy(name = newName, calendarLinkId = newLink)
         dao.upsert(newConf)
-        // TODO: Invalidate calendar cache if newLink is different
         return newConf
     }
 
