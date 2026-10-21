@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.core.cache.CacheConfig
 import me.itzvirtual.openunito.data.student.local.StudentDao
+import me.itzvirtual.openunito.data.student.local.StudentEntity
 import me.itzvirtual.openunito.data.student.mapper.toDomain
 import me.itzvirtual.openunito.data.student.mapper.toEntity
 import me.itzvirtual.openunito.data.student.remote.AppInitDto
@@ -44,7 +45,7 @@ class StudentRepository(
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
 ) {
     private val activeRefreshJob = AtomicReference<Job?>(null)
-    private val refreshMutex = Mutex()
+    private val studentDataMutex = Mutex()
 
     val studentCacheFlow: Flow<CachedStudentData?> = dao.get()
         .map { entity ->
@@ -94,31 +95,28 @@ class StudentRepository(
     }
 
     // TODO: fix multiple requests to /init with cold cache
-    suspend fun refresh(): Result<Unit> = runCatching {
-        refreshMutex.withLock {
-            withContext(ioDispatcher) {
-                val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17").body<AppInitDto>()
-                val session = appInit.session ?: throw Exception("No auth session")
+    suspend fun refresh(): Result<StudentEntity> = runCatching {
+        withContext(ioDispatcher) {
+            val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17").body<AppInitDto>()
+            val session = appInit.session ?: throw Exception("No auth session")
 
-                dao.upsert(session.toEntity(json))
-            }
+            val entity = session.toEntity(json)
+            dao.upsert(entity)
+            entity
         }
     }
 
     // This bullshit of a function exists because we need the career id to initialize UnitoApi
     // A design choice made in the first version that I KNEW would have made me suffer in the future ( now :_) )
     suspend fun getStudentData(): StudentData = withContext(ioDispatcher) {
-        val cachedEntity = dao.getOneShot()
-        if (cachedEntity != null) {
-            runCatching { cachedEntity.toDomain(json) }.getOrNull()?.let { return@withContext it }
+        val entity = dao.getOneShot() ?: studentDataMutex.withLock {
+            dao.getOneShot() ?: refresh().getOrThrow()
         }
 
-        refresh().getOrThrow()
-
-        val freshEntity = dao.getOneShot()
-            ?: throw IllegalStateException("Student data missing after successful refresh")
-
-        freshEntity.toDomain(json)
+        runCatching { entity.toDomain(json) }
+            .getOrElse { e ->
+                throw IllegalStateException("Failed to parse student data domain model", e)
+            }
     }
 
     suspend fun getCurrentCareer(): StudentCareer =
