@@ -10,15 +10,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -32,19 +34,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,12 +52,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.formatDate
+import me.itzvirtual.openunito.domain.formatFriendlyTime
+import me.itzvirtual.openunito.domain.formatMediumDate
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
+import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextButton
-import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -270,104 +273,115 @@ fun ExamBookingList(
 fun ExamSessionCard(
     modifier: Modifier = Modifier,
     exam: ExamDate,
-    onClick: () -> Unit = {}
 ) {
-    var expanded = false
+    var expanded by remember { mutableStateOf(true) }
 
     val bookingEnabled = exam.bookingEnabled
-    val booked = true
+    val booked = false
 
+    // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
+    // yellow: prenotable but not prenoted
+    //  green: prenoted
+    //   grey: unprenotable
+    // italien!
     val sideColor = when {
-        !bookingEnabled -> Color.Gray
-        bookingEnabled && !booked -> Color.Yellow
         booked -> LocalCustomColorsPalette.current.gradePassed
-        else -> Color.DarkGray
+        bookingEnabled -> Color.Yellow
+        else -> MaterialTheme.colorScheme.outlineVariant
     }
 
-    val horizontalPadding = 18.dp
+    val verPadding = 10.dp
+    val horPadding = 16.dp
 
     StdSurface(
         modifier = modifier
             .fillMaxWidth()
             .clickable(
-                onClick = onClick
+                onClick = { expanded = !expanded }
             ),
     ) {
-        // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
-        // yellow: prenotable but not prenoted
-        //  green: prenoted
-        //   grey: unprenotable
-        // italien!
+
         Box (
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopEnd,
         ) {
-            Column(
+            ExamSessionCardContent(
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding, vertical = 12.dp),
-            ) {
-                ExamSessionCardHeader(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    exam = exam,
-                )
+                    .padding(vertical = verPadding)
+                    .padding(start = horPadding, end = horPadding * 2),
+                exam = exam,
+                expanded = expanded,
+            )
 
-                AnimatedVisibility(
-                    visible = expanded,
-                ) {
-                    ExamSessionCardExpandedContent(
-                        exam = exam,
-                    )
-                }
-            }
-            MeasureHeight(
+            // 2 - Circle Option
+
+//            if (booked) {
+//                Box(
+//                    modifier = Modifier
+//                        .size(40.dp),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Surface(
+//                        modifier = Modifier
+//                            .size(18.dp),
+//                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+//                        color = Color(0.3f,0.8f,0.0f),
+//                        shape = CircleShape,
+//
+//                    ) {}
+//                }
+//            }
+
+            // 3 - Sidebar Option
+
+            // Measure Content height and feed it to the sidebar
+            MeasureHeightLayout(
                 viewToMeasure = {
-                    Column(
+                    ExamSessionCardContent(
                         modifier = Modifier
-                            .padding(horizontal = horizontalPadding, vertical = 12.dp),
-                    ) {
-                        ExamSessionCardHeader(
-                            exam = exam,
-                        )
-
-                        AnimatedVisibility(
-                            visible = expanded,
-                        ) {
-                            ExamSessionCardExpandedContent(
-                                exam = exam,
-                            )
-                        }
-                    }
+                            .padding(vertical = verPadding)
+                            .padding(start = horPadding, end = horPadding * 2),
+                        exam = exam,
+                        expanded = expanded,
+                    )
                 }
             ) { measuredHeight ->
                 Surface (
                     modifier = Modifier
-                        .width(horizontalPadding)
+                        .width(horPadding)
                         .height(measuredHeight),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     color = sideColor
                 ) {}
             }
-
         }
     }
 }
 
-@Composable
-fun MeasureHeight(
-    viewToMeasure: @Composable () -> Unit,
-    content: @Composable (measuredWidth: Dp) -> Unit,
-) {
-    SubcomposeLayout { constraints ->
-        val measuredComponent = subcompose("viewToMeasure", viewToMeasure)[0]
-            .measure(Constraints())
 
-        val contentPlaceable = subcompose("content") {
-            content(measuredComponent.height.toDp())
-        }[0].measure(constraints)
-        layout(contentPlaceable.width, contentPlaceable.height) {
-            contentPlaceable.place(0,0)
+
+@Composable
+fun ExamSessionCardContent(
+    modifier: Modifier = Modifier,
+    exam: ExamDate,
+    expanded: Boolean,
+) {
+    Column(
+        modifier = modifier
+    ) {
+        ExamSessionCardHeader(
+            modifier = Modifier
+                .fillMaxWidth(),
+            exam = exam,
+        )
+
+        AnimatedVisibility(
+            visible = expanded,
+        ) {
+            ExamSessionCardDrawer(
+                exam = exam,
+            )
         }
     }
 }
@@ -382,24 +396,29 @@ fun ExamSessionCardHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
+            if (exam.title != exam.description) {
+                Text(
+                    text = unShoutCourseName(exam.title),
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 13.sp,
+                    lineHeight = (13 * 1.47f).sp
+                )
+            }
             Text(
-                text = exam.date.formatDate(),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = unShoutCourseName(exam.title),
+                text = unShoutCourseName(exam.description),
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = unShoutCourseName(exam.description)
+                text = exam.date.formatMediumDate(),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
 
 @Composable
-fun ExamSessionCardExpandedContent(
+fun ExamSessionCardDrawer(
     modifier: Modifier = Modifier,
     exam: ExamDate,
 ) {
@@ -407,20 +426,24 @@ fun ExamSessionCardExpandedContent(
         modifier = modifier,
     ) {
         Spacer(Modifier.height(8.dp))
+
         HorizontalDivider()
+
         Spacer(Modifier.height(8.dp))
+
         InfoSection(
             activityCode = exam.activityCode,
             president = exam.president,
             subscribedStudents = exam.subscribedStudents,
             note = exam.note,
-            startDate = exam.bookingStartDate,
-            endDate = exam.bookingEndDate,
+            spacing = 4.dp,
         )
-        Spacer(Modifier.height(6.dp))
-        BookingStartEndRow(exam.bookingStartDate, exam.bookingEndDate)
 
         Spacer(Modifier.height(4.dp))
+
+        BookingStartEndRow(exam.bookingStartDate, exam.bookingEndDate)
+
+        Spacer(Modifier.height(12.dp))
 
         // Buttons
         Row (
@@ -437,8 +460,11 @@ fun ExamSessionCardExpandedContent(
                 modifier = Modifier.weight(0.15f)
             )
 
-            PrenotButton(
+            PrenotButton( // TODO: Add true vars
                 modifier = Modifier,
+                editable = true,
+                booked = false,
+                onClick = {  },
             )
 
             Spacer(
@@ -454,8 +480,7 @@ fun InfoSection(
     president: String,
     subscribedStudents: Int,
     note: String,
-    startDate: Instant,
-    endDate: Instant,
+    spacing: Dp = 4.dp,
 ) {
     val weakColor = MaterialTheme.colorScheme.outline
     val weakWeight = FontWeight.Medium
@@ -511,7 +536,7 @@ fun InfoSection(
         }
 
         Spacer(
-            modifier = Modifier.height(4.dp),
+            modifier = Modifier.height(spacing),
         )
 
         // President, Subscribed
@@ -560,7 +585,7 @@ fun InfoSection(
         }
 
         Spacer(
-            modifier = Modifier.height(4.dp),
+            modifier = Modifier.height(spacing),
         )
 
         // Session Notes
@@ -605,62 +630,55 @@ fun BookingStartEndRow(
             color = weakColor,
             fontWeight = weakWeight,
             fontSize = size,
+            lineHeight = size.times(1.4f),
         )
         Text(
             text = startDate.formatDate(),
             color = strongColor,
             fontWeight = strongWeight,
             fontSize = size,
+            lineHeight = size.times(1.4f),
         )
         Text(
             text = " to ",
             color = weakColor,
             fontWeight = weakWeight,
             fontSize = size,
+            lineHeight = size.times(1.4f),
         )
         Text(
             text = endDate.formatDate(),
             color = strongColor,
             fontWeight = strongWeight,
             fontSize = size,
+            lineHeight = size.times(1.4f),
         )
-    }
-}
-
-// Copy-pasted from stackOverflow
-@Composable
-fun MeasureUnconstrainedViewWidth(
-    viewToMeasure: @Composable () -> Unit,
-    content: @Composable (measuredWidth: Dp) -> Unit,
-) {
-    SubcomposeLayout { constraints ->
-        val measuredWidth = subcompose("viewToMeasure", viewToMeasure)[0]
-            .measure(Constraints()).width.toDp()
-
-        val contentPlaceable = subcompose("content") {
-            content(measuredWidth)
-        }[0].measure(constraints)
-        layout(contentPlaceable.width, contentPlaceable.height) {
-            contentPlaceable.place(0, 0)
-        }
     }
 }
 
 @Composable
 fun PrenotButton(
     modifier: Modifier = Modifier,
+    editable: Boolean,
+    booked: Boolean,
+    onClick: () -> Unit,
 ) {
-    val book = "PRENOT"
-    val revoke = "UNPRENOT"
+    val bookString = "PRENOT"
+    val revokeString = "UNPRENOT"
 
-    val goodRedColor = Color(
+    val goodRedColor = Color( // TODO: Make this into fkn error color, now it sucks
         217f / 256f,
         85f / 256f,
         85f / 256f
-    ) // TODO: Make this into fkn error color, now it sucks
+    )
+
+    val borderColor = if (editable) goodRedColor else goodRedColor.copy(alpha = 0.5f)
+    val textColor = if (editable) Color.Unspecified else Color.White.copy(alpha = 0.5f)
+    val textString = if (!booked) bookString else revokeString
+
 
     // Ensure that Prenot button is large enough to contain both strings
-    MeasureUnconstrainedViewWidth(
+    MeasureWidthLayout(
         viewToMeasure = {
             StdButtonEmpty(
                 modifier = modifier
@@ -668,7 +686,7 @@ fun PrenotButton(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 9.dp),
-                    text = if (book.length > revoke.length) book else revoke,
+                    text = if (bookString.length > revokeString.length) bookString else revokeString,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -677,8 +695,8 @@ fun PrenotButton(
         StdButtonEmpty(
             modifier = modifier
                 .width(measuredWidth),
-            border = BorderStroke(1.5.dp, goodRedColor),
-            onClick = {} // TODO: Add onclick prenot
+            border = BorderStroke(1.5.dp, borderColor),
+            onClick = onClick
         ) {
             Row(
                 modifier = Modifier
@@ -688,8 +706,9 @@ fun PrenotButton(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 9.dp),
-                    text = "PRENOT",
-                    fontWeight = FontWeight.Bold
+                    text = textString,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
             }
         }
@@ -700,7 +719,6 @@ fun PrenotButton(
 fun AddCalendarButton(
     modifier: Modifier = Modifier,
 ) {
-
     val add = "Add"
     val remove = "Remove"
 
@@ -711,7 +729,7 @@ fun AddCalendarButton(
     ) // TODO: Make this into fkn error color, now it sucks
 
     // Ensure that Prenot button is large enough to contain both strings
-    MeasureUnconstrainedViewWidth(
+    MeasureWidthLayout(
         viewToMeasure = {
             Text(
                 modifier = Modifier,
@@ -721,6 +739,7 @@ fun AddCalendarButton(
         }
     ) { measuredWidth ->
         StdButtonEmpty(
+            modifier = modifier,
             border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
             onClick = {} // TODO: Add onclick addToCalendar
         ) {

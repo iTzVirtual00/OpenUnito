@@ -82,6 +82,7 @@ material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material
 
 compose-navigationevent = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "composeNavigationEvent" }
 
+# Locale library
 locale-core = { module = "dev.carcara:kotlinx-locale-core", version.ref = "kotlinx-locale" }
 locale-platform = { module = "dev.carcara:kotlinx-locale-platform", version.ref = "kotlinx-locale" }
 locale-datetime-cldr-skeletons = { module = "dev.carcara:kotlinx-locale-datetime-cldr-skeletons", version.ref = "kotlinx-locale" }

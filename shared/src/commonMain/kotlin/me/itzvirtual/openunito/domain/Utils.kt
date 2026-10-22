@@ -63,6 +63,15 @@ fun LocalTime.formatFriendlyTime(
     locale: Locale = Locale.current,
 ): String = this.format(FormatStyle.SHORT, locale)
 
+// "21 dec 2026"
+fun Instant.formatMediumDate(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = Locale.current,
+): String = this.toLocalDateTime(timeZone).date.formatMediumDate(locale)
+fun LocalDate.formatMediumDate(
+    locale: Locale = Locale.current,
+): String = this.format(FormatStyle.MEDIUM, locale)
+
 // "21/10/2026" or "10/21/2026"
 fun Instant.formatDate(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
