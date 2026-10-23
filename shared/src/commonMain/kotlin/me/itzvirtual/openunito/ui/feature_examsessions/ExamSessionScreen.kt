@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -50,9 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.examdate.ExamDate
+import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
+import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.formatDate
-import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.formatMediumDate
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
@@ -245,6 +243,8 @@ fun ExamBookingList(
     stateError: String?,
     debug: Boolean,
 ) {
+
+    var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
     ListWrapper(
         modifier = modifier,
         isEmpty = exams.isEmpty(),
@@ -261,7 +261,12 @@ fun ExamBookingList(
                     ExamSessionCard(
                         modifier = Modifier
                             .padding(bottom = 10.dp),
-                        exam = exam
+                        exam = exam,
+                        expanded = exam.id() == expandedExamId,
+                        onClick = {
+                            val id = exam.id()
+                            expandedExamId = if (expandedExamId != id) id else null
+                        }
                     )
                 }
             }
@@ -273,9 +278,9 @@ fun ExamBookingList(
 fun ExamSessionCard(
     modifier: Modifier = Modifier,
     exam: ExamDate,
+    expanded: Boolean,
+    onClick: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(true) }
-
     val bookingEnabled = exam.bookingEnabled
     val booked = false
 
@@ -297,7 +302,7 @@ fun ExamSessionCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(
-                onClick = { expanded = !expanded }
+                onClick = onClick
             ),
     ) {
 

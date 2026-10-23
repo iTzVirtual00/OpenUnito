@@ -6,6 +6,8 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 data class ExamDate(
+    val appId: Long,
+
     val adsceId: Long,
     val adId: Long,
     val activityCode: String,
@@ -31,8 +33,15 @@ data class ExamDate(
     val questionnaire: Int
 )
 
+typealias ExamDateId = Triple<Long, Long, Long>
+// None of the ids seems to be unique :(
+fun ExamDate.id(): ExamDateId {
+    return Triple(adsceId, adId, appId)
+}
+
 val examDateSample: List<ExamDate> = listOf(
     ExamDate(
+        appId = 1,
         adsceId = 23948175L,
         adId = 95183L,
         activityCode = "INF0328",
@@ -52,6 +61,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 2,
         adsceId = 23948176L,
         adId = 95183L,
         activityCode = "INF0328",
@@ -71,6 +81,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 3,
         adsceId = 23948177L,
         adId = 95183L,
         activityCode = "INF0328",
@@ -90,6 +101,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 0
     ),
     ExamDate(
+        appId = 4,
         adsceId = 24183920L,
         adId = 91385L,
         activityCode = "INF0084",
@@ -109,6 +121,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 5,
         adsceId = 24183921L,
         adId = 91385L,
         activityCode = "INF0084",
@@ -128,6 +141,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 6,
         adsceId = 25839104L,
         adId = 93847L,
         activityCode = "INF0102",
@@ -147,6 +161,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 7,
         adsceId = 25839105L,
         adId = 93847L,
         activityCode = "INF0102",
@@ -166,6 +181,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 8,
         adsceId = 26194832L,
         adId = 97421L,
         activityCode = "INF0555",
@@ -185,6 +201,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 9,
         adsceId = 27391845L,
         adId = 98519L,
         activityCode = "MAT0110",
@@ -204,6 +221,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        appId = 10,
         adsceId = 27391846L,
         adId = 98519L,
         activityCode = "MAT0110",

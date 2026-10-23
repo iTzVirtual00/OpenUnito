@@ -7,6 +7,7 @@ import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.getNowMillis
 
 fun ExamDateDto.toDomain() = ExamDate(
+    appId = appId,
     adsceId = adsceId,
     adId = adId,
     activityCode = cod,
