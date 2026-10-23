@@ -1,9 +1,7 @@
 package me.itzvirtual.openunito.core.network
 
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format
-import kotlinx.datetime.offsetAt
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -38,6 +36,7 @@ object MicrosoftDateSerializer : KSerializer<Instant> {
             Instant.fromEpochMilliseconds(0L)
         }
     }
+
     override fun serialize(encoder: Encoder, value: Instant) {
         val offsetString = fixedOffset.format(UtcOffset.Formats.FOUR_DIGITS)
         encoder.encodeString("/Date(${value.toEpochMilliseconds()}$offsetString)/")

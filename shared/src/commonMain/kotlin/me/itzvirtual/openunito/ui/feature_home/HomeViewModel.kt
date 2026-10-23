@@ -59,7 +59,8 @@ class HomeViewModel(
             } else {
                 val today = getToday()
                 val startOfToday = today.atStartOfDayIn(getCurrentTimeZone())
-                val endOfTomorrow = today.plus(2, DateTimeUnit.DAY).atStartOfDayIn(getCurrentTimeZone())
+                val endOfTomorrow =
+                    today.plus(2, DateTimeUnit.DAY).atStartOfDayIn(getCurrentTimeZone())
 
                 agendaRepo.getAgendaFlow(
                     calendarLinkId = selectedCalendar.calendarLinkId,

@@ -306,7 +306,7 @@ fun ExamSessionCard(
             ),
     ) {
 
-        Box (
+        Box(
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopEnd,
@@ -352,7 +352,7 @@ fun ExamSessionCard(
                     )
                 }
             ) { measuredHeight ->
-                Surface (
+                Surface(
                     modifier = Modifier
                         .width(horPadding)
                         .height(measuredHeight),
@@ -363,7 +363,6 @@ fun ExamSessionCard(
         }
     }
 }
-
 
 
 @Composable
@@ -451,7 +450,7 @@ fun ExamSessionCardDrawer(
         Spacer(Modifier.height(12.dp))
 
         // Buttons
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
@@ -465,11 +464,12 @@ fun ExamSessionCardDrawer(
                 modifier = Modifier.weight(0.15f)
             )
 
-            PrenotButton( // TODO: Add true vars
+            PrenotButton(
+                // TODO: Add true vars
                 modifier = Modifier,
                 editable = true,
                 booked = false,
-                onClick = {  },
+                onClick = { },
             )
 
             Spacer(
@@ -496,7 +496,7 @@ fun InfoSection(
     val size = 13.sp
     Column {
         // Activity code, sessions
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Max)
@@ -545,7 +545,7 @@ fun InfoSection(
         )
 
         // President, Subscribed
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Max)

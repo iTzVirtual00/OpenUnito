@@ -57,7 +57,8 @@ class Prefetcher(
                     val today = getToday()
                     val startOfToday = today.atStartOfDay()
                     val endOfTomorrow = today.plus(2, DateTimeUnit.DAY).atStartOfDay()
-                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, startOfToday, endOfTomorrow).first()
+                    agendaRepo.getAgendaFlow(calendar.calendarLinkId, startOfToday, endOfTomorrow)
+                        .first()
                 }
             }
 

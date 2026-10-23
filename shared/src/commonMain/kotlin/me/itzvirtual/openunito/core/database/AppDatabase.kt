@@ -5,34 +5,30 @@ import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
-import androidx.room3.migration.AutoMigrationSpec
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.async.executeSQL
 import me.itzvirtual.openunito.data.agenda.local.AgendaDao
-import me.itzvirtual.openunito.data.calendar.local.CalendarConfigDao
-import me.itzvirtual.openunito.data.config.local.AppConfigDao
-import me.itzvirtual.openunito.data.dashboard.local.DashboardDao
-import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
-import me.itzvirtual.openunito.data.examresult.local.ExamResultDao
-import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
-import me.itzvirtual.openunito.data.student.local.StudentDao
 import me.itzvirtual.openunito.data.agenda.local.AgendaEntity
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfig
+import me.itzvirtual.openunito.data.calendar.local.CalendarConfigDao
 import me.itzvirtual.openunito.data.config.local.AppConfig
+import me.itzvirtual.openunito.data.config.local.AppConfigDao
+import me.itzvirtual.openunito.data.dashboard.local.DashboardDao
 import me.itzvirtual.openunito.data.dashboard.local.DashboardEntity
+import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
 import me.itzvirtual.openunito.data.examdate.local.ExamDateEntity
+import me.itzvirtual.openunito.data.examresult.local.ExamResultDao
 import me.itzvirtual.openunito.data.examresult.local.ExamResultEntity
+import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
 import me.itzvirtual.openunito.data.grade.local.ExamGradeEntity
+import me.itzvirtual.openunito.data.student.local.StudentDao
 import me.itzvirtual.openunito.data.student.local.StudentEntity
-import kotlin.reflect.KClass
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }
-
 
 
 @Database(

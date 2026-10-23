@@ -34,6 +34,7 @@ data class ExamDate(
 )
 
 typealias ExamDateId = Triple<Long, Long, Long>
+
 // None of the ids seems to be unique :(
 fun ExamDate.id(): ExamDateId {
     return Triple(adsceId, adId, appId)

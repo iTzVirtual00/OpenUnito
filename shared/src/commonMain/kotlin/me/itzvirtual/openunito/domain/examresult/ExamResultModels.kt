@@ -4,8 +4,8 @@ package me.itzvirtual.openunito.domain.examresult
 
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Instant
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 data class ExamResult(
     val id: String,
@@ -43,6 +43,7 @@ enum class GradeStatus {
 
 private val oneHourAgo: Instant
     get() = Clock.System.now().minus(1.hours)
+
 @OptIn(ExperimentalTime::class)
 val examResultsDataSample = listOf(
     ExamResult(

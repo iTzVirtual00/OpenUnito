@@ -190,9 +190,13 @@ fun OpenUnitoApp(
                         }
                     }
 
-                    navigation<CareerGraph>(startDestination = CareerRoute){
+                    navigation<CareerGraph>(startDestination = CareerRoute) {
                         composable<CareerRoute> {
-                            CareerScreen(onOpenInvokes = { navState.navController.navigate(InvokeRoute) })
+                            CareerScreen(onOpenInvokes = {
+                                navState.navController.navigate(
+                                    InvokeRoute
+                                )
+                            })
                         }
                         composable<InvokeRoute> {
                             InvokeScreen(onBack = { navState.navController.popBackStack() })
@@ -261,8 +265,10 @@ enum class AppDestinations(
 // Example of Route that needs a nested graph, remember to update AppDestination's graphClass
 @Serializable
 private object HomeGraph
+
 @Serializable
 private object HomeScreenRoute
+
 @Serializable
 private object ProfileScreenRoute
 // </Home>
@@ -270,8 +276,10 @@ private object ProfileScreenRoute
 // <Career>
 @Serializable
 private object CareerGraph
+
 @Serializable
 private object CareerRoute
+
 @Serializable
 private object InvokeRoute
 // </Career>

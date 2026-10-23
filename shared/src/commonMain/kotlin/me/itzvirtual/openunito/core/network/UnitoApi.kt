@@ -17,7 +17,6 @@ import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
 import me.itzvirtual.openunito.data.examresult.remote.ExamResultDto
 import me.itzvirtual.openunito.data.grade.remote.ExamGradeDto
 import me.itzvirtual.openunito.data.student.StudentRepository
-import me.itzvirtual.openunito.domain.student.StudentCareer
 
 data class CareerContext(
     val id: Int,
@@ -30,7 +29,8 @@ class UnitoApi(
     private val studentRepository: StudentRepository,
 ) {
     // .first() hangs until we have a valid career
-    private suspend fun getCareerContext(): CareerContext = studentRepository.careerContextFlow.first()
+    private suspend fun getCareerContext(): CareerContext =
+        studentRepository.careerContextFlow.first()
 
     suspend fun getDashboardData(context: CareerContext? = null): DashboardDataResponseDto {
         val ctx = context ?: getCareerContext()

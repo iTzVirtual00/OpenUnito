@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import me.itzvirtual.openunito.core.network.isNetworkError
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.dashboard.DashboardRepository
 import me.itzvirtual.openunito.data.grade.GradeRepository

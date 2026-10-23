@@ -256,7 +256,7 @@ fun Agenda(
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
 
     val currentWeekEnd by remember(currentWeekStart) {
-        derivedStateOf { currentWeekStart.plus(4, DateTimeUnit.DAY)} // Monday to Friday
+        derivedStateOf { currentWeekStart.plus(4, DateTimeUnit.DAY) } // Monday to Friday
     }
 
     val filteredEvents by remember(events, selectedFilter) {

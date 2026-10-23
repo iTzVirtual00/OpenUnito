@@ -13,7 +13,6 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
-import kotlinx.datetime.format.char
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -25,6 +24,7 @@ import kotlin.time.Instant
 fun getNowInstant(): Instant {
     return Clock.System.now()
 }
+
 fun getNowMillis(): Long {
     return Clock.System.now().toEpochMilliseconds()
 }
@@ -59,6 +59,7 @@ fun Instant.formatFriendlyTime(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     locale: Locale = Locale.current,
 ): String = this.toLocalDateTime(timeZone).time.formatFriendlyTime(locale)
+
 fun LocalTime.formatFriendlyTime(
     locale: Locale = Locale.current,
 ): String = this.format(FormatStyle.SHORT, locale)
@@ -68,6 +69,7 @@ fun Instant.formatMediumDate(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     locale: Locale = Locale.current,
 ): String = this.toLocalDateTime(timeZone).date.formatMediumDate(locale)
+
 fun LocalDate.formatMediumDate(
     locale: Locale = Locale.current,
 ): String = this.format(FormatStyle.MEDIUM, locale)
@@ -77,6 +79,7 @@ fun Instant.formatDate(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     locale: Locale = Locale.current,
 ): String = this.toLocalDateTime(timeZone).date.formatDate(locale)
+
 fun LocalDate.formatDate(
     locale: Locale = Locale.current,
 ): String = this.format(FormatStyle.SHORT, locale)

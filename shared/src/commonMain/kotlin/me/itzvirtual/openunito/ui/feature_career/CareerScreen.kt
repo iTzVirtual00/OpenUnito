@@ -417,7 +417,7 @@ fun ExamResultsSection(
         isLoading = isLoading,
         stateError = stateError
     ) {
-        StdSurface (
+        StdSurface(
             modifier = Modifier
                 .height(90.dp)
         ) {

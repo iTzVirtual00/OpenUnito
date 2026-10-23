@@ -23,8 +23,8 @@ import me.itzvirtual.openunito.data.agenda.remote.PublicAgendaRequest
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.getCurrentTimeZone
-import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.getNowMillis
+import me.itzvirtual.openunito.domain.getToday
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import kotlin.time.Instant
@@ -115,7 +115,9 @@ class AgendaRepository(
                         // TODO: notify something
                     } finally {
                         jobsMutex.withLock {
-                            if(activeRefreshes[key] === coroutineContext[Job]) activeRefreshes.remove(key)
+                            if (activeRefreshes[key] === coroutineContext[Job]) activeRefreshes.remove(
+                                key
+                            )
                         }
                     }
                 }

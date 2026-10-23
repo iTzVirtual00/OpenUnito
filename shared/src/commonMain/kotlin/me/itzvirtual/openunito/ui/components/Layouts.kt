@@ -18,7 +18,7 @@ fun MeasureHeightLayout(
             content(measuredHeight)
         }[0].measure(constraints)
         layout(contentPlaceable.width, contentPlaceable.height) {
-            contentPlaceable.place(0,0)
+            contentPlaceable.place(0, 0)
         }
     }
 }

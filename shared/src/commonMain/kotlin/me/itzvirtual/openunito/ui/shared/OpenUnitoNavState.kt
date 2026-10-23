@@ -31,6 +31,7 @@ fun rememberOpenUnitoNavState(
         OpenUnitoNavState(navController, currentBackStackEntryState)
     }
 }
+
 class OpenUnitoNavState(
     val navController: NavHostController,
     private val entryState: State<NavBackStackEntry?>
@@ -114,7 +115,10 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.tabAwareEnterTransition():
         } else {
             AnimatedContentTransitionScope.SlideDirection.End
         }
-        slideIntoContainer(direction, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+        slideIntoContainer(
+            direction,
+            animationSpec = tween(300)
+        ) + fadeIn(animationSpec = tween(300))
     } else {
         fadeIn(animationSpec = tween(300))
     }
@@ -130,7 +134,11 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.tabAwareExitTransition(): 
         } else {
             AnimatedContentTransitionScope.SlideDirection.End
         }
-        slideOutOfContainer(direction, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+        slideOutOfContainer(direction, animationSpec = tween(300)) + fadeOut(
+            animationSpec = tween(
+                300
+            )
+        )
     } else {
         fadeOut(animationSpec = tween(300))
     }

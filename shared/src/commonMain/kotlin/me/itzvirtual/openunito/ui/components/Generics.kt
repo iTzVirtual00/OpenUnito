@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -20,7 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import me.itzvirtual.openunito.resources.*
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.no_data
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
@@ -53,7 +53,7 @@ fun ListWrapper(
     content: @Composable () -> Unit,
 ) {
     if (isEmpty || stateError != null || isLoading) {
-        StdSurface (
+        StdSurface(
             modifier = modifier,
         ) {
             if (debug) {
@@ -71,7 +71,7 @@ fun ListWrapper(
             }
         }
     } else {
-        Box (
+        Box(
             modifier = modifier,
         ) {
             content()

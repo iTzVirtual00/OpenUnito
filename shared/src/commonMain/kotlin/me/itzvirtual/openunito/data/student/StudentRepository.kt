@@ -53,34 +53,35 @@ class StudentRepository(
 ) {
     private val activeRefreshJob = AtomicReference<Job?>(null)
 
-    val studentCacheFlow: StateFlow<CachedStudentData?> = dao.observe() // add careerId as lookup key
-        .map { entity ->
-            if (entity == null) {
-                triggerBackgroundRefresh()
-                null
-            } else {
-                val isStale =
-                    (getNowMillis() - entity.cachedAt) > CacheConfig.STUDENT_STALE_MS
-
-                if (isStale) {
+    val studentCacheFlow: StateFlow<CachedStudentData?> =
+        dao.observe() // add careerId as lookup key
+            .map { entity ->
+                if (entity == null) {
                     triggerBackgroundRefresh()
-                }
-
-                val domainData = runCatching { entity.toDomain(json) }.getOrNull()
-                if (domainData == null) {
                     null
                 } else {
-                    CachedStudentData(data = domainData, isStale = isStale)
+                    val isStale =
+                        (getNowMillis() - entity.cachedAt) > CacheConfig.STUDENT_STALE_MS
+
+                    if (isStale) {
+                        triggerBackgroundRefresh()
+                    }
+
+                    val domainData = runCatching { entity.toDomain(json) }.getOrNull()
+                    if (domainData == null) {
+                        null
+                    } else {
+                        CachedStudentData(data = domainData, isStale = isStale)
+                    }
                 }
             }
-        }
-        .distinctUntilChanged()
-        .flowOn(ioDispatcher)
-        .stateIn(
-            scope = externalScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
+            .distinctUntilChanged()
+            .flowOn(ioDispatcher)
+            .stateIn(
+                scope = externalScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null
+            )
 
     // TODO: Start prefetcher or destroy other models or something (old data flashes)
     val careerContextFlow: SharedFlow<CareerContext> = combine(
