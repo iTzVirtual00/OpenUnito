@@ -32,8 +32,8 @@ fun ExamDateDto.toDomain() = ExamDate(
     questionnaire = statoQuest
 )
 
-fun List<ExamDateDto>.toEntity(json: Json) =
-    ExamDateEntity(id = 0, data = json.encodeToString(this), cachedAt = getNowMillis())
+fun List<ExamDateDto>.toEntity(json: Json, careerId: Int) =
+    ExamDateEntity(id = careerId, data = json.encodeToString(this), cachedAt = getNowMillis())
 
 fun ExamDateEntity.toDomain(json: Json): List<ExamDate> =
     json.decodeFromString<List<ExamDateDto>>(data).map { it.toDomain() }

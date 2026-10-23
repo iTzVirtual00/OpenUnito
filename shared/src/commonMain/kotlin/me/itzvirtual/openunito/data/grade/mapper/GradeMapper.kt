@@ -17,8 +17,8 @@ fun ExamGradeDto.toDomain() = ExamGrade(
 
 fun ScoreDto.toDomain() = Score(date = date, value = value, laude = laude)
 
-fun List<ExamGradeDto>.toEntity(json: Json) =
-    ExamGradeEntity(id = 0, data = json.encodeToString(this), cachedAt = getNowMillis())
+fun List<ExamGradeDto>.toEntity(json: Json, careerId: Int) =
+    ExamGradeEntity(id = careerId, data = json.encodeToString(this), cachedAt = getNowMillis())
 
 fun ExamGradeEntity.toDomain(json: Json): List<ExamGrade> =
     json.decodeFromString<List<ExamGradeDto>>(data).map { it.toDomain() }

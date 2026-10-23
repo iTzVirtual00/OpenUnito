@@ -5,6 +5,7 @@ import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
+import androidx.room3.migration.AutoMigrationSpec
 import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
@@ -25,6 +26,7 @@ import me.itzvirtual.openunito.data.examdate.local.ExamDateEntity
 import me.itzvirtual.openunito.data.examresult.local.ExamResultEntity
 import me.itzvirtual.openunito.data.grade.local.ExamGradeEntity
 import me.itzvirtual.openunito.data.student.local.StudentEntity
+import kotlin.reflect.KClass
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
@@ -44,10 +46,11 @@ expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
         ExamDateEntity::class,
         ExamGradeEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(3, 4)
+        AutoMigration(3, 4),
+        AutoMigration(4, 5),
     ]
 )
 @ConstructedBy(AppDatabaseConstructor::class)

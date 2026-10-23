@@ -45,6 +45,8 @@
     <string name="tomorrow_classes_title">Tomorrow's classes</string>
     <string name="no_classes_tomorrow">No classes tomorrow</string>
     <string name="careers_title">Careers</string>
+    <string name="select_career_button">Select career</string>
+    <string name="selected_career_label">Selected</string>
     <string name="open_credit_statistics">Open statistics</string>
     <string name="error_no_calendar_configured">No calendars configured.</string>
     <string name="home_tab_title">Home</string>

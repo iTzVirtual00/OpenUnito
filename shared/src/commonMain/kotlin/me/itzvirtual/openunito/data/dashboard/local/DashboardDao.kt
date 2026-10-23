@@ -7,11 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DashboardDao {
-    @Query("SELECT * FROM dashboard_cache WHERE id = 0")
-    fun get(): Flow<DashboardEntity?>
-
-    @Query("SELECT * FROM dashboard_cache WHERE id = 0")
-    suspend fun getOnce(): DashboardEntity?
+    @Query("SELECT * FROM dashboard_cache WHERE id = :careerId")
+    fun observe(careerId: Int): Flow<DashboardEntity?>
 
     @Upsert
     suspend fun upsert(entity: DashboardEntity)

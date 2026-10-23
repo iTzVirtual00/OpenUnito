@@ -32,8 +32,7 @@ class DevtoolsViewModel(
     }
 
     fun copyTokenToClipboard(onToken: (String) -> Unit) {
-        // TODO: This is tech debt
-        //  also: make "copied!" alert in some way
+        // TODO: Show "copied!" alert in some way
         viewModelScope.launch {
             appConfigRepo.getToken()?.let(onToken)
         }

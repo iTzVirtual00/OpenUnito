@@ -53,6 +53,9 @@ fun ProfileScreen(
         onBack = onBack,
         onCopy = { text ->
             scope.launch { clipboard.setText(text) }
+        },
+        onSelectCareer = { careerId ->
+            viewModel.setCareer(careerId)
         }
     )
 }
@@ -63,8 +66,10 @@ fun ProfileScreenContent(
     state: ProfileScreenState,
     onBack: () -> Unit = {},
     onCopy: (text: String) -> Unit = {},
+    onSelectCareer: (careerId: Int) -> Unit = {},
 ) {
     val careers = state.data?.careers ?: emptyList()
+    val selectedCareerId = state.selectedCareerId
     val stateError = state.error
     val isLoading = state.isLoading
 
@@ -96,12 +101,14 @@ fun ProfileScreenContent(
         ) {
             // column??
             // Again, yes
-            Column(modifier = modifier) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 CareersSection(
                     careers = careers,
+                    selectedCareerId = selectedCareerId,
                     stateError = stateError,
                     isLoading = isLoading,
                     onCopy = onCopy,
+                    onSelectCareer = onSelectCareer,
                 )
             }
         }
@@ -113,9 +120,11 @@ fun ProfileScreenContent(
 fun CareersSection(
     modifier: Modifier = Modifier,
     careers: List<StudentCareer>,
+    selectedCareerId: Int? = null,
     stateError: String?,
     isLoading: Boolean,
     onCopy: (text: String) -> Unit = {},
+    onSelectCareer: (careerId: Int) -> Unit = {},
 ) {
     val debug = false // TODO pass with viewModel
 
@@ -136,7 +145,9 @@ fun CareersSection(
                         Spacer(modifier = Modifier.height(8.dp))
                         StudentCareerCard(
                             career = career,
+                            isSelected = career.id == selectedCareerId,
                             onCopy = onCopy,
+                            onSelectCareer = onSelectCareer,
                         )
                     }
                 }
@@ -153,6 +164,7 @@ fun ProfileScreenPreview() {
             ProfileScreenContent(
                 state = ProfileScreenState(
                     data = studentDataSample,
+                    selectedCareerId = 1,
                     isLoading = false,
                     error = null
                 ),

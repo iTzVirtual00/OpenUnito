@@ -51,31 +51,10 @@ class TranscriptViewModel(
         )
     )
 
-    fun refreshGrades() {
-        viewModelScope.launch {
-            manualError.value = null
-            isManualRefreshing.value = true
-            try {
-                gradeRepo.refresh().onFailure { e ->
-                    val hasCachedGrades = screenState.value.gradesState.grades.isNotEmpty()
-                    val shouldSuppress = e.isNetworkError() && hasCachedGrades
-                    if (!shouldSuppress) {
-                        manualError.value = e.message ?: "Failed to refresh grades"
-                    }
-                }
-            } finally {
-                isManualRefreshing.value = false
-            }
-        }
-    }
-
     fun changeGradeStatus(examId: String, newStatus: GradeStatus): Job =
         viewModelScope.launch {
             manualError.value = null
             dashboardRepo.changeGradeStatus(examId, newStatus)
-                .onSuccess {
-                    refreshGrades()
-                }
                 .onFailure { e ->
                     manualError.value = e.message ?: "Failed to update grade status"
                 }

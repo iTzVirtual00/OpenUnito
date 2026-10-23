@@ -4,6 +4,7 @@ import me.itzvirtual.openunito.domain.student.StudentData
 
 data class ProfileScreenState(
     val data: StudentData? = null,
+    val selectedCareerId: Int? = null,
     val isLoading: Boolean = false,
     val isStale: Boolean = false,
     val error: String? = null,

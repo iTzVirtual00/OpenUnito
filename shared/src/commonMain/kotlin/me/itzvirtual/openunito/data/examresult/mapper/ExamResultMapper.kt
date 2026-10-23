@@ -22,9 +22,9 @@ fun GradeResultDto.toDomain() = GradeResult(
     canReject = canReject, laude = laude,
 )
 
-fun List<ExamResultDto>.toEntity(json: Json) =
+fun List<ExamResultDto>.toEntity(json: Json, careerId: Int) =
     ExamResultEntity(
-        id = 0,
+        id = careerId,
         data = json.encodeToString(this),
         cachedAt = getNowMillis()
     )

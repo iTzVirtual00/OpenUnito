@@ -1,28 +1,34 @@
 package me.itzvirtual.openunito.data.student
 
+import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.core.cache.CacheConfig
+import me.itzvirtual.openunito.core.network.CareerContext
+import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.local.StudentDao
 import me.itzvirtual.openunito.data.student.local.StudentEntity
 import me.itzvirtual.openunito.data.student.mapper.toDomain
 import me.itzvirtual.openunito.data.student.mapper.toEntity
 import me.itzvirtual.openunito.data.student.remote.AppInitDto
 import me.itzvirtual.openunito.domain.getNowMillis
-import me.itzvirtual.openunito.domain.student.StudentCareer
 import me.itzvirtual.openunito.domain.student.StudentData
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -40,14 +46,14 @@ class StudentRepository(
     private val client: HttpClient,
     private val dao: StudentDao,
     private val json: Json,
+    private val appConfigRepo: AppConfigRepository,
 
     @Named("ApplicationScope") private val externalScope: CoroutineScope,
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
 ) {
     private val activeRefreshJob = AtomicReference<Job?>(null)
-    private val studentDataMutex = Mutex()
 
-    val studentCacheFlow: Flow<CachedStudentData?> = dao.get()
+    val studentCacheFlow: StateFlow<CachedStudentData?> = dao.observe() // add careerId as lookup key
         .map { entity ->
             if (entity == null) {
                 triggerBackgroundRefresh()
@@ -70,10 +76,40 @@ class StudentRepository(
         }
         .distinctUntilChanged()
         .flowOn(ioDispatcher)
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
-    val studentDataFlow: Flow<StudentData?> = studentCacheFlow
-        .map { it?.data }
+    // TODO: Start prefetcher or destroy other models or something (old data flashes)
+    val careerContextFlow: SharedFlow<CareerContext> = combine(
+        studentCacheFlow.filterNotNull().map { it.data }.distinctUntilChanged(),
+        appConfigRepo.selectedCareerIdState
+    ) { studentData, selectedCareer ->
+        val studentCareers = studentData.careers
+
+        val currentCareer = selectedCareer.let { id ->
+            studentCareers.firstOrNull { it.id == id }
+        }
+
+        return@combine currentCareer ?: run {
+            val firstCareer = studentCareers.firstOrNull()//.firstOrNull { it.id != 0/*REDACTED*/ }
+                ?: throw IllegalStateException("No careers found for student")
+            Logger.w(tag = "StudentRepository") { "Selected career was invalid, fallbacking to first" }
+            appConfigRepo.setCareerId(firstCareer.id)
+            firstCareer
+        }
+    }
+        .map { CareerContext(it.id, it.registrationId) }
         .distinctUntilChanged()
+        // shareIn make it so that early subscribers don't get a null value
+        .shareIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            replay = 1
+        )
+
 
     private fun triggerBackgroundRefresh() {
         val currentJob = activeRefreshJob.load()
@@ -96,7 +132,8 @@ class StudentRepository(
 
     suspend fun refresh(): Result<StudentEntity> = runCatching {
         withContext(ioDispatcher) {
-            val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17").body<AppInitDto>()
+            val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17")
+                .body<AppInitDto>()
             val session = appInit.session ?: throw Exception("No auth session")
 
             val entity = session.toEntity(json)
@@ -104,27 +141,6 @@ class StudentRepository(
             entity
         }
     }
-
-    // This bullshit of a function exists because we need the career id to initialize UnitoApi
-    // A design choice made in the first version that I KNEW would have made me suffer in the future ( now :_) )
-    suspend fun getStudentData(): StudentData = withContext(ioDispatcher) {
-        val entity = dao.getOneShot() ?: studentDataMutex.withLock {
-            dao.getOneShot() ?: refresh().getOrThrow()
-        }
-
-        runCatching { entity.toDomain(json) }
-            .getOrElse { e ->
-                throw IllegalStateException("Failed to parse student data domain model", e)
-            }
-    }
-
-    suspend fun getCurrentCareer(): StudentCareer =
-        getStudentData().careers.firstOrNull {
-            it.id != 0/*REDACTED*/ // TODO: remove after career selection feature
-        }
-            ?: throw IllegalStateException("No careers found for student")
-
-    suspend fun checkAuth(): Boolean = refresh().isSuccess
 
     suspend fun clearCache() {
         withContext(ioDispatcher) {

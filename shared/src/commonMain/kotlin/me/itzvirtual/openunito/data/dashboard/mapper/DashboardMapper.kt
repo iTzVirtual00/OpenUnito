@@ -43,8 +43,8 @@ fun StudentStatsDto.toDomain() = StudentStats(
 
 fun MeanDto.toDomain() = Mean(base = base, definition = definition, type = type, value = value)
 
-fun DashboardDataResponseDto.toEntity(json: Json) =
-    DashboardEntity(id = 0, data = json.encodeToString(this), cachedAt = getNowMillis())
+fun DashboardDataResponseDto.toEntity(json: Json, careerId: Int) =
+    DashboardEntity(id = careerId, data = json.encodeToString(this), cachedAt = getNowMillis())
 
 fun DashboardEntity.toDomain(json: Json): DashboardData =
     json.decodeFromString<DashboardDataResponseDto>(data).toDomain()

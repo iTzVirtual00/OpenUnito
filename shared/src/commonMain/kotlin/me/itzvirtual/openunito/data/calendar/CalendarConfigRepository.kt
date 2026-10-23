@@ -23,7 +23,7 @@ class CalendarConfigRepository(
         .distinctUntilChanged()
 
     val selectedCalendarFlow: Flow<CalendarConfig?> = combine(
-        appConfigRepo.selectedCalendarIdFlow,
+        appConfigRepo.selectedCalendarIdState,
         calendarsFlow
     ) { selectedId, calendars ->
         if (selectedId != null) {

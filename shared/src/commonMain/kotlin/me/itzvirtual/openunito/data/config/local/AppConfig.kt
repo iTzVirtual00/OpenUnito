@@ -7,9 +7,10 @@ import androidx.room3.PrimaryKey
 // Remember to reflect non-default parameters into DatabaseModule.dbInitialize
 @Entity(tableName = "app_config")
 data class AppConfig(
-    @PrimaryKey val id: Int = 0,
+    @PrimaryKey val id: Int,
     val authToken: String? = null,
     val selectedCalendarId: Int? = null,
+    val selectedCareerId: Int? = null,
     @ColumnInfo(defaultValue = "0") val debug: Boolean = false,
     // TODO: Add "selectedProfile", default value 0,
     // They give us careers in a list so why not use the index to select it

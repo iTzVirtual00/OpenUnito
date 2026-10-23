@@ -25,7 +25,7 @@ class ExamSessionViewModel(
     private val datesManualError = MutableStateFlow<String?>(null)
     private val resultsManualError = MutableStateFlow<String?>(null)
     private val isManualRefreshing = MutableStateFlow(false)
-
+    // TODO: refresh behaviour integration and cleanup
     val screenState: StateFlow<ExamDatesScreenState> = uberCombine(
         examDateRepo.examDatesCacheFlow,
         examResultRepo.examResultsCacheFlow,
@@ -63,11 +63,11 @@ class ExamSessionViewModel(
     /**
      * Concurrent manual refresh for swipe-to-refresh.
      */
-    fun refresh() {
+    fun refresh(careerId: Int) {
         viewModelScope.launch {
             isManualRefreshing.value = true
             try {
-                launch { refreshExamDates() }
+                launch { refreshExamDates(careerId) }
             } finally {
                 isManualRefreshing.value = false
             }
@@ -77,10 +77,10 @@ class ExamSessionViewModel(
     /**
      * User-initiated refresh for exam dates.
      */
-    fun refreshExamDates() {
+    fun refreshExamDates(careerId: Int) {
         viewModelScope.launch {
             datesManualError.value = null
-            examDateRepo.refresh().onFailure { err ->
+            examDateRepo.refresh(careerId).onFailure { err ->
                 val hasCached = screenState.value.examDatesState.dates.isNotEmpty()
                 val shouldSuppress = err.isNetworkError() && hasCached
                 if (!shouldSuppress) {

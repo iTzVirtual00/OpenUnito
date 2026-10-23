@@ -6,7 +6,7 @@ import androidx.room3.PrimaryKey
 /** Singleton cache row for the dashboard data response. */
 @Entity(tableName = "dashboard_cache")
 data class DashboardEntity(
-    @PrimaryKey val id: Int = 0,
+    @PrimaryKey val id: Int,
     val data: String,       // JSON-serialized DashboardDataResponseDto
     val cachedAt: Long,
 )

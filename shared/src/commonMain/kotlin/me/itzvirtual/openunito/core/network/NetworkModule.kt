@@ -60,7 +60,7 @@ class NetworkModule {
         defaultRequest {
             url(API_URL)
             header("ResultLang", currentLanguage)
-            appConfigRepo.getTokenInMemory()?.let { token ->
+            appConfigRepo.getToken()?.let { token ->
                 if (token.isNotBlank()) {
                     header("Authorization", token)
                 }

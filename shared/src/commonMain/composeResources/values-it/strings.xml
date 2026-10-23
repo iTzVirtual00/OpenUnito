@@ -44,6 +44,8 @@
     <string name="tomorrow_classes_title">Lezioni di domani</string>
     <string name="no_classes_tomorrow">Nessuna lezione programmata domani</string>
     <string name="careers_title">Carriere</string>
+    <string name="select_career_button">Seleziona carriera</string>
+    <string name="selected_career_label">Selezionata</string>
     <string name="open_credit_statistics">Apri statistiche</string>
     <string name="error_no_calendar_configured">Nessun calendario configurato.</string>
     <string name="home_tab_title">Home</string>

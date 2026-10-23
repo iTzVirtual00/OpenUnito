@@ -463,6 +463,8 @@ fun ExamResultsSection(
     }
 }
 
+
+// TODO: hi Gabriele, cna u pwease UI -> <- ?
 @Composable
 fun ExamResultRow(result: ExamResult) {
     result.gradeResult!!

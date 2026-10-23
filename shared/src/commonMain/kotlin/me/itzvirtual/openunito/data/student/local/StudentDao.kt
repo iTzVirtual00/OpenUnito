@@ -8,10 +8,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface StudentDao {
     @Query("SELECT * FROM student_cache WHERE id = 0")
-    fun get(): Flow<StudentEntity?>
-
-    @Query("SELECT * FROM student_cache WHERE id = 0")
-    suspend fun getOneShot(): StudentEntity?
+    fun observe(): Flow<StudentEntity?>
 
     @Upsert
     suspend fun upsert(entity: StudentEntity)

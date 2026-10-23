@@ -49,6 +49,7 @@ kotlin {
     }
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 
     // Target declarations - add or remove as needed below. These define

@@ -96,10 +96,10 @@ class CareerViewModel(
     )
 
     // experimental pull-to-refresh features
-    fun refreshDashboard() {
+    fun refreshDashboard(careerId: Int) {
         viewModelScope.launch {
             dashboardManualError.value = null
-            dashboardRepo.refresh().onFailure { e ->
+            dashboardRepo.refresh(careerId).onFailure { e ->
                 val hasData = screenState.value.dashboardState.data != null
                 val shouldSuppress = e.isNetworkError() && hasData
                 if (!shouldSuppress) {
@@ -109,10 +109,10 @@ class CareerViewModel(
         }
     }
 
-    fun refreshExamResults() {
+    fun refreshExamResults(careerId: Int) {
         viewModelScope.launch {
             examResultsManualError.value = null
-            examResultRepo.refresh().onFailure { e ->
+            examResultRepo.refresh(careerId).onFailure { e ->
                 val hasData = screenState.value.examResultsState.results.isNotEmpty()
                 val shouldSuppress = e.isNetworkError() && hasData
                 if (!shouldSuppress) {
@@ -122,12 +122,12 @@ class CareerViewModel(
         }
     }
 
-    fun refreshAll() {
+    fun refreshAll(careerId: Int) {
         viewModelScope.launch {
             isManualRefreshing.value = true
             try {
-                launch { refreshDashboard() }
-                launch { refreshExamResults() }
+                launch { refreshDashboard(careerId) }
+                launch { refreshExamResults(careerId) }
             } finally {
                 isManualRefreshing.value = false
             }

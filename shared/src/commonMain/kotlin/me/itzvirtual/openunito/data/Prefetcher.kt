@@ -32,6 +32,7 @@ class Prefetcher(
     @Named("ApplicationScope") private val scope: CoroutineScope,
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
 ) {
+    // TODO: Fix this, recent changes to how Flow works, makes it return loading (null) immediately
     fun prefetchData(scope: CoroutineScope) {
         // Note: we are not prefetching student data as it is initialized with UnitoApi bullshit
         // Check StudentRepository.refresh() for more info
