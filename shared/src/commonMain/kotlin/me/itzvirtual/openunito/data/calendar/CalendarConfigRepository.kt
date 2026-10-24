@@ -14,13 +14,8 @@ import org.koin.core.annotation.Single
 class CalendarConfigRepository(
     private val dao: CalendarConfigDao,
     private val appConfigRepo: AppConfigRepository,
-    private val agendaRepo: AgendaRepository,
 ) {
     val calendarsFlow: Flow<List<CalendarConfig>> = dao.getAllFlow()
-
-    fun getByIdFlow(id: Int): Flow<CalendarConfig?> = calendarsFlow
-        .map { list -> list.find { it.id == id } }
-        .distinctUntilChanged()
 
     val selectedCalendarFlow: Flow<CalendarConfig?> = combine(
         appConfigRepo.selectedCalendarIdState,
@@ -32,15 +27,6 @@ class CalendarConfigRepository(
             calendars.firstOrNull()
         }
     }.distinctUntilChanged()
-
-    suspend fun getAll(): List<CalendarConfig> = dao.getAll()
-
-    suspend fun getById(id: Int): CalendarConfig? = dao.getById(id)
-
-    suspend fun getSelectedCalendar(): CalendarConfig? {
-        val selected = appConfigRepo.getSelectedCalendarId() ?: return null
-        return dao.getById(selected)
-    }
 
     suspend fun add(name: String, calendarLinkId: String): CalendarConfig {
         val config = CalendarConfig(name = name, calendarLinkId = calendarLinkId)

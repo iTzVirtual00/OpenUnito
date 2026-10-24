@@ -32,18 +32,10 @@ class Prefetcher(
     @Named("ApplicationScope") private val scope: CoroutineScope,
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
 ) {
-    // TODO: Fix this, recent changes to how Flow works, makes it return loading (null) immediately
     fun prefetchData(scope: CoroutineScope) {
-        // Note: we are not prefetching student data as it is initialized with UnitoApi bullshit
-        // Check StudentRepository.refresh() for more info
+        // Note: we are not prefetching other repositories anymore as they have eager loading
+        // TODO: also fix agenda repositories to match the other repositories architecture
         scope.launch(ioDispatcher) {
-            val globalWarmingJobs = listOf(
-                launch { dashboardRepo.dashboardCacheFlow.first() },
-                launch { examDateRepo.examDatesCacheFlow.first() },
-                launch { examResultRepo.examResultsCacheFlow.first() },
-                launch { gradeRepository.gradesFlow.first() }
-            )
-
             val agendaJob = launch {
                 val calendar = calendarConfigRepo.selectedCalendarFlow.first()
                 if (calendar != null) {
@@ -62,7 +54,7 @@ class Prefetcher(
                 }
             }
 
-            (globalWarmingJobs + agendaJob).joinAll()
+            agendaJob.join()
         }
     }
 }

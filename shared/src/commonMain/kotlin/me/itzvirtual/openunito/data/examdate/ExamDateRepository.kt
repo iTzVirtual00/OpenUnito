@@ -4,11 +4,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -73,8 +75,12 @@ class ExamDateRepository(
                 // Initial value (So loading state emitted immediately on career switch)
                 .onStart { emit(null) }
         }
-        .distinctUntilChanged()
         .flowOn(ioDispatcher)
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     private fun triggerBackgroundRefresh(careerId: Int) {
         val currentJob = activeRefreshJob.load()

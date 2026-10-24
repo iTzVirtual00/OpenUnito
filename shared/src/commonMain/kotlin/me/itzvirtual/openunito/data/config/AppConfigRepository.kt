@@ -43,8 +43,6 @@ class AppConfigRepository(
             started = SharingStarted.Eagerly,
             initialValue = null
         )
-
-    fun getSelectedCareerId(): Int? = selectedCareerIdState.value
     suspend fun setCareerId(newId: Int) {
         configDao.updateCareerId(newId)
     }
