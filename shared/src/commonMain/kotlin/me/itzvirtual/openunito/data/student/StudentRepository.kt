@@ -6,6 +6,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -40,7 +43,7 @@ data class CachedStudentData(
     val isStale: Boolean
 )
 
-@OptIn(ExperimentalAtomicApi::class)
+@OptIn(ExperimentalAtomicApi::class, ExperimentalCoroutinesApi::class)
 @Single
 class StudentRepository(
     private val client: HttpClient,
@@ -53,35 +56,41 @@ class StudentRepository(
 ) {
     private val activeRefreshJob = AtomicReference<Job?>(null)
 
-    val studentCacheFlow: StateFlow<CachedStudentData?> =
-        dao.observe() // add careerId as lookup key
-            .map { entity ->
-                if (entity == null) {
-                    triggerBackgroundRefresh()
-                    null
-                } else {
-                    val isStale =
-                        (getNowMillis() - entity.cachedAt) > CacheConfig.STUDENT_STALE_MS
-
-                    if (isStale) {
+    // React to appConfigRepo.tokenState (on login)
+    val studentCacheFlow: StateFlow<CachedStudentData?> = appConfigRepo.tokenState
+        .flatMapLatest { token ->
+            if (token.isNullOrBlank()) {
+                flowOf(null)
+            } else {
+                dao.observe().map { entity ->
+                    if (entity == null) {
                         triggerBackgroundRefresh()
-                    }
-
-                    val domainData = runCatching { entity.toDomain(json) }.getOrNull()
-                    if (domainData == null) {
                         null
                     } else {
-                        CachedStudentData(data = domainData, isStale = isStale)
+                        val isStale =
+                            (getNowMillis() - entity.cachedAt) > CacheConfig.STUDENT_STALE_MS
+
+                        if (isStale) {
+                            triggerBackgroundRefresh()
+                        }
+
+                        val domainData = runCatching { entity.toDomain(json) }.getOrNull()
+                        if (domainData == null) {
+                            null
+                        } else {
+                            CachedStudentData(data = domainData, isStale = isStale)
+                        }
                     }
                 }
             }
-            .distinctUntilChanged()
-            .flowOn(ioDispatcher)
-            .stateIn(
-                scope = externalScope,
-                started = SharingStarted.Eagerly,
-                initialValue = null
-            )
+        }
+        .distinctUntilChanged()
+        .flowOn(ioDispatcher)
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     // TODO: Start prefetcher or destroy other models or something (old data flashes)
     val careerContextFlow: SharedFlow<CareerContext> = combine(
@@ -95,7 +104,7 @@ class StudentRepository(
         }
 
         return@combine currentCareer ?: run {
-            val firstCareer = studentCareers.firstOrNull()//.firstOrNull { it.id != 0/*REDACTED*/ }
+            val firstCareer = studentCareers.firstOrNull()
                 ?: throw IllegalStateException("No careers found for student")
             Logger.w(tag = "StudentRepository") { "Selected career was invalid, fallbacking to first" }
             appConfigRepo.setCareerId(firstCareer.id)
