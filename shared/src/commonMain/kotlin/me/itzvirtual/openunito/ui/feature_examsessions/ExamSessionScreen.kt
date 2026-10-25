@@ -65,6 +65,7 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
+// TODO: group by month
 //Maybe call it ExamSession or just Session
 
 /*
@@ -469,7 +470,7 @@ fun ExamSessionCardDrawer(
                 modifier = Modifier,
                 editable = true,
                 booked = false,
-                onClick = { },
+                onClick = {  },
             )
 
             Spacer(

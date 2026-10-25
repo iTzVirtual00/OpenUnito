@@ -39,9 +39,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ProfileScreen(
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = koinViewModel()
+    viewModel: ProfileViewModel = koinViewModel(),
+    onBack: () -> Unit
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val clipboard = koinInject<PlatformClipboardManager>()

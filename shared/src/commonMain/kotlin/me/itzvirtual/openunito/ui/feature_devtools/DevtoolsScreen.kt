@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.feature_devtools
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
@@ -118,7 +120,7 @@ fun DevtoolsContent(modifier: Modifier = Modifier) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            UpdateCard()
+//            UpdateCard()
             PurgeCachesCard()
             AuthDebuggerCard()
         }
@@ -162,7 +164,11 @@ fun PurgeCachesCard() {
 }
 
 @Composable
-expect fun UpdateCard()
+expect fun UpdateCard(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 16.dp,
+    border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+)
 
 @Composable
 fun AuthDebuggerCard() {

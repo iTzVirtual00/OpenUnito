@@ -5,7 +5,17 @@ package me.itzvirtual.openunito.domain.examdate
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+// BOOKABLE: bookingEnabled
+// BOOKED: !bookableExam && unbookingEnabled
+// UNBOOKED: !BOOKED
+enum class ExamBookingState() {
+    BOOKABLE,
+    BOOKED,
+} // TODO: add in viewModel
+
 data class ExamDate(
+    val bookingState: ExamBookingState,
+
     val appId: Long,
 
     val adsceId: Long,
@@ -42,6 +52,7 @@ fun ExamDate.id(): ExamDateId {
 
 val examDateSample: List<ExamDate> = listOf(
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 1,
         adsceId = 23948175L,
         adId = 95183L,
@@ -62,6 +73,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKED,
         appId = 2,
         adsceId = 23948176L,
         adId = 95183L,
@@ -82,6 +94,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKED,
         appId = 3,
         adsceId = 23948177L,
         adId = 95183L,
@@ -102,6 +115,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 0
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 4,
         adsceId = 24183920L,
         adId = 91385L,
@@ -122,6 +136,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 5,
         adsceId = 24183921L,
         adId = 91385L,
@@ -142,6 +157,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 6,
         adsceId = 25839104L,
         adId = 93847L,
@@ -162,6 +178,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKED,
         appId = 7,
         adsceId = 25839105L,
         adId = 93847L,
@@ -182,6 +199,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKED,
         appId = 8,
         adsceId = 26194832L,
         adId = 97421L,
@@ -202,6 +220,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 9,
         adsceId = 27391845L,
         adId = 98519L,
@@ -222,6 +241,7 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
+        bookingState = ExamBookingState.BOOKABLE,
         appId = 10,
         adsceId = 27391846L,
         adId = 98519L,

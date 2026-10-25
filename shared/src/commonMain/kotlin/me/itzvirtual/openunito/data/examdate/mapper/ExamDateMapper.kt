@@ -3,10 +3,12 @@ package me.itzvirtual.openunito.data.examdate.mapper
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.data.examdate.local.ExamDateEntity
 import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
+import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.getNowMillis
 
 fun ExamDateDto.toDomain() = ExamDate(
+    bookingState = ExamBookingState.BOOKABLE, // TODO: change this shit
     appId = appId,
     adsceId = adsceId,
     adId = adId,

@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.HistoryEdu
+import androidx.compose.material.icons.filled.Man3
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
@@ -182,7 +183,6 @@ fun HomeScreenContent(
 
 @Composable
 fun UserInitialsIcon(
-    initials: String,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp
 ) {
@@ -193,10 +193,10 @@ fun UserInitialsIcon(
         contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = initials,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
+            Icon(
+                modifier = Modifier.size(34.dp),
+                imageVector = Icons.Default.Man3,
+                contentDescription = null,
             )
         }
     }
@@ -210,18 +210,14 @@ fun ProfileSection( //TODO: pull state to top level
     val state = homeState.studentState
     val debug = homeState.debug
 
-    val initials: String
     val firstName: String
     val lastName: String
 
     if (state.data != null) {
         val studentData = state.data
-        initials =
-            "${studentData.firstname.firstOrNull() ?: ""}${studentData.lastname.firstOrNull() ?: ""}".uppercase()
         firstName = studentData.firstname
         lastName = studentData.lastname
     } else {
-        initials = "/"
         firstName = "Profile" //add translation
         lastName = ""
     }
@@ -249,7 +245,7 @@ fun ProfileSection( //TODO: pull state to top level
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    UserInitialsIcon(initials)
+                    UserInitialsIcon()
                     Text(
                         text = "$firstName $lastName",
                         style = MaterialTheme.typography.headlineMedium,

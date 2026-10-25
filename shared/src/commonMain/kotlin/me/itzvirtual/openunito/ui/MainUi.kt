@@ -40,12 +40,15 @@ import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.home_tab_title
 import me.itzvirtual.openunito.ui.feature_agenda.AgendaScreen
 import me.itzvirtual.openunito.ui.feature_career.CareerScreen
-import me.itzvirtual.openunito.ui.feature_devtools.DevtoolsScreen
 import me.itzvirtual.openunito.ui.feature_examsessions.InvokeScreen
 import me.itzvirtual.openunito.ui.feature_home.HomeScreen
 import me.itzvirtual.openunito.ui.feature_login.AuthViewModel
 import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.openunito.ui.feature_profile.ProfileScreen
+import me.itzvirtual.openunito.ui.feature_settings.AppearanceScreen
+import me.itzvirtual.openunito.ui.feature_settings.DevScreen
+import me.itzvirtual.openunito.ui.feature_settings.LanguageScreen
+import me.itzvirtual.openunito.ui.feature_settings.SettingsScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
 import me.itzvirtual.openunito.ui.shared.OpenUnitoNavState
 import me.itzvirtual.openunito.ui.shared.rememberOpenUnitoNavState
@@ -57,7 +60,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.reflect.KClass
 
-
+// TODO: add recovery points
 @Composable
 fun RootNavigation(
     authViewModel: AuthViewModel = koinViewModel()
@@ -207,8 +210,35 @@ fun OpenUnitoApp(
                         AgendaScreen()
                     }
 
-                    composable<DevToolsRoute> {
-                        DevtoolsScreen()
+                    navigation<SettingsGraph>(startDestination = SettingsRoute) {
+                        composable<SettingsRoute> {
+                            SettingsScreen(
+                                onClickAppearance = {
+                                    navState.navController.navigate(
+                                        AppearenceRoute
+                                    )
+                                },
+                                onClickLanguage = {
+                                    navState.navController.navigate(
+                                        LanguageRoute
+                                    )
+                                },
+                                onClickDev = {
+                                    navState.navController.navigate(
+                                        DevRoute
+                                    )
+                                }
+                            )
+                        }
+                        composable<AppearenceRoute> {
+                            AppearanceScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                        composable<LanguageRoute> {
+                            LanguageScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                        composable<DevRoute> {
+                            DevScreen(onBack = { navState.navController.popBackStack() })
+                        }
                     }
                 }
 
@@ -246,12 +276,12 @@ enum class AppDestinations(
         CalendarRoute::class,
         CalendarRoute::class
     ),
-    DEVTOOLS(
+    SETTINGS(
         Res.string.dev_tab_title,
         Icons.Default.LogoDev,
-        DevToolsRoute,
-        DevToolsRoute::class,
-        DevToolsRoute::class
+        SettingsRoute,
+        SettingsGraph::class,
+        SettingsRoute::class
     );
 
     val label: String
@@ -289,10 +319,24 @@ private object InvokeRoute
 private object CalendarRoute
 // </Calendar>
 
-// <DevTools>
+// <Settings>
 @Serializable
-private object DevToolsRoute
-// </DevTools>
+private object SettingsGraph
+
+
+@Serializable
+private object SettingsRoute
+
+@Serializable
+private object AppearenceRoute
+
+@Serializable
+private object LanguageRoute
+
+@Serializable
+private object DevRoute
+
+// </Settings>
 
 /*
 Notes:
