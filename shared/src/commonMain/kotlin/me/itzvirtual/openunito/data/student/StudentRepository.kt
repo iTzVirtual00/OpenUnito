@@ -104,7 +104,7 @@ class StudentRepository(
         }
 
         return@combine currentCareer ?: run {
-            val firstCareer = studentCareers.firstOrNull()//.firstOrNull { it.id != 0/*REDACTED*/ }
+            val firstCareer = studentCareers.firstOrNull()
                 ?: throw IllegalStateException("No careers found for student")
             Logger.w(tag = "StudentRepository") { "Selected career was invalid, fallbacking to first" }
             appConfigRepo.setCareerId(firstCareer.id)
