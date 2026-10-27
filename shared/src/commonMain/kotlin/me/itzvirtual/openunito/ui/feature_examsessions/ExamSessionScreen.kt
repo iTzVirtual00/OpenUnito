@@ -209,7 +209,7 @@ fun InvokeScreenContent(
                     0 -> {
                         ExamBookingList(
                             modifier = Modifier
-                                .padding(8.dp),
+                                .padding(horizontal = 8.dp),
                             exams = dates,
                             isLoading = uiState.isLoading,
                             stateError = uiState.error,
@@ -257,6 +257,11 @@ fun ExamBookingList(
             modifier = Modifier
                 .fillMaxSize(),
         ) {
+            item {
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+            }
             exams.forEach { exam ->
                 item {
                     ExamSessionCard(

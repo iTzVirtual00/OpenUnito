@@ -6,16 +6,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -56,9 +62,7 @@ fun SettingsScreenContent(
     onClickDev: () -> Unit = {},
 ) {
     val spacing = 12.dp
-
-    var showDev = false
-
+    var showDevCount by remember { mutableStateOf(0) }
 
 
     Scaffold(
@@ -87,7 +91,13 @@ fun SettingsScreenContent(
                 .padding(paddingValues)
                 .padding(horizontal = 8.dp)
         ) {
-            UpdateCard().toString()
+            UpdateCard(
+                onClick = {
+                    if (showDevCount < 7) {
+                        showDevCount++
+                    }
+                }
+            )
 
             Spacer(
                 modifier = Modifier.height(spacing)
@@ -104,7 +114,7 @@ fun SettingsScreenContent(
                         text = "Aspetto",
                         fontWeight = FontWeight.Bold,
                         icon = Icons.Default.Palette,
-                        iconColor = Color(246f / 256f,85f / 256f,85f / 256f),
+                        iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
                         onClick = onClickAppearance,
                     )
 
@@ -120,7 +130,19 @@ fun SettingsScreenContent(
                         iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
                     )
 
-                    if (true) { // Dev
+                    HorizontalDivider()
+
+                    StdTextIconEntry(
+                        modifier = Modifier
+                            .padding(vertical = spacing),
+                        text = "LogOut",
+                        fontWeight = FontWeight.Bold,
+                        icon = Icons.AutoMirrored.Filled.Logout,
+                        onClick = onClickAppearance,
+                        iconColor = MaterialTheme.colorScheme.error,
+                    )
+
+                    if (showDevCount >= 7) { // Dev
                         HorizontalDivider()
 
                         StdTextIconEntry(
@@ -130,7 +152,7 @@ fun SettingsScreenContent(
                             icon = Icons.Default.LogoDev,
                             onClick = onClickDev,
                             fontWeight = FontWeight.Bold,
-                            iconColor = Color(0.373f, 0.812f, 0.914f, 1.0f)
+                            iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
                         )
                     }
                 }

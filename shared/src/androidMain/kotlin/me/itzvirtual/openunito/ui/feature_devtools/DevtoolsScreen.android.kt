@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.feature_devtools
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ actual fun UpdateCard(
     modifier: Modifier,
     cornerRadius: Dp,
     border: BorderStroke,
+    onClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val updater = remember { HTTPUpdater(context) }
@@ -50,7 +52,11 @@ actual fun UpdateCard(
     var downloadProgress by remember { mutableFloatStateOf(0f) }
 
     StdSurface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = onClick,
+            ),
         cornerRadius = cornerRadius,
         border = border,
     ) {

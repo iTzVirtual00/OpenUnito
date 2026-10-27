@@ -168,6 +168,7 @@ expect fun UpdateCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 16.dp,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    onClick: () -> Unit = {},
 )
 
 @Composable
