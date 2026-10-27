@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LogoDev
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,9 +39,10 @@ import me.itzvirtual.openunito.resources.calendar_tab_title
 import me.itzvirtual.openunito.resources.career_tab_title
 import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.home_tab_title
+import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.feature_agenda.AgendaScreen
 import me.itzvirtual.openunito.ui.feature_career.CareerScreen
-import me.itzvirtual.openunito.ui.feature_examsessions.InvokeScreen
+import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionScreen
 import me.itzvirtual.openunito.ui.feature_home.HomeScreen
 import me.itzvirtual.openunito.ui.feature_login.AuthViewModel
 import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
@@ -202,7 +204,7 @@ fun OpenUnitoApp(
                             })
                         }
                         composable<InvokeRoute> {
-                            InvokeScreen(onBack = { navState.navController.popBackStack() })
+                            ExamSessionScreen(onBack = { navState.navController.popBackStack() })
                         }
                     }
 
@@ -277,8 +279,8 @@ enum class AppDestinations(
         CalendarRoute::class
     ),
     SETTINGS(
-        Res.string.dev_tab_title,
-        Icons.Default.LogoDev,
+        Res.string.settings_tab_title,
+        Icons.Default.Settings,
         SettingsRoute,
         SettingsGraph::class,
         SettingsRoute::class

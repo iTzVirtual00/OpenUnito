@@ -8,13 +8,17 @@ import kotlin.time.Instant
 // BOOKABLE: bookingEnabled
 // BOOKED: !bookableExam && unbookingEnabled
 // UNBOOKED: !BOOKED
+// also UNBOOKABLE maybe?
 enum class ExamBookingState() {
     BOOKABLE,
     BOOKED,
-} // TODO: add in viewModel
+} // TODO: Mario add in viewModel
+
 
 data class ExamDate(
     val bookingState: ExamBookingState,
+
+    val addedToCalendar: Boolean, // TODO: Mario how do we manage this
 
     val appId: Long,
 
@@ -53,6 +57,7 @@ fun ExamDate.id(): ExamDateId {
 val examDateSample: List<ExamDate> = listOf(
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = false,
         appId = 1,
         adsceId = 23948175L,
         adId = 95183L,
@@ -74,6 +79,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKED,
+        addedToCalendar = false,
         appId = 2,
         adsceId = 23948176L,
         adId = 95183L,
@@ -95,6 +101,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKED,
+        addedToCalendar = true,
         appId = 3,
         adsceId = 23948177L,
         adId = 95183L,
@@ -116,6 +123,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = true,
         appId = 4,
         adsceId = 24183920L,
         adId = 91385L,
@@ -137,6 +145,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = false,
         appId = 5,
         adsceId = 24183921L,
         adId = 91385L,
@@ -158,6 +167,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = false,
         appId = 6,
         adsceId = 25839104L,
         adId = 93847L,
@@ -179,6 +189,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKED,
+        addedToCalendar = false,
         appId = 7,
         adsceId = 25839105L,
         adId = 93847L,
@@ -200,6 +211,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKED,
+        addedToCalendar = false,
         appId = 8,
         adsceId = 26194832L,
         adId = 97421L,
@@ -221,6 +233,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = false,
         appId = 9,
         adsceId = 27391845L,
         adId = 98519L,
@@ -242,6 +255,7 @@ val examDateSample: List<ExamDate> = listOf(
     ),
     ExamDate(
         bookingState = ExamBookingState.BOOKABLE,
+        addedToCalendar = false,
         appId = 10,
         adsceId = 27391846L,
         adId = 98519L,

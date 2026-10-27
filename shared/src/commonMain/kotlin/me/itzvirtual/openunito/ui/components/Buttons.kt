@@ -17,18 +17,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -39,6 +42,7 @@ fun StdButtonEmpty(
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
+    color: Color = MaterialTheme.colorScheme.surface, // TODO: Add it to dependencies
     tonalElevation: Dp = 2.dp,
     content: @Composable (() -> Unit)
 ) {
@@ -46,6 +50,7 @@ fun StdButtonEmpty(
         shape = shape,
         onClick = onClick,
         modifier = modifier,
+        color = color,
         tonalElevation = tonalElevation,
         border = border,
     ) {
@@ -58,6 +63,8 @@ fun StdTextButton(
     text: String,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
+    fontSize: TextUnit = TextUnit.Unspecified, //former 20.sp
+    internalPadding: Dp = 26.dp,
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
@@ -73,14 +80,14 @@ fun StdTextButton(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(26f.dp, 8.dp),
+                .padding(internalPadding, 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
             Text(
                 text = text,
                 modifier = textModifier,
-                fontSize = 20.sp,
+                fontSize = fontSize,
                 fontWeight = FontWeight.Medium
             )
         }

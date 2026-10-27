@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.feature_examsessions
 
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,23 +34,25 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
@@ -58,23 +65,13 @@ import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
-import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
 // TODO: group by month
 //Maybe call it ExamSession or just Session
-
-/*
-lista materie (codice):
-    date (opt, orale/scritto):
-        prenotabile dal:
-        prenotabile fino al:
-        if (prenotabile) prenota
- */
 
 /*
 //Which one is the fucking booked tag?
@@ -117,30 +114,53 @@ lista materie (codice):
 - "visCancPren":true
  */
 
+enum class filterState {
+    ANY,
+    BOOKED,
+    UNBOOKED
+}
+
 @Composable
-fun InvokeScreen(
+fun ExamSessionScreen(
     modifier: Modifier = Modifier,
     viewModel: ExamSessionViewModel = koinViewModel(),
     onBack: () -> Unit = {}
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    InvokeScreenContent(modifier, state, onBack = onBack)
+    ExamSessionScreenContent(modifier, state, onBack = onBack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InvokeScreenContent(
+fun ExamSessionScreenContent(
     modifier: Modifier = Modifier,
     state: ExamDatesScreenState,
     onBack: () -> Unit = {},
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val subjectsList = listOf("Matematica", "Informatica", "Sucatica") // TODO: replace this with subjects list from ViewModel
+
+    val selectedSubject = remember { mutableStateOf<Int?>(null) }
+    var selectedFilter by remember { mutableStateOf<filterState>(filterState.ANY) }
 
     val uiState = state.examDatesState
     val dates = uiState.dates
     val debug = state.debug
 
+
+    // Filter dates
+//    if(selectedSubject.value != null) { // TODO: Uncomment these when subjectsList is reliable
+//        dates.filter {
+//            it.title == subjectsList[selectedSubject.value!!]
+//        }
+//    }
+    dates.filter {
+        when(selectedFilter) {
+            filterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
+            filterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
+            else -> true // ANY
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -165,72 +185,217 @@ fun InvokeScreenContent(
 
     ) { paddingValues ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .padding(0.dp),
-            ) {
-                StdTextButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(80.dp),
-                    onClick = { selectedTab = 0 },
-                    text = "Bookable", //TODO: translation
-                    shape = RectangleShape,
-                    tonalElevation = when (selectedTab) {
-                        0 -> 2f.dp
-                        else -> 0f.dp
+            FilterTopBar(
+                selectedSubject = selectedSubject,
+                subjectsList = subjectsList,
+                filter = selectedFilter,
+                onClickBooked = {
+                    selectedFilter = when(selectedFilter) {
+                        filterState.BOOKED -> filterState.ANY
+                        else -> filterState.BOOKED
                     }
-                )
-                StdTextButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(80.dp),
-                    onClick = { selectedTab = 1 },
-                    text = "Booked", //TODO: translation
-                    shape = RectangleShape,
-                    tonalElevation = when (selectedTab) {
-                        0 -> 0f.dp
-                        else -> 4f.dp
+                },
+                onClickUnbooked = {
+                    selectedFilter = when(selectedFilter) {
+                        filterState.UNBOOKED -> filterState.ANY
+                        else -> filterState.UNBOOKED
                     }
-                )
-            }
+                }
+            )
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(0.dp),
             ) {
-                when (selectedTab) {
-                    0 -> {
-                        ExamBookingList(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp),
-                            exams = dates,
-                            isLoading = uiState.isLoading,
-                            stateError = uiState.error,
-                            debug = debug,
-                        )
-                    }
+                ExamBookingList(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp),
+                    exams = dates,
+                    isLoading = uiState.isLoading,
+                    stateError = uiState.error,
+                    debug = debug,
+                )
+            }
+        }
+    }
+}
 
-                    1 -> {
-                        ExamBookingList(
-                            modifier = Modifier
-                                .padding(8.dp),
-                            exams = dates,
-//                            dates = dates.filter {
-//                            //TODO: filter for booked
-//                        },
-                            isLoading = uiState.isLoading,
-                            stateError = uiState.error,
-                            debug = debug
-                        )
-                    }
+@Composable
+fun FilterTopBar(
+    selectedSubject: MutableState<Int?>,
+    subjectsList: List<String>,
+    filter: filterState,
+    onClickBooked: () -> Unit = {},
+    onClickUnbooked: () -> Unit = {},
+) {
+    // TODO: translation
+    val horPadding = 6.dp
+    val fontSize = 16.sp
+
+    val selectedColor = MaterialTheme.colorScheme.primary
+    val unselectedColor = MaterialTheme.colorScheme.surface
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .padding(0.dp),
+    ) {
+        SubjectDropdownMenu(
+            modifier = Modifier
+                .weight(0.9f)
+                .fillMaxHeight()
+                .padding(horizontal = horPadding),
+            selectedSubject = selectedSubject,
+            subjectsList = subjectsList,
+            fontSize = fontSize,
+        )
+
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .padding(end = horPadding),
+        ) {
+            // Booked
+            StdButtonEmpty(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxHeight(),
+                onClick = onClickBooked,
+                color = when (filter) {
+                    filterState.BOOKED -> selectedColor
+                    else -> unselectedColor
+                },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Booked",
+                        fontSize = fontSize,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
+            }
+
+            // Unbooked
+            StdButtonEmpty(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxHeight(),
+                onClick = onClickUnbooked,
+                color = when (filter) {
+                    filterState.UNBOOKED -> selectedColor
+                    else -> unselectedColor
+                },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp, 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Unbooked",
+                        fontSize = fontSize,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SubjectDropdownMenu(
+    modifier: Modifier = Modifier,
+    subjectsList: List<String>,
+    selectedSubject: MutableState<Int?>,
+    fontSize: TextUnit = TextUnit.Unspecified,
+) {
+    var isDropDownExpanded by remember { mutableStateOf(false) }
+
+    val color =  when (selectedSubject.value) {
+        null -> MaterialTheme.colorScheme.outline
+        else -> Color.Unspecified
+    }
+
+    Box(
+        modifier = modifier
+    ) {
+        StdButtonEmpty(
+            modifier = Modifier,
+            onClick = {
+                isDropDownExpanded = true
+            }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = when (selectedSubject.value) {
+                        null -> "All Subs"
+                        else -> subjectsList.get(selectedSubject.value!!)
+                    },
+                    fontSize = fontSize,
+                    color = color
+                )
+                AnimatedContent(
+                    targetState = isDropDownExpanded
+                ) { scope ->
+                    val rot = if (!scope) 90f else 270f
+                    Icon(
+                        modifier = Modifier
+                            .rotate(rot),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+        }
+        DropdownMenu(
+            expanded = isDropDownExpanded,
+            onDismissRequest = { isDropDownExpanded = false },
+        ) {
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = "All Subs",
+                    )
+                },
+                onClick = {
+                    isDropDownExpanded = false
+                    selectedSubject.value = null
+                }
+            )
+
+            subjectsList.forEachIndexed { index, subjectString ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = subjectString,
+                        )
+                    },
+                    onClick = {
+                        isDropDownExpanded = false
+                        selectedSubject.value = index
+                    }
+                )
             }
         }
     }
@@ -244,8 +409,8 @@ fun ExamBookingList(
     stateError: String?,
     debug: Boolean,
 ) {
-
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
+
     ListWrapper(
         modifier = modifier,
         isEmpty = exams.isEmpty(),
@@ -287,22 +452,24 @@ fun ExamSessionCard(
     expanded: Boolean,
     onClick: () -> Unit,
 ) {
-    val bookingEnabled = exam.bookingEnabled
-    val booked = false
-
     // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
     // yellow: prenotable but not prenoted
     //  green: prenoted
     //   grey: unprenotable
     // italien!
-    val sideColor = when {
-        booked -> LocalCustomColorsPalette.current.gradePassed
-        bookingEnabled -> Color.Yellow
+    val sideColor = when(exam.bookingState) {
+        ExamBookingState.BOOKED -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.outlineVariant
     }
 
     val verPadding = 10.dp
     val horPadding = 16.dp
+
+    val border = when {
+        exam.bookableExam -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    }
+
 
     StdSurface(
         modifier = modifier
@@ -310,6 +477,7 @@ fun ExamSessionCard(
             .clickable(
                 onClick = onClick
             ),
+        border = border,
     ) {
 
         Box(
@@ -362,7 +530,6 @@ fun ExamSessionCard(
                     modifier = Modifier
                         .width(horPadding)
                         .height(measuredHeight),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     color = sideColor
                 ) {}
             }
@@ -464,17 +631,22 @@ fun ExamSessionCardDrawer(
                 modifier = Modifier.weight(0.1f)
             )
 
-            AddCalendarButton()
+            AddCalendarButton(
+                addedToCalendar = exam.addedToCalendar,
+                onAddToCal = {
+                    // TODO: Add this exam to calendar onClick
+                }
+            )
 
             Spacer(
                 modifier = Modifier.weight(0.15f)
             )
 
             PrenotButton(
-                // TODO: Add true vars
+                // TODO: Add real vars
                 modifier = Modifier,
                 editable = true,
-                booked = false,
+                booked = exam.bookingState == ExamBookingState.BOOKED,
                 onClick = {  },
             )
 
@@ -729,9 +901,11 @@ fun PrenotButton(
 @Composable
 fun AddCalendarButton(
     modifier: Modifier = Modifier,
+    addedToCalendar: Boolean,
+    onAddToCal: () -> Unit = {},
 ) {
-    val add = "Add"
-    val remove = "Remove"
+    val addString = "Add"
+    val removeString = "Remove"
 
     val goodRedColor = Color(
         217f / 256f,
@@ -744,7 +918,7 @@ fun AddCalendarButton(
         viewToMeasure = {
             Text(
                 modifier = Modifier,
-                text = if (add.length > remove.length) add else remove,
+                text = if (addString.length > removeString.length) addString else removeString,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -772,7 +946,7 @@ fun AddCalendarButton(
                 Text(
                     modifier = Modifier
                         .width(measuredWidth),
-                    text = add, // TODO: Switch to remove when clicked
+                    text = if (!addedToCalendar) addString else removeString,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -889,7 +1063,7 @@ fun ExamSessionEntry(
 fun ProfileScreenPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            InvokeScreenContent(
+            ExamSessionScreenContent(
                 modifier = Modifier.padding(innerPadding),
                 state = ExamDatesScreenState(
                     ExamDatesUiState(
