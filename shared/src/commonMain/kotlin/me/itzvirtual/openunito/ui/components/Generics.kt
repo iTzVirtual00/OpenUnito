@@ -125,6 +125,7 @@ fun StdTextIconEntry(
     modifier: Modifier = Modifier,
     text: String,
     fontWeight: FontWeight? = null,
+    textColor: Color = Color.Unspecified,
     icon: ImageVector,
     iconColor: Color = LocalContentColor.current,
     clickable: Boolean = true,
@@ -152,6 +153,7 @@ fun StdTextIconEntry(
             Text(
                 text = text,
                 fontWeight = fontWeight,
+                color = textColor,
             )
         }
     }
