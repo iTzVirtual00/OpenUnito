@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
@@ -59,14 +60,19 @@ import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.domain.formatMediumDate
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.examsession_open_from_to
+import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
+import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
@@ -138,7 +144,11 @@ fun ExamSessionScreenContent(
     state: ExamDatesScreenState,
     onBack: () -> Unit = {},
 ) {
-    val subjectsList = listOf("Matematica", "Informatica", "Sucatica") // TODO: replace this with subjects list from ViewModel
+    val subjectsList = listOf(
+        "Matematica",
+        "Informatica",
+        "Sucatica"
+    ) // TODO: replace this with subjects list from ViewModel
 
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
     var selectedFilter by remember { mutableStateOf<filterState>(filterState.ANY) }
@@ -155,7 +165,7 @@ fun ExamSessionScreenContent(
 //        }
 //    }
     dates.filter {
-        when(selectedFilter) {
+        when (selectedFilter) {
             filterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
             filterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
             else -> true // ANY
@@ -168,7 +178,7 @@ fun ExamSessionScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Appelli", // TODO: add translation
+                        text = stringResource(Res.string.examsession_title),
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -194,13 +204,13 @@ fun ExamSessionScreenContent(
                 subjectsList = subjectsList,
                 filter = selectedFilter,
                 onClickBooked = {
-                    selectedFilter = when(selectedFilter) {
+                    selectedFilter = when (selectedFilter) {
                         filterState.BOOKED -> filterState.ANY
                         else -> filterState.BOOKED
                     }
                 },
                 onClickUnbooked = {
-                    selectedFilter = when(selectedFilter) {
+                    selectedFilter = when (selectedFilter) {
                         filterState.UNBOOKED -> filterState.ANY
                         else -> filterState.UNBOOKED
                     }
@@ -238,7 +248,7 @@ fun FilterTopBar(
 
     val selectedColor = MaterialTheme.colorScheme.primary
     val unselectedColor = MaterialTheme.colorScheme.surface
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -325,7 +335,7 @@ fun SubjectDropdownMenu(
 ) {
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
-    val color =  when (selectedSubject.value) {
+    val color = when (selectedSubject.value) {
         null -> MaterialTheme.colorScheme.outline
         else -> Color.Unspecified
     }
@@ -457,7 +467,7 @@ fun ExamSessionCard(
     //  green: prenoted
     //   grey: unprenotable
     // italien!
-    val sideColor = when(exam.bookingState) {
+    val sideColor = when (exam.bookingState) {
         ExamBookingState.BOOKED -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.outlineVariant
     }
@@ -647,7 +657,7 @@ fun ExamSessionCardDrawer(
                 modifier = Modifier,
                 editable = true,
                 booked = exam.bookingState == ExamBookingState.BOOKED,
-                onClick = {  },
+                onClick = { },
             )
 
             Spacer(
@@ -797,42 +807,28 @@ fun BookingStartEndRow(
     startDate: Instant,
     endDate: Instant,
 ) {
-    // TODO: Add translation
-    val weakColor = MaterialTheme.colorScheme.outline
-    val weakWeight = FontWeight.Light
+    val weakStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.outline,
+        fontWeight = FontWeight.Light
+    )
 
-    val strongColor = MaterialTheme.colorScheme.outline
-    val strongWeight = FontWeight.Medium
+    val strongStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.outline,
+        fontWeight = FontWeight.Medium
+    )
 
     val size = 12.sp
     Row(
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
-            text = "Open from ",
-            color = weakColor,
-            fontWeight = weakWeight,
-            fontSize = size,
-            lineHeight = size.times(1.4f),
-        )
-        Text(
-            text = startDate.formatDate(),
-            color = strongColor,
-            fontWeight = strongWeight,
-            fontSize = size,
-            lineHeight = size.times(1.4f),
-        )
-        Text(
-            text = " to ",
-            color = weakColor,
-            fontWeight = weakWeight,
-            fontSize = size,
-            lineHeight = size.times(1.4f),
-        )
-        Text(
-            text = endDate.formatDate(),
-            color = strongColor,
-            fontWeight = strongWeight,
+            text = annotatedStringResource(
+                Res.string.examsession_open_from_to,
+                weakStyle,
+                strongStyle,
+                startDate.formatDate(),
+                endDate.formatDate()
+            ),
             fontSize = size,
             lineHeight = size.times(1.4f),
         )
@@ -958,6 +954,7 @@ fun AddCalendarButton(
 //--------------------
 //------ Legacy ------
 //--------------------
+/*
 @Composable
 fun ExamBookingCard(
     modifier: Modifier = Modifier,
@@ -977,8 +974,7 @@ fun ExamBookingCard(
             modifier = Modifier
                 .padding(16.dp, 16.dp)
         ) {
-            Column(
-            ) {
+            Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -1049,12 +1045,13 @@ fun ExamSessionEntry(
                 text = date.formatDate(),
                 fontWeight = FontWeight.Bold
             )
-            Text( // TODO: Add translation
+            Text(
                 text = "Open from ${bookingStartDate.formatDate()} to ${bookingEndDate.formatDate()}"
             )
         }
     }
 }
+*/
 
 
 // PREVIEW

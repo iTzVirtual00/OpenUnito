@@ -56,4 +56,10 @@
     <string name="settings_tab_title">Settings</string>
     <string name="dev_tab_title">Dev</string>
     <string name="attendance_tracking_button_name">Attendances Tracking</string>
+    <string name="settings_customization">Customization</string>
+    <string name="examsession_title">Exams</string>
+    <string name="examsession_open_from_to">Open from %1$s to %2$s</string>
+    <string name="language_screen_title">Language</string>
+    <string name="ND">ND</string>
+    <string name="error">Error</string>
 </resources>

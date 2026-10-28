@@ -15,7 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -41,7 +44,7 @@ fun AppearanceScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Aspetto", // TODO: add translation
+                        text = stringResource(Res.string.settings_customization),
                         fontWeight = FontWeight.Bold,
                     )
                 },

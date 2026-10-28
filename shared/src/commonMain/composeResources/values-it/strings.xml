@@ -55,4 +55,10 @@
     <string name="settings_tab_title">Impostazioni</string>
     <string name="dev_tab_title">Dev</string>
     <string name="attendance_tracking_button_name">Rilevazione Frequenze</string>
+    <string name="settings_customization">Aspetto</string>
+    <string name="examsession_title">Appelli</string>
+    <string name="examsession_open_from_to">Aperto da %1$s a %2$s</string>
+    <string name="language_screen_title">Lingua</string>
+    <string name="ND">ND</string>
+    <string name="error">Errore</string>
 </resources>

@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
+import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextIconEntry
@@ -145,7 +146,7 @@ fun SettingsScreenContent(
                     StdTextIconEntry(
                         modifier = Modifier
                             .padding(vertical = spacing),
-                        text = "Aspetto", // TODO: Add translation
+                        text = stringResource(Res.string.settings_customization),
                         fontWeight = FontWeight.Bold,
                         icon = Icons.Default.Palette,
                         iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),

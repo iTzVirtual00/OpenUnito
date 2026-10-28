@@ -65,6 +65,7 @@ import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import me.itzvirtual.openunito.resources.ND
 
 @Composable
 fun HomeScreen(
@@ -218,7 +219,7 @@ fun ProfileSection( //TODO: pull state to top level
         firstName = studentData.firstname
         lastName = studentData.lastname
     } else {
-        firstName = "Profile" //add translation
+        firstName = stringResource(Res.string.ND)
         lastName = ""
     }
 

@@ -25,8 +25,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.empty_list
+import me.itzvirtual.openunito.resources.error
+import me.itzvirtual.openunito.resources.loading
 import me.itzvirtual.openunito.resources.no_data
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
@@ -56,6 +59,7 @@ fun ListWrapper(
     debug: Boolean,
     isLoading: Boolean,
     stateError: String?,
+    emptyMessage: String = stringResource(Res.string.empty_list),
     content: @Composable () -> Unit,
 ) {
     if (isEmpty || stateError != null || isLoading) {
@@ -67,11 +71,12 @@ fun ListWrapper(
                 ErrorItem(stateError)
             } else {
                 val msg = when {
-                    isEmpty -> stringResource(Res.string.empty_list)
+                    isEmpty -> emptyMessage
                     isLoading -> {
-                        stringResource(Res.string.empty_list) + "..."
+                        stringResource(Res.string.ND)
                     }
-                    else -> stringResource(Res.string.no_data)
+                    // state error is not null
+                    else -> stringResource(Res.string.error)
                 }
 
                 ErrorItem(msg, Color.Gray)

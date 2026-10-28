@@ -34,11 +34,16 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -175,4 +180,54 @@ fun unShoutCourseName(input: String): String {
         .replace("Ii", "II") // E E E EEE <3
         .replace("Iii", "III") // EEE, La vendetta
         .replace("Iv", "IV") // Just in case
+}
+
+private val FormatSpecifierRegex = Regex("""%(\d+)\$[ds]""")
+
+/**
+ * Builds an [AnnotatedString] by matching standard format tokens (%1$s, %2$d, etc.)
+ * directly from the raw template string.
+ */
+@Composable
+fun annotatedStringResource(
+    resource: StringResource,
+    templateStyle: SpanStyle,
+    argStyle: SpanStyle,
+    vararg formatArgs: Any
+): AnnotatedString {
+    val rawTemplate = stringResource(resource)
+
+    return remember(rawTemplate, templateStyle, argStyle, formatArgs) {
+        val argsList = formatArgs.map { it.toString() }
+
+        buildAnnotatedString {
+            var currentIndex = 0
+
+            FormatSpecifierRegex.findAll(rawTemplate).forEach { matchResult ->
+                val range = matchResult.range
+                val argIndex = matchResult.groupValues[1].toInt() - 1
+
+                // Append static template text preceding this argument
+                if (range.first > currentIndex) {
+                    pushStyle(templateStyle)
+                    append(rawTemplate.substring(currentIndex, range.first))
+                    pop()
+                }
+
+                if (argIndex in argsList.indices) {
+                    pushStyle(argStyle)
+                    append(argsList[argIndex])
+                    pop()
+                }
+
+                currentIndex = range.last + 1
+            }
+
+            if (currentIndex < rawTemplate.length) {
+                pushStyle(templateStyle)
+                append(rawTemplate.substring(currentIndex))
+                pop()
+            }
+        }
+    }
 }
