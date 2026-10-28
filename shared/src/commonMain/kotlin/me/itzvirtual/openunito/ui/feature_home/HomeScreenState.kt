@@ -15,7 +15,7 @@ data class StudentDataUiState(
 )
 
 data class DailyClassesUiState(
-    val classes: List<AgendaEntry> = emptyList(),
+    val classes: List<AgendaEntry> = emptyList(), // TODO: Mario make this list?
     val isLoading: Boolean = false,
     val isStale: Boolean = false,
     val error: String? = null,

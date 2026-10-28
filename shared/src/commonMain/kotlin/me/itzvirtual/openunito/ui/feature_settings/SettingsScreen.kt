@@ -2,6 +2,7 @@ package me.itzvirtual.openunito.ui.feature_settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -99,6 +100,7 @@ fun SettingsScreenContent(
 ) {
     var showDevCount by remember { mutableStateOf(0) }
     val spacing = 12.dp
+    val insetPadding = 12.dp
 
     Scaffold(
         topBar = {
@@ -118,13 +120,18 @@ fun SettingsScreenContent(
                     )
                 }
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(
+            insetPadding,
+            0.dp,
+            insetPadding,
+            0.dp,
+        )
     ) { paddingValues ->
         Column (
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 8.dp)
         ) {
             UpdateCard(
                 onClick = {

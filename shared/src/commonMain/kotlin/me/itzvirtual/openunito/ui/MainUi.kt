@@ -48,7 +48,7 @@ import me.itzvirtual.openunito.ui.feature_login.AuthViewModel
 import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.openunito.ui.feature_profile.ProfileScreen
 import me.itzvirtual.openunito.ui.feature_settings.AppearanceScreen
-import me.itzvirtual.openunito.ui.feature_settings.DevScreen
+import me.itzvirtual.openunito.ui.feature_settings.dev_screen.DevScreen
 import me.itzvirtual.openunito.ui.feature_settings.LanguageScreen
 import me.itzvirtual.openunito.ui.feature_settings.SettingsScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
