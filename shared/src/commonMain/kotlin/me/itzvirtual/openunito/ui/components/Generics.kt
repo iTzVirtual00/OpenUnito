@@ -101,11 +101,12 @@ fun StdEntry(
     content: @Composable () -> Unit,
 ) {
     Box (
-        modifier = modifier
+        modifier = Modifier
             .clickable(
                 enabled = clickable,
                 onClick = onClick,
-            ),
+            )
+            .then(modifier),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically

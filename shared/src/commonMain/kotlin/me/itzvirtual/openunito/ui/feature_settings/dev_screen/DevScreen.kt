@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
+import me.itzvirtual.openunito.ui.components.StdEntry
+import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.StringResource
@@ -45,7 +47,7 @@ import org.jetbrains.compose.resources.getSystemResourceEnvironment
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-
+// TODO: add debug
 @Composable
 fun DevScreen(
     modifier: Modifier = Modifier,
@@ -123,12 +125,20 @@ fun DevScreenContent(
                 onSetToken = setToken,
                 onCopyToken = copyToken,
             )
+
             Spacer(
                 modifier = Modifier.height(10.dp)
             )
+
             PurgeCachesCard(
                 onPurgeCaches = onPurgeCaches
             )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            DevContentCard()
         }
     }
 }
@@ -228,6 +238,20 @@ fun PurgeCachesCard(
             }
         }
     }
+}
+
+@Composable
+fun DevContentCard() {
+    StdSurface {
+        DebugEnableEntry()
+    }
+}
+
+@Composable
+fun DebugEnableEntry() {
+    Text(
+        text = "Debug"
+    )
 }
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)

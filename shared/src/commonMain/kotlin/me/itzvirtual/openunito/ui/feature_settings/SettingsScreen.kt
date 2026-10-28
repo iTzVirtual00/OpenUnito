@@ -1,11 +1,15 @@
 package me.itzvirtual.openunito.ui.feature_settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
@@ -50,36 +54,20 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: DevtoolsViewModel = koinViewModel(), // TODO: Mario, move this to SettingsViewModel
+    viewModel: SettingsViewModel = koinViewModel(),
     onClickAppearance: () -> Unit,
     onClickLanguage: () -> Unit,
     onClickDev: () -> Unit,
 ) {
     // I can do WHAT??
     val restartApp = rememberRestartApp()
-    val clipboard = koinInject<PlatformClipboardManager>()
-    val scope = rememberCoroutineScope()
 
     // Bind ViewModel logic to the Actions data class
-    val actions = remember(viewModel, restartApp, clipboard) {
+    val actions = remember(viewModel) {
         DevtoolsActions(
-            setToken = { token ->
-                viewModel.login(token) {
-                    viewModel.purgeAllCaches {
-                        restartApp()
-                    }
-                }
-            },
-            copyToken = {
-                viewModel.copyTokenToClipboard { token ->
-                    scope.launch { clipboard.setText(token) }
-                }
-            },
             clearToken = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp() } } },
-            purgeAllCaches = { viewModel.purgeAllCaches { restartApp() } }
         )
     }
-
 
     SettingsScreenContent(
         modifier = modifier,
@@ -99,6 +87,7 @@ fun SettingsScreenContent(
     onClickDev: () -> Unit = {},
 ) {
     var showDevCount by remember { mutableStateOf(0) }
+
     val spacing = 12.dp
     val insetPadding = 12.dp
 
@@ -128,7 +117,7 @@ fun SettingsScreenContent(
             0.dp,
         )
     ) { paddingValues ->
-        Column (
+        Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -146,13 +135,11 @@ fun SettingsScreenContent(
             )
 
             StdSurface {
-                Column (
-                    modifier = Modifier
-                        .padding(horizontal = 14.dp)
-                ) {
+                val horPadding = 14.dp
+                Column {
                     StdTextIconEntry(
                         modifier = Modifier
-                            .padding(vertical = spacing),
+                            .padding(horizontal = horPadding, vertical = spacing),
                         text = stringResource(Res.string.settings_customization),
                         fontWeight = FontWeight.Bold,
                         icon = Icons.Default.Palette,
@@ -164,7 +151,7 @@ fun SettingsScreenContent(
 
                     StdTextIconEntry(
                         modifier = Modifier
-                            .padding(vertical = spacing),
+                            .padding(horizontal = horPadding, vertical = spacing),
                         text = "Language",
                         fontWeight = FontWeight.Bold,
                         icon = Icons.Default.Language,
@@ -172,25 +159,12 @@ fun SettingsScreenContent(
                         iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
                     )
 
-                    HorizontalDivider()
-
-                    StdTextIconEntry(
-                        modifier = Modifier
-                            .padding(vertical = spacing),
-                        text = "LogOut",
-                        fontWeight = FontWeight.Bold,
-                        textColor = MaterialTheme.colorScheme.error,
-                        icon = Icons.AutoMirrored.Filled.Logout,
-                        onClick = onClickLogout,
-                        iconColor = MaterialTheme.colorScheme.error,
-                    )
-
                     if (showDevCount >= 7) { // Dev
                         HorizontalDivider()
 
                         StdTextIconEntry(
                             modifier = Modifier
-                                .padding(vertical = spacing),
+                                .padding(horizontal = horPadding, vertical = spacing),
                             text = stringResource(Res.string.dev_tab_title),
                             icon = Icons.Default.LogoDev,
                             onClick = onClickDev,
@@ -198,12 +172,40 @@ fun SettingsScreenContent(
                             iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
                         )
                     }
+
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier
+                            .clickable(
+                                onClick = onClickLogout,
+                            )
+                            .fillMaxWidth()
+                            .padding(horizontal = horPadding, vertical = spacing)
+                    ) {
+                        val color = MaterialTheme.colorScheme.error
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = null,
+                            tint = color,
+                        )
+
+                        Spacer(
+                            modifier = Modifier.width(12.dp)
+                        )
+
+
+                        Text(
+                            text = "Log Out",
+                            fontWeight = FontWeight.Bold,
+                            color = color,
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
