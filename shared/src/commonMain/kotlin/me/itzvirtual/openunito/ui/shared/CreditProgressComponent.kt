@@ -56,8 +56,8 @@ fun CreditProgressIndicator(
     var animationPlayed by rememberSaveable { mutableStateOf(false) }
     val playAnimation = animate && !animationPlayed
 
-    var targetProgress by remember { mutableFloatStateOf(if (playAnimation) 0f else creditProgress) }
-    var targetPlanned by remember { mutableFloatStateOf(if (playAnimation) 0f else plannedCreditProgress) }
+    var targetProgress by remember(creditProgress) { mutableFloatStateOf(if (playAnimation) 0f else creditProgress) }
+    var targetPlanned by remember(plannedCreditProgress) { mutableFloatStateOf(if (playAnimation) 0f else plannedCreditProgress) }
 
     LaunchedEffect(Unit) {
         if (playAnimation) {

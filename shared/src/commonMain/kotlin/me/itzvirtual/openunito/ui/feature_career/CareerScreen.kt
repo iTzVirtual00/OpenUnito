@@ -259,8 +259,8 @@ fun CreditsSection(
     val yearlyProgress: Float
     val remainingCfu: String
 
-    if (!isLoading && stateError == null) {
-        val stats = data!!.stats
+    if (data != null) {
+        val stats = data.stats
 
         currentCredits = stats.creditsGained.toInt()
         totalPlannedCredits = stats.totalPlanCredits
