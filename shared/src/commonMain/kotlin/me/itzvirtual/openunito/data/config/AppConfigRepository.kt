@@ -23,7 +23,7 @@ class AppConfigRepository(
 
     val tokenState: StateFlow<String?> = config
         .map { it?.authToken }
-        .distinctUntilChanged()
+        .distinctUntilChanged() // TODO: Mario check this, isn't it be redundant?
         .stateIn(
             scope = externalScope,
             started = SharingStarted.Eagerly,
@@ -61,4 +61,9 @@ class AppConfigRepository(
     fun getCalendarClientId(): String = "5852fd1ab7305612a8354d51"
     suspend fun setSelectedCalendarId(calendarId: Int?) =
         configDao.updateSelectedCalendarId(calendarId)
+
+    // Debug //
+    val debug: Flow<Boolean> = configDao.getDebug()
+
+    suspend fun setDebug(value: Boolean) = configDao.updateDebug(value)
 }

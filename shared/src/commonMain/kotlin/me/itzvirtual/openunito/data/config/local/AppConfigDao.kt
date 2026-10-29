@@ -25,6 +25,12 @@ interface AppConfigDao {
     @Query("UPDATE app_config SET selectedCalendarId = :calendarId WHERE id = 0")
     suspend fun updateSelectedCalendarId(calendarId: Int?)
 
+    // Debug //
+    @Query("SELECT debug FROM app_config WHERE id = 0")
+    fun getDebug(): Flow<Boolean>
+
+    @Query("UPDATE app_config SET debug = :value WHERE id = 0")
+    suspend fun updateDebug(value: Boolean)
 
     @Query("DELETE FROM app_config")
     suspend fun clearAll()

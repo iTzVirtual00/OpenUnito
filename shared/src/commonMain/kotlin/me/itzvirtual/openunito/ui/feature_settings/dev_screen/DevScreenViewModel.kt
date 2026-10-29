@@ -2,6 +2,10 @@ package me.itzvirtual.openunito.ui.feature_settings.dev_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.agenda.local.AgendaDao
 import me.itzvirtual.openunito.data.config.AppConfigRepository
@@ -22,12 +26,19 @@ class DevScreenViewModel (
     private val examDateDao: ExamDateDao,
     private val examGradeDao: ExamGradeDao,
 ): ViewModel() {
+    val screenState: StateFlow<DevScreenState> = combine(
+        appConfigRepo.debug
+    ) { debug ->
+        DevScreenState(
+            debug = debug[0],
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = DevScreenState()
+    )
     fun login(token: String, onComplete: () -> Unit = {}) {
         viewModelScope.launch { appConfigRepo.saveToken(token); onComplete() }
-    }
-
-    fun clearToken(onComplete: () -> Unit = {}) {
-        viewModelScope.launch { appConfigRepo.clearAuth(); onComplete() }
     }
 
     fun copyTokenToClipboard(onToken: (String) -> Unit) {
@@ -46,6 +57,12 @@ class DevScreenViewModel (
             examDateDao.clearAll()
             examGradeDao.clearAll()
             onComplete()
+        }
+    }
+
+    fun setDebug(value: Boolean) {
+        viewModelScope.launch {
+            appConfigRepo.setDebug(value)
         }
     }
 }

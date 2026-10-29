@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -19,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -30,30 +33,31 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
-import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getSystemResourceEnvironment
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-// TODO: add debug
+
 @Composable
 fun DevScreen(
     modifier: Modifier = Modifier,
     viewModel: DevScreenViewModel = koinViewModel(),
     onBack: () -> Unit,
 ) {
+    val state by viewModel.screenState.collectAsStateWithLifecycle()
+
     val restartApp = rememberRestartApp()
     val clipboard = koinInject<PlatformClipboardManager>()
     val scope = rememberCoroutineScope()
@@ -75,6 +79,10 @@ fun DevScreen(
         onPurgeCaches = {
             viewModel.purgeAllCaches { restartApp() }
         },
+        debugValue = state.debug,
+        onSetDebug = { value ->
+            viewModel.setDebug(value)
+        },
         onBack = onBack,
     )
 }
@@ -85,6 +93,8 @@ fun DevScreenContent(
     setToken: (String) -> Unit = {},
     copyToken: () -> Unit = {},
     onPurgeCaches: () -> Unit = {},
+    debugValue: Boolean,
+    onSetDebug: (Boolean) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val insetPadding = 12.dp
@@ -138,7 +148,11 @@ fun DevScreenContent(
                 modifier = Modifier.height(10.dp)
             )
 
-            DevContentCard()
+            DevContentCard(
+                debugValue = debugValue,
+                onSetDebug = onSetDebug,
+
+            )
         }
     }
 }
@@ -241,17 +255,58 @@ fun PurgeCachesCard(
 }
 
 @Composable
-fun DevContentCard() {
+fun DevContentCard(
+    modifier: Modifier = Modifier,
+    debugValue: Boolean,
+    onSetDebug: (Boolean) -> Unit = {},
+) {
     StdSurface {
-        DebugEnableEntry()
+        DebugSwitchEntry(
+            modifier = modifier
+                .padding(horizontal = 16.dp, 2.dp)
+                .fillMaxWidth(),
+            debugValue = debugValue,
+            onChecked = onSetDebug,
+        )
     }
 }
 
 @Composable
-fun DebugEnableEntry() {
-    Text(
-        text = "Debug"
-    )
+fun DebugSwitchEntry(
+    modifier: Modifier = Modifier,
+    debugValue: Boolean,
+    onChecked: (Boolean) -> Unit = {},
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+        ) {
+            Icon(
+                modifier = Modifier,
+                imageVector = Icons.Default.BugReport,
+                contentDescription = null,
+                tint = Color(0.976f, 0.733f, 0.275f, 1.0f),
+            )
+            Spacer(
+                modifier = Modifier
+                    .width(12.dp),
+            )
+            Text(
+                text = "Debug",
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Switch(
+            modifier = Modifier
+                .padding(vertical = 2.dp),
+            checked = debugValue,
+            onCheckedChange = { state -> onChecked(state) }
+        )
+    }
 }
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
@@ -262,7 +317,8 @@ fun DevScreenPreview() {
             DevScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                debugValue = false,
             )
         }
     }

@@ -96,7 +96,7 @@ class HomeViewModel(
             todaysClasses = agendaState.todaysClasses,
             tomorrowClasses = agendaState.tomorrowClasses,
             isGlobalLoading = studentState.isLoading && agendaState.todaysClasses.isLoading,
-            debug = config?.debug ?: false
+            debug = config?.debug ?: false // TODO: change those
         )
     }.stateIn(
         scope = viewModelScope,
