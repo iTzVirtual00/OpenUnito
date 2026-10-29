@@ -24,7 +24,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +57,7 @@ import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.examdate.id
+import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.domain.formatMediumDate
 import me.itzvirtual.openunito.resources.Res
@@ -67,7 +67,6 @@ import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
-import me.itzvirtual.openunito.ui.components.StdEntry
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
@@ -77,47 +76,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
 // TODO: group by month
-
-/*
-//Which one is the fucking booked tag?
-
-- "adsce_id":23948175,
-- "ad_id":95183,
-- "cod":"INF0328",
-- "title":"MATEMATICA DISCRETA, ALGEBRA E GEOMETRIA",
-- "description":"M.D.A.G- PARTE DI MATEMATICA DISCRETA",
-- "note":"aule A+B+C+D+F",
-- "date":"/Date(1800313200000+0100)/",
-- "bookingStartDate":"/Date(1798585200000+0100)/",
-- "bookingEndDate":"/Date(1799708400000+0100)/",
-- "bookableExam":true,
-- "bookingEnabled":false,
-- "unbookingEnabled":false,
-- "cds_app_id":14928,
-- "ad_app_id":95183,
-- "iscritti":0,
-- "posiz":null,
-- "adreg_id":null,
-- "applista_id":null,
-- "app_id":17,
-- "tipo_app_cod":"PF",
-- "ad_cod":"INF0328",
-- "ad_des":"MATEMATICA DISCRETA, ALGEBRA E GEOMETRIA",
-- "app_des":"M.D.A.G- PARTE DI MATEMATICA DISCRETA",
-- "presidente":"PAOLA CONTI",
-- "tipo_des":null,
-- "stato_quest":1,
-- "des_edificio":null,
-- "des_aula":null,
-- "dom_part_cod":null,
-- "fat_part_cod":null,
-- "turni":null,
-- "sessioni":null,
-- "misureComp":null,
-- "tipiSvolgimentoEsame":null,
-- "chkQuestVal":"0",
-- "visCancPren":true
- */
 
 enum class filterState {
     ANY,
@@ -132,44 +90,45 @@ fun ExamSessionScreen(
     onBack: () -> Unit = {}
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val uiState = state.examDatesState
 
-    ExamSessionScreenContent(modifier, state, onBack = onBack)
+    ExamSessionScreenContent(
+        modifier = modifier,
+        dates = uiState.dates,
+        subjectsList = uiState.subjects,
+        isLoading = uiState.isLoading,
+        stateError = uiState.error,
+        debug = state.debug,
+        onBack = onBack,
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExamSessionScreenContent(
     modifier: Modifier = Modifier,
-    state: ExamDatesScreenState,
+    dates: List<ExamDate>,
+    subjectsList: List<String>,
+    isLoading: Boolean = false,
+    stateError: String? = null,
+    debug: Boolean = false,
     onBack: () -> Unit = {},
 ) {
-    val subjectsList = listOf(
-        "Matematica",
-        "Informatica",
-        "Sucatica"
-    ) // TODO: replace this with subjects list from ViewModel
-
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
-    var selectedFilter by remember { mutableStateOf<filterState>(filterState.ANY) }
-
-    val uiState = state.examDatesState
-    val dates = uiState.dates
-    val debug = state.debug
-
+    var selectedFilter by remember { mutableStateOf(filterState.ANY) }
+    var filteredDates = dates
 
     // Filter dates
-//    if(selectedSubject.value != null) { // TODO: Uncomment these when subjectsList is reliable
-//        dates.filter {
-//            it.title == subjectsList[selectedSubject.value!!]
-//        }
-//    }
-    dates.filter {
-        when (selectedFilter) {
-            filterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
-            filterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
-            else -> true // ANY
+    filteredDates = dates
+        .filter { // if selected == null don't, otherwise filter by subject
+            selectedSubject.value == null || it.title == subjectsList[selectedSubject.value!!]
         }
-    }
+        .filter {
+            when (selectedFilter) {
+                filterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
+                filterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
+                else -> true // ANY
+            }
+        }
 
     Scaffold(
         modifier = modifier,
@@ -223,9 +182,9 @@ fun ExamSessionScreenContent(
                 ExamBookingList(
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
-                    exams = dates,
-                    isLoading = uiState.isLoading,
-                    stateError = uiState.error,
+                    exams = filteredDates,
+                    isLoading = isLoading,
+                    stateError = stateError,
                     debug = debug,
                 )
             }
@@ -358,7 +317,7 @@ fun SubjectDropdownMenu(
                 Text(
                     text = when (selectedSubject.value) {
                         null -> "All Subs"
-                        else -> subjectsList.get(selectedSubject.value!!)
+                        else -> unShoutCourseName(subjectsList[selectedSubject.value!!])
                     },
                     fontSize = fontSize,
                     color = color
@@ -397,7 +356,7 @@ fun SubjectDropdownMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = subjectString,
+                            text = unShoutCourseName(subjectString),
                         )
                     },
                     onClick = {
@@ -643,7 +602,7 @@ fun ExamSessionCardDrawer(
             AddCalendarButton(
                 addedToCalendar = exam.addedToCalendar,
                 onAddToCal = {
-                    // TODO: Add this exam to calendar onClick
+                    // TODO: Add this exam to system calendar
                 }
             )
 
@@ -921,7 +880,7 @@ fun AddCalendarButton(
         StdButtonEmpty(
             modifier = modifier,
             border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
-            onClick = {} // TODO: Add onclick addToCalendar
+            onClick = onAddToCal,
         ) {
             Row(
                 modifier = Modifier
@@ -1061,11 +1020,8 @@ fun ProfileScreenPreview() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             ExamSessionScreenContent(
                 modifier = Modifier.padding(innerPadding),
-                state = ExamDatesScreenState(
-                    ExamDatesUiState(
-                        dates = examDateSample
-                    )
-                )
+                dates = examDateSample,
+                subjectsList = subjectsListSample,
             )
         }
     }

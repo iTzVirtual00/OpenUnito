@@ -276,3 +276,20 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     )
 ).sortedBy { it.date }
+
+val subjectsListSample = buildList(
+    builderAction = {
+        examDateSample.forEach { date ->
+            val sub = date.title
+            val found = find(
+                { el ->
+                    el == sub
+                }
+            )
+
+            if (found != null) {
+                add(sub)
+            }
+        }
+    }
+)

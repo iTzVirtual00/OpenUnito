@@ -186,7 +186,7 @@ fun StdArrowButton(
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CareerScreenPreview() {
+fun ButtonsPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
             Column {

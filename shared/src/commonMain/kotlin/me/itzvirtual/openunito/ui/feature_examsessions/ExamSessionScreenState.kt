@@ -3,8 +3,9 @@ package me.itzvirtual.openunito.ui.feature_examsessions
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 
 data class ExamDatesUiState(
-    val dates: List<ExamDate> = emptyList(),  // Outer list contains the subject("ad" in Api),
-    val isLoading: Boolean = false,                 // inner contains the single session
+    val dates: List<ExamDate> = emptyList(),
+    val subjects: List<String> = emptyList(),
+    val isLoading: Boolean = false,
     val isStale: Boolean = false,
     val error: String? = null,
 )

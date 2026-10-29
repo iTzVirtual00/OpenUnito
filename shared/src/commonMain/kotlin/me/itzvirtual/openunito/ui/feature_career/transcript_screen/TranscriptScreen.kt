@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -58,7 +57,6 @@ import me.itzvirtual.openunito.domain.grade.ExamGrade
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.grades_section_title
-import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
@@ -109,7 +107,7 @@ fun TranscriptScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(Res.string.settings_tab_title),
+                        text = stringResource(Res.string.grades_section_title),
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -124,9 +122,9 @@ fun TranscriptScreenContent(
             )
         },
         contentWindowInsets = WindowInsets(
+            8.dp,
             0.dp,
-            0.dp,
-            0.dp,
+            8.dp,
             32.dp,
         )
     ) { paddingValues ->
@@ -138,20 +136,12 @@ fun TranscriptScreenContent(
                     .padding(paddingValues),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = stringResource(Res.string.grades_section_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
                 GradesSection(
                     rawGrades = rawGrades,
                     isLoading = isLoading,
                     stateError = stateError,
                     debug = debug,
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -275,9 +265,7 @@ fun GradesSection(
         stateError = stateError
     ) {
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+            modifier = Modifier,
             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)

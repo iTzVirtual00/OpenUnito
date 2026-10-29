@@ -134,7 +134,7 @@ fun CareersSection(
                 .padding(bottom = 16.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            ListWrapper(
+            ListWrapper( // TODO Gabriele: no calendar shows No element present, prepone state error
                 isEmpty = careers.isEmpty(),
                 debug = debug,
                 isLoading = isLoading,

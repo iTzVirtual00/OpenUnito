@@ -12,6 +12,7 @@ import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.examdate.ExamDateRepository
 import me.itzvirtual.openunito.data.examresult.ExamResultRepository
 import me.itzvirtual.openunito.ui.feature_career.uberCombine
+import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import org.koin.android.annotation.KoinViewModel
 
 
@@ -40,8 +41,24 @@ class ExamSessionViewModel(
 
         val sortedDates = cachedDates?.dates?.sortedBy { it.date } ?: emptyList()
 
+        val subjects = buildList(
+            builderAction = {
+                sortedDates.forEach { date ->
+                    val sub = date.title
+                    val found = find { el ->
+                        el == sub
+                    }
+
+                    if (found == null) {
+                        add(sub)
+                    }
+                }
+            }
+        )
+
         val examDatesUiState = ExamDatesUiState(
             dates = sortedDates,
+            subjects = subjects,
             isStale = cachedDates?.isStale ?: false,
             isLoading = isDatesLoading,
             error = datesError

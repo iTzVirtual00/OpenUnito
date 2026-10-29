@@ -24,7 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.HistoryEdu
-import androidx.compose.material.icons.filled.Man3
+import androidx.compose.material.icons.filled.PersonalInjury
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
@@ -53,6 +53,7 @@ import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getNowInstant
 import me.itzvirtual.openunito.domain.student.studentDataSample
+import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.attendance_tracking_button_name
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
@@ -65,7 +66,6 @@ import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import me.itzvirtual.openunito.resources.ND
 
 @Composable
 fun HomeScreen(
@@ -195,8 +195,8 @@ fun UserInitialsIcon(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
-                modifier = Modifier.size(34.dp),
-                imageVector = Icons.Default.Man3,
+                modifier = Modifier.size(30.dp),
+                imageVector = Icons.Default.PersonalInjury,
                 contentDescription = null,
             )
         }
