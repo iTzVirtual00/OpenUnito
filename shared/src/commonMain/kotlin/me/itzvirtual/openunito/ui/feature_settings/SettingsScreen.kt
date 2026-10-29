@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LogoDev
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
@@ -54,6 +57,7 @@ fun SettingsScreen(
     onClickAppearance: () -> Unit,
     onClickLanguage: () -> Unit,
     onClickDev: () -> Unit,
+    onBack: () -> Unit,
 ) {
     // I can do WHAT??
     val restartApp = rememberRestartApp()
@@ -71,6 +75,7 @@ fun SettingsScreen(
         onClickLanguage = onClickLanguage,
         onClickLogout = actions.clearToken,
         onClickDev = onClickDev,
+        onBack = onBack,
     )
 }
 
@@ -81,6 +86,7 @@ fun SettingsScreenContent(
     onClickLanguage: () -> Unit = {},
     onClickLogout: () -> Unit = {},
     onClickDev: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     var showDevCount by remember { mutableStateOf(0) }
 
@@ -97,12 +103,12 @@ fun SettingsScreenContent(
                     )
                 },
                 navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .padding(6.dp),
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = null,
-                    )
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
                 }
             )
         },
@@ -130,76 +136,96 @@ fun SettingsScreenContent(
                 modifier = Modifier.height(spacing)
             )
 
-            StdSurface {
-                val horPadding = 14.dp
-                Column {
-                    StdTextIconEntry(
-                        modifier = Modifier
-                            .padding(horizontal = horPadding, vertical = spacing),
-                        text = stringResource(Res.string.settings_customization),
-                        fontWeight = FontWeight.Bold,
-                        icon = Icons.Default.Palette,
-                        iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
-                        onClick = onClickAppearance,
+            SettingsEntries(
+                showDev = (showDevCount >= 7),
+                onClickAppearance = onClickAppearance,
+                onClickLanguage = onClickLanguage,
+                onClickLogout = onClickLogout,
+                onClickDev = onClickDev,
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsEntries(
+    modifier: Modifier = Modifier,
+    horPadding: Dp = 14.dp,
+    spacing: Dp = 12.dp,
+    showDev: Boolean,
+    onClickAppearance: () -> Unit = {},
+    onClickLanguage: () -> Unit = {},
+    onClickLogout: () -> Unit = {},
+    onClickDev: () -> Unit = {},
+) {
+
+    StdSurface {
+        Column {
+            StdTextIconEntry(
+                modifier = Modifier
+                    .padding(horizontal = horPadding, vertical = spacing),
+                text = stringResource(Res.string.settings_customization),
+                fontWeight = FontWeight.Bold,
+                icon = Icons.Default.Palette,
+                iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
+                onClick = onClickAppearance,
+            )
+
+            HorizontalDivider()
+
+            StdTextIconEntry(
+                modifier = Modifier
+                    .padding(horizontal = horPadding, vertical = spacing),
+                text = "Language",
+                fontWeight = FontWeight.Bold,
+                icon = Icons.Default.Language,
+                onClick = onClickLanguage,
+                iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
+            )
+
+            if (showDev) { // Dev
+                HorizontalDivider()
+
+                StdTextIconEntry(
+                    modifier = Modifier
+                        .padding(horizontal = horPadding, vertical = spacing),
+                    text = stringResource(Res.string.dev_tab_title),
+                    icon = Icons.Default.LogoDev,
+                    onClick = onClickDev,
+                    fontWeight = FontWeight.Bold,
+                    iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
+                )
+            }
+
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier
+                    .clickable(
+                        onClick = onClickLogout,
                     )
+                    .fillMaxWidth()
+                    .padding(horizontal = horPadding, vertical = spacing)
+            ) {
+                val color = MaterialTheme.colorScheme.error
+                Icon(
+                    modifier = Modifier
+                        .offset(2.dp),
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = null,
+                    tint = color,
+                )
 
-                    HorizontalDivider()
-
-                    StdTextIconEntry(
-                        modifier = Modifier
-                            .padding(horizontal = horPadding, vertical = spacing),
-                        text = "Language",
-                        fontWeight = FontWeight.Bold,
-                        icon = Icons.Default.Language,
-                        onClick = onClickLanguage,
-                        iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
-                    )
-
-                    if (showDevCount >= 7) { // Dev
-                        HorizontalDivider()
-
-                        StdTextIconEntry(
-                            modifier = Modifier
-                                .padding(horizontal = horPadding, vertical = spacing),
-                            text = stringResource(Res.string.dev_tab_title),
-                            icon = Icons.Default.LogoDev,
-                            onClick = onClickDev,
-                            fontWeight = FontWeight.Bold,
-                            iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
-                        )
-                    }
-
-                    HorizontalDivider()
-
-                    Row(
-                        modifier = Modifier
-                            .clickable(
-                                onClick = onClickLogout,
-                            )
-                            .fillMaxWidth()
-                            .padding(horizontal = horPadding, vertical = spacing)
-                    ) {
-                        val color = MaterialTheme.colorScheme.error
-                        Icon(
-                            modifier = Modifier
-                                .offset(2.dp),
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = null,
-                            tint = color,
-                        )
-
-                        Spacer(
-                            modifier = Modifier.width(12.dp)
-                        )
+                Spacer(
+                    modifier = Modifier.width(12.dp)
+                )
 
 
-                        Text(
-                            text = "Log Out",
-                            fontWeight = FontWeight.Bold,
-                            color = color,
-                        )
-                    }
-                }
+                Text(
+                    text = "Log Out",
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                )
             }
         }
     }

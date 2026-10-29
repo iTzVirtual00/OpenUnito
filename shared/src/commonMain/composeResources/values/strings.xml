@@ -62,4 +62,5 @@
     <string name="language_screen_title">Language</string>
     <string name="ND">ND</string>
     <string name="error">Error</string>
+    <string name="transcript_title">Transcript</string>
 </resources>

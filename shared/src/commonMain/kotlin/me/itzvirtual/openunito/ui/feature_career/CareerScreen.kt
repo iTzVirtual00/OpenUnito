@@ -89,8 +89,10 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
 import me.itzvirtual.openunito.resources.exam_results_title
+import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.resources.open_credit_statistics
 import me.itzvirtual.openunito.resources.remaining_cfu_title
+import me.itzvirtual.openunito.resources.transcript_title
 import me.itzvirtual.openunito.resources.yearly_progress_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
@@ -100,11 +102,10 @@ import me.itzvirtual.openunito.ui.shared.ErrorItem
 import me.itzvirtual.openunito.ui.shared.toColor
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
-import me.itzvirtual.openunito.ui.transcript.GradeWrapper
-import me.itzvirtual.openunito.ui.transcript.LocalTranscriptActions
-import me.itzvirtual.openunito.ui.transcript.TranscriptActions
-import me.itzvirtual.openunito.ui.transcript.TranscriptSheet
-import me.itzvirtual.openunito.ui.transcript.TranscriptViewModel
+import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
+import me.itzvirtual.openunito.ui.feature_career.transcript_screen.LocalTranscriptActions
+import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptActions
+import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -114,12 +115,11 @@ fun CareerScreen(
     modifier: Modifier = Modifier,
     viewModel: CareerViewModel = koinViewModel(),
     transcriptViewModel: TranscriptViewModel = koinViewModel(),
-    onOpenInvokes: () -> Unit = {}
+    onOpenTranscript: () -> Unit = {},
+    onOpenInvokes: () -> Unit = {},
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
-    var showTranscript by remember { mutableStateOf(false) }
-
 
     val actions = TranscriptActions(
         changeGradeStatus = { gradeId, newStatus ->
@@ -132,7 +132,7 @@ fun CareerScreen(
             state,
             modifier,
             onClickStatistics = { showStatistics = true },
-            onClickTranscript = { showTranscript = true },
+            onClickTranscript = onOpenTranscript,
             onClickInvoke = onOpenInvokes,
         )
     }
@@ -142,9 +142,6 @@ fun CareerScreen(
         //TODO: change to Statistic fun
         //TODO: Show WIP alert
         showStatistics = false
-    }
-    if (showTranscript) {
-        TranscriptSheet(transcriptViewModel, onDismiss = { showTranscript = false })
     }
 }
 
@@ -181,7 +178,7 @@ fun CareerScreenContent(
         Spacer(Modifier.height(16.dp))
         StdIconTextButton(
             icon = Icons.Default.Book,
-            text = "Libretto",
+            text = stringResource(Res.string.transcript_title),
             onClick = onClickTranscript,
             modifier = Modifier
                 .padding(8.dp, 0.dp)
@@ -191,7 +188,7 @@ fun CareerScreenContent(
         Spacer(Modifier.height(8.dp))
         StdIconTextButton(
             icon = Icons.Default.AccountBalance,
-            text = "Appelli",
+            text = stringResource(Res.string.examsession_title),
             onClick = onClickInvoke,
             modifier = Modifier
                 .padding(8.dp, 0.dp)

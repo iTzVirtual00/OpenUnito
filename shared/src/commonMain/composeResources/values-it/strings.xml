@@ -61,4 +61,5 @@
     <string name="language_screen_title">Lingua</string>
     <string name="ND">ND</string>
     <string name="error">Errore</string>
+    <string name="transcript_title">Libretto</string>
 </resources>

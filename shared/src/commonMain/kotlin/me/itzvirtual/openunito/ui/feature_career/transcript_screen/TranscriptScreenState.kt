@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.transcript
+package me.itzvirtual.openunito.ui.feature_career.transcript_screen
 
 import me.itzvirtual.openunito.domain.grade.ExamGrade
 

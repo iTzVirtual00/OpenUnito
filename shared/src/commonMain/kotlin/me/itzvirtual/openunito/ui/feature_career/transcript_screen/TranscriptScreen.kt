@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.transcript
+package me.itzvirtual.openunito.ui.feature_career.transcript_screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -9,21 +9,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -53,6 +58,7 @@ import me.itzvirtual.openunito.domain.grade.ExamGrade
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.grades_section_title
+import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
@@ -61,31 +67,75 @@ import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TranscriptSheet(
+fun TranscriptScreen(
+    modifier: Modifier = Modifier,
     viewModel: TranscriptViewModel = koinViewModel(),
-    onDismiss: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Expanded)
 
-    val actions = TranscriptActions(
+    TranscriptScreenContent(
+        rawGrades = state.gradesState.grades,
+        isLoading = state.gradesState.isLoading,
+        stateError = state.gradesState.error,
+        debug = state.debug,
         changeGradeStatus = { gradeId, newStatus ->
             viewModel.changeGradeStatus(gradeId, newStatus)
+        },
+        onBack = onBack,
+    )
+}
+
+
+@Composable
+fun TranscriptScreenContent(
+    modifier: Modifier = Modifier,
+    rawGrades: List<ExamGrade>,
+    isLoading: Boolean,
+    stateError: String?,
+    debug: Boolean,
+    changeGradeStatus: (String, GradeStatus) ->Job,
+    onBack: () -> Unit = {},
+) {
+    val actions = TranscriptActions(
+        changeGradeStatus = { gradeId, newStatus ->
+            changeGradeStatus(gradeId, newStatus)
         }
     )
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(Res.string.settings_tab_title),
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        },
+        contentWindowInsets = WindowInsets(
+            0.dp,
+            0.dp,
+            0.dp,
+            32.dp,
+        )
+    ) { paddingValues ->
         CompositionLocalProvider(LocalTranscriptActions provides actions) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 32.dp),
+                    .padding(paddingValues),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
@@ -95,10 +145,10 @@ fun TranscriptSheet(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 GradesSection(
-                    state.gradesState.grades,
-                    state.gradesState.isLoading,
-                    state.gradesState.error,
-                    debug = state.debug,
+                    rawGrades = rawGrades,
+                    isLoading = isLoading,
+                    stateError = stateError,
+                    debug = debug,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -138,7 +188,7 @@ fun GradeWrapper(result: ExamResult) {
             Column(
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.clip(
-                    androidx.compose.foundation.shape.RoundedCornerShape(
+                    RoundedCornerShape(
                         cornerRadius
                     )
                 ).clickable(

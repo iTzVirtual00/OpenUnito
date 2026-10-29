@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -37,20 +36,20 @@ import me.itzvirtual.openunito.MainViewModel
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.calendar_tab_title
 import me.itzvirtual.openunito.resources.career_tab_title
-import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.home_tab_title
 import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.feature_agenda.AgendaScreen
 import me.itzvirtual.openunito.ui.feature_career.CareerScreen
+import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptScreen
 import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionScreen
 import me.itzvirtual.openunito.ui.feature_home.HomeScreen
 import me.itzvirtual.openunito.ui.feature_login.AuthViewModel
 import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.openunito.ui.feature_profile.ProfileScreen
 import me.itzvirtual.openunito.ui.feature_settings.AppearanceScreen
-import me.itzvirtual.openunito.ui.feature_settings.dev_screen.DevScreen
 import me.itzvirtual.openunito.ui.feature_settings.LanguageScreen
 import me.itzvirtual.openunito.ui.feature_settings.SettingsScreen
+import me.itzvirtual.openunito.ui.feature_settings.dev_screen.DevScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
 import me.itzvirtual.openunito.ui.shared.OpenUnitoNavState
 import me.itzvirtual.openunito.ui.shared.rememberOpenUnitoNavState
@@ -197,11 +196,21 @@ fun OpenUnitoApp(
 
                     navigation<CareerGraph>(startDestination = CareerRoute) {
                         composable<CareerRoute> {
-                            CareerScreen(onOpenInvokes = {
-                                navState.navController.navigate(
-                                    InvokeRoute
-                                )
-                            })
+                            CareerScreen(
+                                onOpenTranscript = {
+                                    navState.navController.navigate(
+                                        TranscriptRoute
+                                    )
+                                },
+                                onOpenInvokes = {
+                                    navState.navController.navigate(
+                                        InvokeRoute
+                                    )
+                                }
+                            )
+                        }
+                        composable<TranscriptRoute> {
+                            TranscriptScreen(onBack = { navState.navController.popBackStack() })
                         }
                         composable<InvokeRoute> {
                             ExamSessionScreen(onBack = { navState.navController.popBackStack() })
@@ -229,7 +238,10 @@ fun OpenUnitoApp(
                                     navState.navController.navigate(
                                         DevRoute
                                     )
-                                }
+                                },
+                                onBack = {
+                                    navState.navController.popBackStack()
+                                },
                             )
                         }
                         composable<AppearenceRoute> {
@@ -311,6 +323,8 @@ private object CareerGraph
 
 @Serializable
 private object CareerRoute
+@Serializable
+private object TranscriptRoute
 
 @Serializable
 private object InvokeRoute

@@ -77,7 +77,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
 // TODO: group by month
-//Maybe call it ExamSession or just Session
 
 /*
 //Which one is the fucking booked tag?
