@@ -79,6 +79,7 @@ fun SettingsScreen(
                 showDevCount >= 6 -> {// Triggers on 7th click
                     viewModel.setShowDev(true)
                 }
+
                 else -> {
                     showDevCount++
                 }
@@ -104,29 +105,11 @@ fun SettingsScreenContent(
     val insetPadding = 12.dp
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.settings_tab_title),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
-            )
-        },
         contentWindowInsets = WindowInsets(
             insetPadding,
-            0.dp,
             insetPadding,
-            0.dp,
+            insetPadding,
+            insetPadding,
         )
     ) { paddingValues ->
         Column(
@@ -157,7 +140,7 @@ fun SettingsScreenContent(
 fun SettingsEntries(
     modifier: Modifier = Modifier,
     horPadding: Dp = 14.dp,
-    spacing: Dp = 12.dp,
+    spacing: Dp = 6.dp,
     showDev: Boolean?,
     onClickAppearance: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
@@ -165,36 +148,45 @@ fun SettingsEntries(
     onClickDev: () -> Unit = {},
 ) {
 
-    StdSurface {
-        Column {
+
+    Column {
+        StdSurface {
             StdTextIconEntry(
                 modifier = Modifier
-                    .padding(horizontal = horPadding, vertical = spacing),
+                    .padding(horizontal = horPadding, vertical = 12.dp),
                 text = stringResource(Res.string.settings_customization),
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Palette,
                 iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
                 onClick = onClickAppearance,
             )
+        }
 
-            HorizontalDivider()
+        Spacer(
+            modifier = Modifier.height(spacing)
+        )
 
+        StdSurface {
             StdTextIconEntry(
                 modifier = Modifier
-                    .padding(horizontal = horPadding, vertical = spacing),
+                    .padding(horizontal = horPadding, vertical = 12.dp),
                 text = "Language",
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Language,
                 onClick = onClickLanguage,
                 iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
             )
+        }
 
-            if (showDev ?: false) { // Dev
-                HorizontalDivider()
+        if (showDev ?: false) { // Dev
+            Spacer(
+                modifier = Modifier.height(spacing)
+            )
 
+            StdSurface {
                 StdTextIconEntry(
                     modifier = Modifier
-                        .padding(horizontal = horPadding, vertical = spacing),
+                        .padding(horizontal = horPadding, vertical = 12.dp),
                     text = stringResource(Res.string.dev_tab_title),
                     icon = Icons.Default.LogoDev,
                     onClick = onClickDev,
@@ -202,16 +194,20 @@ fun SettingsEntries(
                     iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
                 )
             }
+        }
 
-            HorizontalDivider()
+        Spacer(
+            modifier = Modifier.height(spacing)
+        )
 
+        StdSurface {
             Row(
                 modifier = Modifier
                     .clickable(
                         onClick = onClickLogout,
                     )
                     .fillMaxWidth()
-                    .padding(horizontal = horPadding, vertical = spacing)
+                    .padding(horizontal = horPadding, vertical = 12.dp)
             ) {
                 val color = MaterialTheme.colorScheme.error
                 Icon(
