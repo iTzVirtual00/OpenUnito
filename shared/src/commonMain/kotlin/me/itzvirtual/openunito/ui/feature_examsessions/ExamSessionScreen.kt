@@ -389,7 +389,7 @@ fun ExamBookingList(
     debug: Boolean,
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
-    val examsByMonth by remember(exams) { mutableStateOf(exams.groupBy { exam -> exam.date.formatFullMonth() }) }
+    val examsByMonth = remember(exams) { exams.groupBy { exam -> exam.date.formatFullMonth() } }
 
     ListWrapper(
         modifier = modifier,
