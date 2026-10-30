@@ -117,6 +117,7 @@ fun CareerScreen(
     transcriptViewModel: TranscriptViewModel = koinViewModel(),
     onOpenTranscript: () -> Unit = {},
     onOpenInvokes: () -> Unit = {},
+    onOpenStatistics: () -> Unit = {},
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
@@ -129,29 +130,28 @@ fun CareerScreen(
 
     CompositionLocalProvider(LocalTranscriptActions provides actions) {
         CareerScreenContent(
-            state,
-            modifier,
+            dashboardState = state.dashboardState,
+            examResultsState = state.examResultsState,
+            modifier = modifier,
             onClickStatistics = { showStatistics = true },
             onClickTranscript = onOpenTranscript,
             onClickInvoke = onOpenInvokes,
+            onOpenStatistics = onOpenStatistics,
         )
-    }
-
-    // Callback handling
-    if (showStatistics) {
-        //TODO: change to Statistic fun
-        //TODO: Show WIP alert
-        showStatistics = false
     }
 }
 
 @Composable
 fun CareerScreenContent(
-    state: CareerScreenState,
+//    state: CareerScreenState,
+    dashboardState: CareerDashboardUiState,
+    examResultsState: ExamResultsUiState,
     modifier: Modifier = Modifier,
+    debug: Boolean? = null,
     onClickStatistics: () -> Unit = {},
     onClickTranscript: () -> Unit = {},
     onClickInvoke: () -> Unit = {},
+    onOpenStatistics: () -> Unit = {},
 ) {
     // column??
     // Yes, column. Wdym?!
@@ -169,10 +169,11 @@ fun CareerScreenContent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             CreditsSection(
-                data = state.dashboardState.data,
-                isLoading = state.dashboardState.isLoading,
-                stateError = state.dashboardState.error,
-                debug = state.debug
+                data = dashboardState.data,
+                isLoading = dashboardState.isLoading,
+                stateError = dashboardState.error,
+                debug = debug,
+                onOpenStatistics = onOpenStatistics,
             )
         }
         Spacer(Modifier.height(16.dp))
@@ -203,40 +204,37 @@ fun CareerScreenContent(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         ExamResultsSection(
-            results = state.examResultsState.results,
-            stateError = state.examResultsState.error,
-            isLoading = state.examResultsState.isLoading,
-            debug = state.debug,
+            results = examResultsState.results,
+            stateError = examResultsState.error,
+            isLoading = examResultsState.isLoading,
+            debug = debug,
         )
     }
 }
 
 @Composable
-fun GoToCreditStatisticsSection() {
+fun GoToStatisticsSection(
+    onOpenStatistics: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(Res.string.open_credit_statistics),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+        Text(
+            text = stringResource(Res.string.open_credit_statistics),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Medium
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 
@@ -246,9 +244,10 @@ fun CreditsSection(
     data: DashboardData?,
     isLoading: Boolean,
     stateError: String?,
-    debug: Boolean = false,
+    debug: Boolean? = null,
+    onOpenStatistics: () -> Unit,
 ) {
-    val showDebug = debug && stateError != null
+    val showDebug = debug ?: false && stateError != null
 
     val currentCredits: Int
     val totalPlannedCredits: Int
@@ -318,9 +317,9 @@ fun CreditsSection(
                 color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
             ) {
                 //TODO: add refresh button
-                if (debug && isLoading) {
+                if (debug ?: false && isLoading) {
                     ErrorItem("Loading")
-                } else if (debug && stateError != null) {
+                } else if (debug ?: false && stateError != null) {
                     ErrorItem(stateError)
                 } else { // !debug or !error
                     YearlyProgressCard(
@@ -338,7 +337,7 @@ fun CreditsSection(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.tertiaryContainer,
             ) {
-                if (debug && (stateError != null || isLoading)) {
+                if (debug ?: false && (stateError != null || isLoading)) {
                     ErrorItem(stateError ?: "Loading")
                 } else {
                     Box(
@@ -360,7 +359,9 @@ fun CreditsSection(
             }
         }
     }
-    GoToCreditStatisticsSection() //TODO: replace with statistics
+    GoToStatisticsSection(
+        onOpenStatistics = onOpenStatistics,
+    )
 }
 
 
@@ -402,7 +403,7 @@ fun ExamResultsSection(
     results: List<ExamResult>,
     stateError: String?,
     isLoading: Boolean,
-    debug: Boolean = false,
+    debug: Boolean? = null,
 ) {
     val cornerRadius = 16.dp
 
@@ -794,7 +795,8 @@ fun CareerScreenPreview() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
                 CareerScreenContent(
-                    state = previewState,
+                    dashboardState = previewState.dashboardState,
+                    examResultsState = previewState.examResultsState,
                     modifier = Modifier.padding(innerPadding)
                 )
             }

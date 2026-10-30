@@ -28,24 +28,15 @@ interface AppConfigDao {
     suspend fun updateSelectedCalendarId(calendarId: Int?)
 
     // Debug //
-    @Query("SELECT debug FROM app_config WHERE id = 0")
-    fun getDebug(): Flow<Boolean>
-
     @Query("UPDATE app_config SET debug = :value WHERE id = 0")
     suspend fun updateDebug(value: Boolean)
 
     // ShowAttendance //
-    @Query("SELECT showAttendance FROM app_config WHERE id = 0")
-    fun getShowAttendance(): Flow<Boolean>
-
     @Query("UPDATE app_config SET showAttendance = :value WHERE id = 0")
     suspend fun updateShowAttendance(value: Boolean)
 
     // ShowDev //
-    @Query("SELECT showAttendance FROM app_config WHERE id = 0 LIMIT 1")
-    fun getShowDev(): Flow<Boolean>
-
-    @Query("UPDATE app_config SET showAttendance = :value WHERE id = 0")
+    @Query("UPDATE app_config SET showDev = :value WHERE id = 0")
     suspend fun updateShowDev(value: Boolean)
 
     // Clear //

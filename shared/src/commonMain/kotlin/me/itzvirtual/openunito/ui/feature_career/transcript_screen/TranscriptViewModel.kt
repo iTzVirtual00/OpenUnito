@@ -29,8 +29,8 @@ class TranscriptViewModel(
         gradeRepo.gradesFlow,
         manualError,
         isManualRefreshing,
-        appConfigRepo.config
-    ) { cachedData, error, manualRefreshing, config ->
+        appConfigRepo.debugState
+    ) { cachedData, error, manualRefreshing, debug ->
         val isLoading = cachedData == null || manualRefreshing
 
         TranscriptScreenState(
@@ -40,7 +40,7 @@ class TranscriptViewModel(
                 isLoading = isLoading,
                 error = error
             ),
-            debug = config?.debug ?: false,
+            debug = debug,
         )
     }.stateIn(
         scope = viewModelScope,

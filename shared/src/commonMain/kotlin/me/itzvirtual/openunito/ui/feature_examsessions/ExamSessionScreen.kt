@@ -110,7 +110,7 @@ fun ExamSessionScreenContent(
     subjectsList: List<String>,
     isLoading: Boolean = false,
     stateError: String? = null,
-    debug: Boolean = false,
+    debug: Boolean? = null,
     onBack: () -> Unit = {},
 ) {
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
@@ -386,7 +386,7 @@ fun ExamBookingList(
     exams: List<ExamDate>,
     isLoading: Boolean,
     stateError: String?,
-    debug: Boolean,
+    debug: Boolean?,
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
     val examsByMonth = remember(exams) { exams.groupBy { exam -> exam.date.formatFullMonth() } }

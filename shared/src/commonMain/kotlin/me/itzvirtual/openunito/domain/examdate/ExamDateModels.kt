@@ -33,7 +33,7 @@ data class ExamDate(
     val bookingStartDate: Instant,
     val bookingEndDate: Instant,
 
-    val bookableExam: Boolean,
+    val bookableExam: Boolean, // Selezionati nel piano carriera. Fuck Cineca
     val bookingEnabled: Boolean,
     val unbookingEnabled: Boolean,
 

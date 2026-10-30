@@ -101,9 +101,9 @@ fun DevScreenContent(
     setToken: (String) -> Unit = {},
     copyToken: () -> Unit = {},
     onPurgeCaches: () -> Unit = {},
-    debugValue: Boolean,
+    debugValue: Boolean?,
     onChangeDebug: (Boolean) -> Unit = {},
-    showDevValue: Boolean,
+    showDevValue: Boolean?,
     onChangeShowDev: (Boolean) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
@@ -268,9 +268,9 @@ fun PurgeCachesCard(
 @Composable
 fun DevContentCard(
     modifier: Modifier = Modifier,
-    debugValue: Boolean,
+    debugValue: Boolean?,
     onChangeDebug: (Boolean) -> Unit = {},
-    showDevValue: Boolean,
+    showDevValue: Boolean?,
     onChangeShowDev: (Boolean) -> Unit = {},
 ) {
     StdSurface(
@@ -281,7 +281,7 @@ fun DevContentCard(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, 2.dp)
                     .fillMaxWidth(),
-                value = debugValue,
+                value = debugValue ?: false,
                 onChanged = onChangeDebug,
                 icon = Icons.Default.BugReport,
                 iconColor = Color(0.976f, 0.733f, 0.275f, 1.0f),
@@ -295,7 +295,7 @@ fun DevContentCard(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, 2.dp)
                     .fillMaxWidth(),
-                value = showDevValue,
+                value = showDevValue ?: false,
                 onChanged = onChangeShowDev,
                 icon = Icons.Default.LogoDev,
                 iconColor = MaterialTheme.colorScheme.error,

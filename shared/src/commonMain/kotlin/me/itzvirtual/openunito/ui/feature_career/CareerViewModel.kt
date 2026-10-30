@@ -61,8 +61,8 @@ class CareerViewModel(
         dashboardManualError,
         examResultsManualError,
         isManualRefreshing,
-        appConfigRepo.config
-    ) { cachedDashboard, cachedExamResults, dashError, examError, manualRefreshing, config ->
+        appConfigRepo.debugState
+    ) { cachedDashboard, cachedExamResults, dashError, examError, manualRefreshing, debug ->
 
         val isDashboardLoading = cachedDashboard == null
         val isExamResultsLoading = cachedExamResults == null
@@ -87,7 +87,7 @@ class CareerViewModel(
             dashboardState = dashboardUiState,
             examResultsState = examResultsUiState,
             isGlobalLoading = isGlobalLoading,
-            debug = config?.debug ?: false
+            debug = debug,
         )
     }.stateIn(
         scope = viewModelScope,

@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getNowInstant
+import me.itzvirtual.openunito.domain.student.StudentData
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
@@ -80,8 +81,10 @@ fun HomeScreen(
 
 
     HomeScreenContent(
-        state = state,
         modifier = modifier,
+        studentState = state.studentState,
+        todayClassesState = state.todaysClasses,
+        tomorrowClassesState = state.tomorrowClasses,
         showAttendance = showAttendance,
         onNavigateToSchedule = onNavigateToSchedule,
         onOpenProfile = onOpenProfile,
@@ -91,17 +94,16 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    state: HomeScreenState,
     modifier: Modifier = Modifier,
-    showAttendance: Boolean,
+    todayClassesState: DailyClassesUiState,
+    tomorrowClassesState: DailyClassesUiState,
+    studentState: StudentDataUiState,
+    showAttendance: Boolean?,
+    debug: Boolean? = null,
     onNavigateToSchedule: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onClickAttendance: () -> Unit = {}
 ) {
-    val todayClassesState = state.todaysClasses
-    val tomorrowClassesState = state.tomorrowClasses
-
-
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
 
@@ -112,7 +114,9 @@ fun HomeScreenContent(
                 .padding(16.dp)
         ) {
             ProfileSection(
-                homeState = state,
+                data = studentState.data,
+                stateError = studentState.error,
+                debug = debug,
                 modifier = Modifier.clickable { onOpenProfile() }
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -129,7 +133,7 @@ fun HomeScreenContent(
                     stateError = todayClassesState.error,
                     onOpenScheduleClick = onNavigateToSchedule,
                     onEventClick = { event -> selectedEvent = event },
-                    debug = state.debug,
+                    debug = debug,
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 ClassesSection(
@@ -139,11 +143,12 @@ fun HomeScreenContent(
                     stateError = tomorrowClassesState.error,
                     onOpenScheduleClick = onNavigateToSchedule,
                     onEventClick = { event -> selectedEvent = event },
-                    debug = state.debug,
+                    debug = debug,
                 )
                 Spacer(modifier = Modifier.height(32.dp))
             }
-//            if (showAttendance) {
+//            // Attendance Tracking
+//            if (showAttendance ?: false) { // TODO: Uncomment when showAttendance is ready
 //                StdIconTextButton(
 //                    icon = Icons.Default.HistoryEdu,
 //                    text = stringResource(Res.string.attendance_tracking_button_name),
@@ -216,34 +221,23 @@ fun UserProfileIcon(
 
 @Composable
 fun ProfileSection( //TODO: pull state to top level
-    homeState: HomeScreenState,
+    data: StudentData? = null,
+    stateError: String?,
+    debug: Boolean? = null,
     modifier: Modifier = Modifier
 ) {
-    val state = homeState.studentState
-    val debug = homeState.debug
-
-    val firstName: String
-    val lastName: String
-
-    if (state.data != null) {
-        val studentData = state.data
-        firstName = studentData.firstname
-        lastName = studentData.lastname
-    } else {
-        firstName = stringResource(Res.string.ND)
-        lastName = ""
-    }
-
+    val firstName = data?.firstname ?: stringResource(Res.string.ND)
+    val lastName = data?.lastname ?: ""
 
     Box(modifier = modifier) {
-        if (debug && state.error != null) {
+        if (debug ?: false && stateError != null) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 Text(
-                    text = state.error,
+                    text = stateError,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -287,7 +281,7 @@ fun ClassesSection(
     stateError: String?,
     onOpenScheduleClick: () -> Unit,
     onEventClick: (AgendaEntry) -> Unit,
-    debug: Boolean,
+    debug: Boolean?,
 ) {
 
 
@@ -499,14 +493,13 @@ fun HomeScreenPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             HomeScreenContent(
-                state = HomeScreenState(
-                    studentState = StudentDataUiState(data = studentDataSample),
-                    todaysClasses = DailyClassesUiState(classes = todaysClassesSample),
-                    tomorrowClasses = DailyClassesUiState(classes = tomorrowClassesSample)
-                ),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
+                studentState = StudentDataUiState(data = studentDataSample),
+                todayClassesState = DailyClassesUiState(classes = todaysClassesSample),
+                tomorrowClassesState = DailyClassesUiState(classes = tomorrowClassesSample),
+                debug = null,
                 showAttendance = true,
             )
         }

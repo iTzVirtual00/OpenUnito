@@ -1,7 +1,6 @@
 package me.itzvirtual.openunito.data.config
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -17,13 +16,16 @@ class AppConfigRepository(
     private val configDao: AppConfigDao,
     @Named("ApplicationScope") private val externalScope: CoroutineScope,
 ) {
-    // TODO: use StateFlow?
-    val config: Flow<AppConfig?> = configDao.getConfig()
+    val config: StateFlow<AppConfig?> = configDao.getConfig()
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
 
     val tokenState: StateFlow<String?> = config
         .map { it?.authToken }
-        .distinctUntilChanged() // TODO: Mario check this, isn't it be redundant?
         .stateIn(
             scope = externalScope,
             started = SharingStarted.Eagerly,
@@ -37,7 +39,6 @@ class AppConfigRepository(
 
     val selectedCareerIdState: StateFlow<Int?> = config
         .map { it?.selectedCareerId }
-        .distinctUntilChanged()
         .stateIn(
             scope = externalScope,
             started = SharingStarted.Eagerly,
@@ -63,17 +64,35 @@ class AppConfigRepository(
         configDao.updateSelectedCalendarId(calendarId)
 
     // Debug //
-    val debug: Flow<Boolean> = configDao.getDebug()
+    val debugState: StateFlow<Boolean?> = config
+        .map { it?.debug }
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     suspend fun setDebug(value: Boolean) = configDao.updateDebug(value)
 
     // ShowAttendance //
-    val showAttendance: Flow<Boolean> = configDao.getShowAttendance()
+    val showAttendanceState: StateFlow<Boolean?> = config
+        .map { it?.showAttendance }
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     suspend fun setShowAttendance(value: Boolean) = configDao.updateShowAttendance(value)
 
     // ShowDev //
-    val showDev: Flow<Boolean> = configDao.getShowDev()
+    val showDevState: StateFlow<Boolean?> = config
+        .map { it?.showDev }
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     suspend fun setShowDev(value: Boolean) = configDao.updateShowDev(value)
 }

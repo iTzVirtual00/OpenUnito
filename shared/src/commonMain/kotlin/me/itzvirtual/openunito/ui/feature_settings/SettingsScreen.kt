@@ -75,7 +75,7 @@ fun SettingsScreen(
         showDev = showDev,
         onCLickUpdateCard = {
             when {
-                showDev -> {}
+                (showDev ?: false) -> {}
                 showDevCount >= 6 -> {// Triggers on 7th click
                     viewModel.setShowDev(true)
                 }
@@ -95,7 +95,7 @@ fun SettingsScreenContent(
     onClickAppearance: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onClickLogout: () -> Unit = {},
-    showDev: Boolean = true,
+    showDev: Boolean? = null,
     onCLickUpdateCard: () -> Unit = {},
     onClickDev: () -> Unit = {},
     onBack: () -> Unit = {},
@@ -158,7 +158,7 @@ fun SettingsEntries(
     modifier: Modifier = Modifier,
     horPadding: Dp = 14.dp,
     spacing: Dp = 12.dp,
-    showDev: Boolean,
+    showDev: Boolean?,
     onClickAppearance: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onClickLogout: () -> Unit = {},
@@ -189,7 +189,7 @@ fun SettingsEntries(
                 iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
             )
 
-            if (showDev) { // Dev
+            if (showDev ?: false) { // Dev
                 HorizontalDivider()
 
                 StdTextIconEntry(

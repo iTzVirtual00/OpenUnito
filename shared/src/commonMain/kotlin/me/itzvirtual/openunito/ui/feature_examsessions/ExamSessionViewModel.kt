@@ -32,7 +32,7 @@ class ExamSessionViewModel(
         datesManualError,
         resultsManualError,
         isManualRefreshing,
-        appConfigRepo.debug
+        appConfigRepo.debugState
     ) { cachedDates, cachedResults, datesError, resultsError, manualRefreshing, debug ->
 
         val isDatesLoading = cachedDates == null

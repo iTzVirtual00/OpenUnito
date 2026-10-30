@@ -89,8 +89,8 @@ class HomeViewModel(
     val screenState: StateFlow<HomeScreenState> = combine(
         studentUiStateFlow,
         agendaUiStateFlow,
-        appConfigRepo.debug,
-        appConfigRepo.showAttendance,
+        appConfigRepo.debugState,
+        appConfigRepo.showAttendanceState,
     ) { studentState, agendaState, debug, showAttendance ->
         HomeScreenState(
             studentState = studentState,

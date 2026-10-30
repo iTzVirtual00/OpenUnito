@@ -27,8 +27,8 @@ class DevScreenViewModel (
     private val examGradeDao: ExamGradeDao,
 ): ViewModel() {
     val screenState: StateFlow<DevScreenState> = combine(
-        appConfigRepo.debug,
-        appConfigRepo.showDev,
+        appConfigRepo.debugState,
+        appConfigRepo.showDevState,
     ) { debug, showDev ->
         DevScreenState(
             debug = debug,

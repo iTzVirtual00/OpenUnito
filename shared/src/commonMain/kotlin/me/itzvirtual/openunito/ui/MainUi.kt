@@ -48,7 +48,7 @@ import me.itzvirtual.openunito.ui.feature_login.UniToLoginScreen
 import me.itzvirtual.openunito.ui.feature_profile.ProfileScreen
 import me.itzvirtual.openunito.ui.feature_settings.LanguageScreen
 import me.itzvirtual.openunito.ui.feature_settings.SettingsScreen
-import me.itzvirtual.openunito.ui.feature_settings.customization_screen.AppearanceScreen
+import me.itzvirtual.openunito.ui.feature_settings.customization_screen.CustomizationScreen
 import me.itzvirtual.openunito.ui.feature_settings.dev_screen.DevScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
 import me.itzvirtual.openunito.ui.shared.OpenUnitoNavState
@@ -247,7 +247,7 @@ fun OpenUnitoApp(
                             )
                         }
                         composable<AppearenceRoute> {
-                            AppearanceScreen(onBack = { navState.navController.popBackStack() })
+                            CustomizationScreen(onBack = { navState.navController.popBackStack() })
                         }
                         composable<LanguageRoute> {
                             LanguageScreen(onBack = { navState.navController.popBackStack() })

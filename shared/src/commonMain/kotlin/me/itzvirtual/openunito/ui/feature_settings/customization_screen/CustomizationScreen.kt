@@ -32,14 +32,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AppearanceScreen(
+fun CustomizationScreen(
     modifier: Modifier = Modifier,
     viewModel: CustomizationScreenViewModel = koinViewModel(),
     onBack: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
 
-    AppearanceScreenContent(
+    CustomizationScreenContent(
         modifier = modifier,
         onBack = onBack,
         showAttendanceValue = state.showAttendance,
@@ -50,9 +50,9 @@ fun AppearanceScreen(
 }
 
 @Composable
-fun AppearanceScreenContent(
+fun CustomizationScreenContent(
     modifier: Modifier = Modifier,
-    showAttendanceValue: Boolean,
+    showAttendanceValue: Boolean?,
     onChangeShowAttendance: (Boolean) -> Unit,
     onBack: () -> Unit = {},
 ) {
@@ -95,7 +95,7 @@ fun AppearanceScreenContent(
                         modifier = Modifier
                             .padding(horizontal = 16.dp, 2.dp)
                             .fillMaxWidth(),
-                        value = showAttendanceValue,
+                        value = showAttendanceValue ?: false,
                         onChanged = onChangeShowAttendance,
                         icon = Icons.Default.HistoryEdu,
                         iconColor = Color(99, 166, 234, 255),
@@ -110,10 +110,10 @@ fun AppearanceScreenContent(
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun AppearanceScreenPreview() {
+fun CustomizationScreenPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            AppearanceScreenContent(
+            CustomizationScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),

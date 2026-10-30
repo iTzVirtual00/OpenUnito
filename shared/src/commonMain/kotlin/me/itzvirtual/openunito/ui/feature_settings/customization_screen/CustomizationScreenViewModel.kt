@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.config.AppConfigRepository
@@ -14,11 +15,10 @@ import org.koin.android.annotation.KoinViewModel
 class CustomizationScreenViewModel(
     private val appConfigRepo: AppConfigRepository,
 ): ViewModel() {
-    val screenState: StateFlow<CustomizationScreenState> = combine(
-        appConfigRepo.showAttendance
-    ) { showAttendance ->
+    val screenState: StateFlow<CustomizationScreenState> = appConfigRepo.showAttendanceState
+    .map{ showAttendance ->
         CustomizationScreenState(
-            showAttendance = showAttendance[0],
+            showAttendance = showAttendance,
         )
     }.stateIn(
         scope = viewModelScope,

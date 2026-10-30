@@ -84,7 +84,6 @@ class StudentRepository(
                 }
             }
         }
-        .distinctUntilChanged()
         .flowOn(ioDispatcher)
         .stateIn(
             scope = externalScope,
@@ -94,7 +93,7 @@ class StudentRepository(
 
     // TODO: Start prefetcher or destroy other models or something (old data flashes)
     val careerContextFlow: SharedFlow<CareerContext> = combine(
-        studentCacheFlow.filterNotNull().map { it.data }.distinctUntilChanged(),
+        studentCacheFlow.filterNotNull().map { it.data },
         appConfigRepo.selectedCareerIdState
     ) { studentData, selectedCareer ->
         val studentCareers = studentData.careers

@@ -92,7 +92,7 @@ fun TranscriptScreenContent(
     rawGrades: List<ExamGrade>,
     isLoading: Boolean,
     stateError: String?,
-    debug: Boolean,
+    debug: Boolean?,
     changeGradeStatus: (String, GradeStatus) ->Job,
     onBack: () -> Unit = {},
 ) {
@@ -251,7 +251,7 @@ fun GradesSection(
     rawGrades: List<ExamGrade>,
     isLoading: Boolean,
     stateError: String?,
-    debug: Boolean,
+    debug: Boolean?,
 ) {
     val grades = remember(rawGrades) {
         rawGrades.filter { it.score != null }
@@ -260,7 +260,7 @@ fun GradesSection(
 
     ListWrapper(
         isEmpty = grades.isEmpty(),
-        debug = debug,
+        debug = debug ?: false,
         isLoading = isLoading,
         stateError = stateError
     ) {

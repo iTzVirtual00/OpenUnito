@@ -13,5 +13,5 @@ data class ExamDatesUiState(
 data class ExamDatesScreenState(
     val examDatesState: ExamDatesUiState = ExamDatesUiState(isLoading = true),
     val isGlobalLoading: Boolean = true,
-    val debug: Boolean = false,
+    val debug: Boolean? = null,
 )

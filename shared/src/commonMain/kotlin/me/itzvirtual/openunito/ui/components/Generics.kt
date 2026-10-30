@@ -59,7 +59,7 @@ fun StdSurface(
 fun ListWrapper(
     modifier: Modifier = Modifier,
     isEmpty: Boolean,
-    debug: Boolean,
+    debug: Boolean?,
     isLoading: Boolean,
     stateError: String?,
     emptyMessage: String = stringResource(Res.string.empty_list),
@@ -70,7 +70,7 @@ fun ListWrapper(
             modifier = modifier
                 .padding(vertical = 8.dp), // To add padding only in case of noData in ExamSessions
         ) {
-            if (debug && stateError != null) {
+            if (debug ?: false && stateError != null) {
                 ErrorItem(stateError)
             } else {
                 val msg = when {
