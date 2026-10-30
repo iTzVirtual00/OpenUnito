@@ -63,4 +63,5 @@
     <string name="ND">ND</string>
     <string name="error">Error</string>
     <string name="transcript_title">Transcript</string>
+    <string name="all">All</string>
 </resources>

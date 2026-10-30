@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,8 +59,10 @@ import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.domain.formatDate
+import me.itzvirtual.openunito.domain.formatFullMonth
 import me.itzvirtual.openunito.domain.formatMediumDate
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
@@ -75,7 +77,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
-// TODO: group by month
 
 enum class filterState {
     ANY,
@@ -210,77 +211,72 @@ fun FilterTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(36.dp)
             .padding(0.dp),
     ) {
         SubjectDropdownMenu(
             modifier = Modifier
                 .weight(0.9f)
-                .fillMaxHeight()
                 .padding(horizontal = horPadding),
             selectedSubject = selectedSubject,
             subjectsList = subjectsList,
             fontSize = fontSize,
         )
 
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(end = horPadding),
-        ) {
-            // Booked
-            StdButtonEmpty(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight(),
-                onClick = onClickBooked,
-                color = when (filter) {
-                    filterState.BOOKED -> selectedColor
-                    else -> unselectedColor
-                },
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp, 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Booked",
-                        fontSize = fontSize,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            // Unbooked
-            StdButtonEmpty(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight(),
-                onClick = onClickUnbooked,
-                color = when (filter) {
-                    filterState.UNBOOKED -> selectedColor
-                    else -> unselectedColor
-                },
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp, 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Unbooked",
-                        fontSize = fontSize,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-            }
-        }
+//        Row(
+//            modifier = Modifier
+//                .weight(1f)
+//                .padding(end = horPadding),
+//        ) {
+//            // Booked
+//            StdButtonEmpty(
+//                modifier = Modifier
+//                    .weight(0.5f),
+//                onClick = onClickBooked,
+//                color = when (filter) {
+//                    filterState.BOOKED -> selectedColor
+//                    else -> unselectedColor
+//                },
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(8.dp, 8.dp),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Text(
+//                        text = "Booked",
+//                        fontSize = fontSize,
+//                        fontWeight = FontWeight.Medium
+//                    )
+//                }
+//            }
+//
+//            // Unbooked
+//            StdButtonEmpty(
+//                modifier = Modifier
+//                    .weight(0.5f),
+//                onClick = onClickUnbooked,
+//                color = when (filter) {
+//                    filterState.UNBOOKED -> selectedColor
+//                    else -> unselectedColor
+//                },
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(8.dp, 8.dp),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Text(
+//                        text = "Unbooked",
+//                        fontSize = fontSize,
+//                        fontWeight = FontWeight.Medium,
+//                    )
+//                }
+//            }
+//        }
     }
 }
 
@@ -309,19 +305,35 @@ fun SubjectDropdownMenu(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = when (selectedSubject.value) {
-                        null -> "All Subs"
-                        else -> unShoutCourseName(subjectsList[selectedSubject.value!!])
-                    },
-                    fontSize = fontSize,
-                    color = color
-                )
+                Column {
+                    val smallFontSize = fontSize.times(0.65)
+
+                    Text(
+                        text = "Subjects", // TODO: add translations
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        fontSize = smallFontSize,
+                        lineHeight = smallFontSize.times(1.4),
+                    )
+                    Row {
+                        Spacer(
+                            modifier = Modifier.width(8.dp)
+                        )
+                        Text(
+                            text = when (selectedSubject.value) {
+                                null -> stringResource(Res.string.all)
+                                else -> unShoutCourseName(subjectsList[selectedSubject.value!!])
+                            },
+                            fontSize = fontSize,
+                            lineHeight = fontSize.times(1.4),
+                            color = color
+                        )
+                    }
+                }
                 AnimatedContent(
                     targetState = isDropDownExpanded
                 ) { scope ->
@@ -343,7 +355,7 @@ fun SubjectDropdownMenu(
             DropdownMenuItem(
                 text = {
                     Text(
-                        text = "All Subs",
+                        text = stringResource(Res.string.all),
                     )
                 },
                 onClick = {
@@ -378,6 +390,7 @@ fun ExamBookingList(
     debug: Boolean,
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
+    var examsByMonth = remember { derivedStateOf { exams.groupBy { exam -> exam.date.formatFullMonth() } } }
 
     ListWrapper(
         modifier = modifier,
@@ -395,21 +408,75 @@ fun ExamBookingList(
                     modifier = Modifier.height(8.dp)
                 )
             }
-            exams.forEach { exam ->
+
+            examsByMonth.value.forEach { (month, examList) ->
                 item {
-                    ExamSessionCard(
+                    MonthCard(
                         modifier = Modifier
-                            .padding(bottom = 10.dp),
-                        exam = exam,
-                        expanded = exam.id() == expandedExamId,
-                        onClick = {
-                            val id = exam.id()
-                            expandedExamId = if (expandedExamId != id) id else null
+                            .padding(),
+                        month = month.replaceFirstChar { // Capitalize month
+                            if (it.isLowerCase()) it.titlecase() else it.toString()
                         }
                     )
                 }
+
+                examList.forEach { exam ->
+                    item {
+                        ExamSessionCard(
+                            modifier = Modifier
+                                .padding(bottom = 10.dp),
+                            exam = exam,
+                            expanded = exam.id() == expandedExamId,
+                            onClick = {
+                                val id = exam.id()
+                                expandedExamId = if (expandedExamId != id) id else null
+                            }
+                        )
+                    }
+                }
+
             }
         }
+    }
+}
+
+@Composable
+fun MonthCard(
+    modifier: Modifier = Modifier,
+    month: String,
+) {
+    val color = MaterialTheme.colorScheme.outlineVariant
+
+    Column(
+        modifier = modifier,
+    ) {
+        Spacer(Modifier.height(2.dp))
+
+        HorizontalDivider(
+            color = color,
+            thickness = 1.dp
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp),
+        ) {
+            Text(
+                text = month,
+                fontWeight = FontWeight.Light,
+                color = MaterialTheme.colorScheme.outline,
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+
+        HorizontalDivider(
+            color = color,
+            thickness = 1.dp
+        )
+
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -434,7 +501,7 @@ fun ExamSessionCard(
     val horPadding = 16.dp
 
     val border = when {
-        exam.bookableExam -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+//        exam.bookableExam -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
         else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     }
 
@@ -641,7 +708,7 @@ fun InfoSection(
 
     val size = 13.sp
     Column {
-        // Activity code, sessions
+        // Activity code, Subscribed
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -660,55 +727,6 @@ fun InfoSection(
                 )
                 Text(
                     text = activityCode,
-                    fontWeight = strongWeight,
-                    fontSize = size,
-                    lineHeight = size.times(1.4f),
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                Text(
-                    text = "Sessions: ",
-                    color = weakColor,
-                    fontWeight = weakWeight,
-                    fontSize = size,
-                    lineHeight = size.times(1.4f),
-                )
-                Text(
-                    text = "Placeholder",
-                    fontWeight = strongWeight,
-                    fontSize = size,
-                    lineHeight = size.times(1.4f),
-                )
-            }
-        }
-
-        Spacer(
-            modifier = Modifier.height(spacing),
-        )
-
-        // President, Subscribed
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                Text(
-                    text = "President: ",
-                    color = weakColor,
-                    fontWeight = weakWeight,
-                    fontSize = size,
-                    lineHeight = size.times(1.4f),
-                )
-                Text(
-                    text = unShoutCourseName(president),
                     fontWeight = strongWeight,
                     fontSize = size,
                     lineHeight = size.times(1.4f),
@@ -739,23 +757,50 @@ fun InfoSection(
             modifier = Modifier.height(spacing),
         )
 
-        // Session Notes
+        // President
         Row(
-            verticalAlignment = Alignment.Top
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
         ) {
             Text(
-                text = "Notes: ",
+                text = "President: ",
                 color = weakColor,
                 fontWeight = weakWeight,
                 fontSize = size,
                 lineHeight = size.times(1.4f),
             )
             Text(
-                text = note,
+                text = unShoutCourseName(president),
                 fontWeight = strongWeight,
                 fontSize = size,
                 lineHeight = size.times(1.4f),
             )
+        }
+
+        Spacer(
+            modifier = Modifier.height(spacing),
+        )
+
+        // Session Notes
+        if (note != "") {
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = "Notes: ",
+                    color = weakColor,
+                    fontWeight = weakWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+                Text(
+                    text = note,
+                    fontWeight = strongWeight,
+                    fontSize = size,
+                    lineHeight = size.times(1.4f),
+                )
+            }
         }
     }
 }

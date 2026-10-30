@@ -62,6 +62,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.reflect.KClass
 
 // TODO: add recovery points
+
+// TODO: add a background gradient or smth
 @Composable
 fun RootNavigation(
     authViewModel: AuthViewModel = koinViewModel()

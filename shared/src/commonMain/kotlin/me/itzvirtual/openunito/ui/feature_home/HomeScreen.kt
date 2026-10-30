@@ -23,8 +23,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.HistoryEdu
-import androidx.compose.material.icons.filled.PersonalInjury
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RollerSkating
+import androidx.compose.material.icons.filled.SatelliteAlt
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
@@ -183,10 +187,26 @@ fun HomeScreenContent(
 
 
 @Composable
-fun UserInitialsIcon(
+fun UserProfileIcon(
     modifier: Modifier = Modifier,
+    special: Int?,
     size: Dp = 40.dp
 ) {
+    /*  Specials:
+            null: everyone (Person)
+            0: Mario
+            1: Emi // Hopefully one day she'll have the app
+            2: Anna // Beta tester #1
+            3: Luca Neri // Genetics was cool but not present in this lib
+    */
+    val icon = when(special) {
+        0 -> Icons.Default.SatelliteAlt
+        1 -> Icons.Default.RollerSkating
+        2 -> Icons.Default.BugReport
+        3 -> Icons.Default.Translate
+        else -> Icons.Default.Person
+    }
+
     Surface(
         modifier = modifier.size(size),
         shape = CircleShape,
@@ -195,8 +215,8 @@ fun UserInitialsIcon(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
-                modifier = Modifier.size(30.dp),
-                imageVector = Icons.Default.PersonalInjury,
+                modifier = Modifier.size(29.dp),
+                imageVector = icon,
                 contentDescription = null,
             )
         }
@@ -246,7 +266,14 @@ fun ProfileSection( //TODO: pull state to top level
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    UserInitialsIcon()
+                    UserProfileIcon(
+                        special = when {
+                            firstName == "Mario" && lastName == "Rossi" -> 0
+                            firstName == "Maria" && lastName == "Bianchi" -> 1
+                            firstName == "Anna" && lastName == "Verdi" -> 2
+                            else -> null
+                        }
+                    )
                     Text(
                         text = "$firstName $lastName",
                         style = MaterialTheme.typography.headlineMedium,

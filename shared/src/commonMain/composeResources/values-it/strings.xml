@@ -62,4 +62,5 @@
     <string name="ND">ND</string>
     <string name="error">Errore</string>
     <string name="transcript_title">Libretto</string>
+    <string name="all">Tutte</string>
 </resources>

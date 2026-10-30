@@ -84,6 +84,16 @@ fun LocalDate.formatDate(
     locale: Locale = Locale.current,
 ): String = this.format(FormatStyle.SHORT, locale)
 
+// 11
+fun Instant.formatFullMonth(
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    locale: Locale = Locale.current,
+): String = this.toLocalDateTime(timeZone).date.formatFullMonth(locale)
+
+fun LocalDate.formatFullMonth(
+    locale: Locale = Locale.current
+): String = this.format("MMMM", locale)
+
 fun getDayOfWeek(
     day: DayOfWeek,
     today: LocalDate = getToday(),
