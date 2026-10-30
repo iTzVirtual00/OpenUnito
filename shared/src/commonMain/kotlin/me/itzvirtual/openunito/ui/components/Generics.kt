@@ -2,10 +2,10 @@ package me.itzvirtual.openunito.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +15,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -24,13 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
-import me.itzvirtual.openunito.resources.loading
-import me.itzvirtual.openunito.resources.no_data
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
 
@@ -42,8 +45,8 @@ fun StdSurface(
     content: @Composable (() -> Unit),
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth(), //TODO: remove these
+        modifier = modifier,
+//            .fillMaxWidth(), //TODO: remove these
         shape = RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
         border = border
@@ -164,5 +167,57 @@ fun StdTextIconEntry(
                 color = textColor,
             )
         }
+    }
+}
+
+@Composable
+fun StdSwitch(
+    modifier: Modifier = Modifier,
+    value: Boolean,
+    onChanged: (Boolean) -> Unit,
+    icon: ImageVector,
+    iconColor: Color = Color.Unspecified,
+    text: String,
+    textColor: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    switchColors: SwitchColors = SwitchDefaults.colors(),
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+        ) {
+            Icon(
+                modifier = Modifier,
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+            )
+            Spacer(
+                modifier = Modifier
+                    .width(12.dp),
+            )
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = fontWeight,
+                fontSize = fontSize,
+                lineHeight = when {
+                    fontSize.isSpecified -> fontSize.times(1.4)
+                    else -> TextUnit.Unspecified
+                },
+            )
+        }
+        Switch(
+            modifier = Modifier
+                .padding(vertical = 2.dp),
+            checked = value,
+            onCheckedChange = onChanged,
+            colors = switchColors,
+        )
     }
 }

@@ -54,7 +54,7 @@
     <string name="career_tab_title">Career</string>
     <string name="calendar_tab_title">Calendar</string>
     <string name="settings_tab_title">Settings</string>
-    <string name="dev_tab_title">Dev</string>
+    <string name="dev_tab_title">Developer</string>
     <string name="attendance_tracking_button_name">Attendances Tracking</string>
     <string name="settings_customization">Customization</string>
     <string name="examsession_title">Exams</string>
@@ -64,4 +64,6 @@
     <string name="error">Error</string>
     <string name="transcript_title">Transcript</string>
     <string name="all">All</string>
+    <string name="debug_entry">Debug</string>
+    <string name="show_dev_button">Show Developer Section</string>
 </resources>

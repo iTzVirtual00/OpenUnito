@@ -42,11 +42,12 @@ expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
         ExamDateEntity::class,
         ExamGradeEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(3, 4),
         AutoMigration(4, 5),
+        AutoMigration(5, 6),
     ]
 )
 @ConstructedBy(AppDatabaseConstructor::class)

@@ -24,7 +24,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RollerSkating
 import androidx.compose.material.icons.filled.SatelliteAlt
@@ -59,13 +58,11 @@ import me.itzvirtual.openunito.domain.getNowInstant
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
-import me.itzvirtual.openunito.resources.attendance_tracking_button_name
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.resources.open_schedule
 import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -78,22 +75,17 @@ fun HomeScreen(
     onNavigateToSchedule: () -> Unit = {},
     onOpenProfile: () -> Unit = {}
 ) {
-    var showAttendancesTracking by remember { mutableStateOf(false) }
-
-    if (showAttendancesTracking) {
-        //TODO: call attendance tracking
-        //TODO: Show WIP alert
-        showAttendancesTracking = false
-    }
-
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val showAttendance = state.showAttendance
+
 
     HomeScreenContent(
         state = state,
         modifier = modifier,
+        showAttendance = showAttendance,
         onNavigateToSchedule = onNavigateToSchedule,
         onOpenProfile = onOpenProfile,
-        onClickAttendance = { showAttendancesTracking = true }
+        onClickAttendance = {} // TODO: Implement AttendanceTrackingScreen
     )
 }
 
@@ -101,12 +93,11 @@ fun HomeScreen(
 fun HomeScreenContent(
     state: HomeScreenState,
     modifier: Modifier = Modifier,
+    showAttendance: Boolean,
     onNavigateToSchedule: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onClickAttendance: () -> Unit = {}
 ) {
-    val showAttendance = true // TODO: add this in settings
-
     val todayClassesState = state.todaysClasses
     val tomorrowClassesState = state.tomorrowClasses
 
@@ -152,17 +143,17 @@ fun HomeScreenContent(
                 )
                 Spacer(modifier = Modifier.height(32.dp))
             }
-            if (showAttendance) {
-                StdIconTextButton(
-                    icon = Icons.Default.HistoryEdu,
-                    text = stringResource(Res.string.attendance_tracking_button_name),
-                    onClick = onClickAttendance,
-                    modifier = Modifier
-                        .padding(0.dp, 0.dp)
-                        .height(90.dp),
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-                )
-            }
+//            if (showAttendance) {
+//                StdIconTextButton(
+//                    icon = Icons.Default.HistoryEdu,
+//                    text = stringResource(Res.string.attendance_tracking_button_name),
+//                    onClick = onClickAttendance,
+//                    modifier = Modifier
+//                        .padding(0.dp, 0.dp)
+//                        .height(90.dp),
+//                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+//                )
+//            }
         }
 
         var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
@@ -515,7 +506,8 @@ fun HomeScreenPreview() {
                 ),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                showAttendance = true,
             )
         }
     }

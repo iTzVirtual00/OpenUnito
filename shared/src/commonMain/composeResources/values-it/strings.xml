@@ -53,7 +53,7 @@
     <string name="career_tab_title">Carriera</string>
     <string name="calendar_tab_title">Calendario</string>
     <string name="settings_tab_title">Impostazioni</string>
-    <string name="dev_tab_title">Dev</string>
+    <string name="dev_tab_title">Sviluppatore</string>
     <string name="attendance_tracking_button_name">Rilevazione Frequenze</string>
     <string name="settings_customization">Aspetto</string>
     <string name="examsession_title">Appelli</string>
@@ -63,4 +63,6 @@
     <string name="error">Errore</string>
     <string name="transcript_title">Libretto</string>
     <string name="all">Tutte</string>
+    <string name="debug_entry">Debug</string>
+    <string name="show_dev_button">Mostra Opzioni Sviluppatore</string>
 </resources>

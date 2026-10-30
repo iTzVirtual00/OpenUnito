@@ -27,16 +27,19 @@ class DevScreenViewModel (
     private val examGradeDao: ExamGradeDao,
 ): ViewModel() {
     val screenState: StateFlow<DevScreenState> = combine(
-        appConfigRepo.debug
-    ) { debug ->
+        appConfigRepo.debug,
+        appConfigRepo.showDev,
+    ) { debug, showDev ->
         DevScreenState(
-            debug = debug[0],
+            debug = debug,
+            showDev = showDev,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = DevScreenState()
     )
+
     fun login(token: String, onComplete: () -> Unit = {}) {
         viewModelScope.launch { appConfigRepo.saveToken(token); onComplete() }
     }
@@ -63,6 +66,12 @@ class DevScreenViewModel (
     fun setDebug(value: Boolean) {
         viewModelScope.launch {
             appConfigRepo.setDebug(value)
+        }
+    }
+
+    fun setShowDev(value: Boolean) {
+        viewModelScope.launch {
+            appConfigRepo.setShowDev(value)
         }
     }
 }

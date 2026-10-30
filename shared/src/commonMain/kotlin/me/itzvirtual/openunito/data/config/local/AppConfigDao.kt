@@ -13,9 +13,11 @@ interface AppConfigDao {
     @Upsert
     suspend fun saveConfig(config: AppConfig)
 
+    // AuthToken //
     @Query("UPDATE app_config SET authToken = :token WHERE id = 0")
     suspend fun updateToken(token: String?)
 
+    // SelectedCareerId //
     @Query("UPDATE app_config SET selectedCareerId = :careerId WHERE id = 0")
     suspend fun updateCareerId(careerId: Int?)
 
@@ -32,6 +34,21 @@ interface AppConfigDao {
     @Query("UPDATE app_config SET debug = :value WHERE id = 0")
     suspend fun updateDebug(value: Boolean)
 
+    // ShowAttendance //
+    @Query("SELECT showAttendance FROM app_config WHERE id = 0")
+    fun getShowAttendance(): Flow<Boolean>
+
+    @Query("UPDATE app_config SET showAttendance = :value WHERE id = 0")
+    suspend fun updateShowAttendance(value: Boolean)
+
+    // ShowDev //
+    @Query("SELECT showAttendance FROM app_config WHERE id = 0 LIMIT 1")
+    fun getShowDev(): Flow<Boolean>
+
+    @Query("UPDATE app_config SET showAttendance = :value WHERE id = 0")
+    suspend fun updateShowDev(value: Boolean)
+
+    // Clear //
     @Query("DELETE FROM app_config")
     suspend fun clearAll()
 }

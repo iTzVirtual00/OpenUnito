@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -390,11 +389,11 @@ fun ExamBookingList(
     debug: Boolean,
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
-    var examsByMonth = remember { derivedStateOf { exams.groupBy { exam -> exam.date.formatFullMonth() } } }
+    val examsByMonth by remember(exams) { mutableStateOf(exams.groupBy { exam -> exam.date.formatFullMonth() }) }
 
     ListWrapper(
         modifier = modifier,
-        isEmpty = exams.isEmpty(),
+        isEmpty = examsByMonth.isEmpty(),
         debug = debug,
         isLoading = isLoading,
         stateError = stateError
@@ -409,7 +408,7 @@ fun ExamBookingList(
                 )
             }
 
-            examsByMonth.value.forEach { (month, examList) ->
+            examsByMonth.forEach { (month, examList) ->
                 item {
                     MonthCard(
                         modifier = Modifier

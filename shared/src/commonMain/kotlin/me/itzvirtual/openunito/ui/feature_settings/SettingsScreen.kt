@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,13 +36,13 @@ import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextIconEntry
-import me.itzvirtual.openunito.ui.feature_devtools.DevtoolsActions
 import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -59,21 +58,32 @@ fun SettingsScreen(
     onClickDev: () -> Unit,
     onBack: () -> Unit,
 ) {
+    val state by viewModel.screenState.collectAsStateWithLifecycle()
+    var showDevCount by remember { mutableStateOf(0) }
+    val showDev = state.showDev
+
     // I can do WHAT??
     val restartApp = rememberRestartApp()
+    val doLogout = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp() } } }
 
-    // Bind ViewModel logic to the Actions data class
-    val actions = remember(viewModel) {
-        DevtoolsActions(
-            clearToken = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp() } } },
-        )
-    }
 
     SettingsScreenContent(
         modifier = modifier,
         onClickAppearance = onClickAppearance,
         onClickLanguage = onClickLanguage,
-        onClickLogout = actions.clearToken,
+        onClickLogout = doLogout,
+        showDev = showDev,
+        onCLickUpdateCard = {
+            when {
+                showDev -> {}
+                showDevCount >= 6 -> {// Triggers on 7th click
+                    viewModel.setShowDev(true)
+                }
+                else -> {
+                    showDevCount++
+                }
+            }
+        },
         onClickDev = onClickDev,
         onBack = onBack,
     )
@@ -85,11 +95,11 @@ fun SettingsScreenContent(
     onClickAppearance: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onClickLogout: () -> Unit = {},
+    showDev: Boolean = true,
+    onCLickUpdateCard: () -> Unit = {},
     onClickDev: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
-    var showDevCount by remember { mutableStateOf(0) }
-
     val spacing = 12.dp
     val insetPadding = 12.dp
 
@@ -125,11 +135,7 @@ fun SettingsScreenContent(
                 .padding(paddingValues)
         ) {
             UpdateCard(
-                onClick = {
-                    if (showDevCount < 7) {
-                        showDevCount++
-                    }
-                }
+                onClick = onCLickUpdateCard
             )
 
             Spacer(
@@ -137,7 +143,7 @@ fun SettingsScreenContent(
             )
 
             SettingsEntries(
-                showDev = (showDevCount >= 7),
+                showDev = showDev,
                 onClickAppearance = onClickAppearance,
                 onClickLanguage = onClickLanguage,
                 onClickLogout = onClickLogout,

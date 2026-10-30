@@ -9,19 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -42,8 +43,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.domain.PlatformClipboardManager
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.debug_entry
 import me.itzvirtual.openunito.resources.dev_tab_title
+import me.itzvirtual.openunito.resources.show_dev_button
 import me.itzvirtual.openunito.ui.components.StdSurface
+import me.itzvirtual.openunito.ui.components.StdSwitch
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -80,8 +84,12 @@ fun DevScreen(
             viewModel.purgeAllCaches { restartApp() }
         },
         debugValue = state.debug,
-        onSetDebug = { value ->
+        onChangeDebug = { value ->
             viewModel.setDebug(value)
+        },
+        showDevValue = state.showDev,
+        onChangeShowDev = { value ->
+            viewModel.setShowDev(value)
         },
         onBack = onBack,
     )
@@ -94,7 +102,9 @@ fun DevScreenContent(
     copyToken: () -> Unit = {},
     onPurgeCaches: () -> Unit = {},
     debugValue: Boolean,
-    onSetDebug: (Boolean) -> Unit = {},
+    onChangeDebug: (Boolean) -> Unit = {},
+    showDevValue: Boolean,
+    onChangeShowDev: (Boolean) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     val insetPadding = 12.dp
@@ -150,8 +160,9 @@ fun DevScreenContent(
 
             DevContentCard(
                 debugValue = debugValue,
-                onSetDebug = onSetDebug,
-
+                onChangeDebug = onChangeDebug,
+                showDevValue = showDevValue,
+                onChangeShowDev = onChangeShowDev,
             )
         }
     }
@@ -258,54 +269,45 @@ fun PurgeCachesCard(
 fun DevContentCard(
     modifier: Modifier = Modifier,
     debugValue: Boolean,
-    onSetDebug: (Boolean) -> Unit = {},
+    onChangeDebug: (Boolean) -> Unit = {},
+    showDevValue: Boolean,
+    onChangeShowDev: (Boolean) -> Unit = {},
 ) {
-    StdSurface {
-        DebugSwitchEntry(
-            modifier = modifier
-                .padding(horizontal = 16.dp, 2.dp)
-                .fillMaxWidth(),
-            debugValue = debugValue,
-            onChecked = onSetDebug,
-        )
-    }
-}
-
-@Composable
-fun DebugSwitchEntry(
-    modifier: Modifier = Modifier,
-    debugValue: Boolean,
-    onChecked: (Boolean) -> Unit = {},
-) {
-    Row(
+    StdSurface(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-        ) {
-            Icon(
-                modifier = Modifier,
-                imageVector = Icons.Default.BugReport,
-                contentDescription = null,
-                tint = Color(0.976f, 0.733f, 0.275f, 1.0f),
-            )
-            Spacer(
+        Column() {
+            StdSwitch(
                 modifier = Modifier
-                    .width(12.dp),
-            )
-            Text(
-                text = "Debug",
+                    .padding(horizontal = 16.dp, 2.dp)
+                    .fillMaxWidth(),
+                value = debugValue,
+                onChanged = onChangeDebug,
+                icon = Icons.Default.BugReport,
+                iconColor = Color(0.976f, 0.733f, 0.275f, 1.0f),
+                text = stringResource(Res.string.debug_entry),
                 fontWeight = FontWeight.Bold
             )
+
+            HorizontalDivider()
+
+            StdSwitch(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, 2.dp)
+                    .fillMaxWidth(),
+                value = showDevValue,
+                onChanged = onChangeShowDev,
+                icon = Icons.Default.LogoDev,
+                iconColor = MaterialTheme.colorScheme.error,
+                text = stringResource(Res.string.show_dev_button),
+                textColor = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.Bold,
+                switchColors = SwitchDefaults.colors().copy(
+                    checkedTrackColor = MaterialTheme.colorScheme.error,
+                    checkedThumbColor = MaterialTheme.colorScheme.onError,
+                )
+            )
         }
-        Switch(
-            modifier = Modifier
-                .padding(vertical = 2.dp),
-            checked = debugValue,
-            onCheckedChange = { state -> onChecked(state) }
-        )
     }
 }
 
@@ -319,6 +321,7 @@ fun DevScreenPreview() {
                     .fillMaxSize()
                     .padding(innerPadding),
                 debugValue = false,
+                showDevValue = false,
             )
         }
     }

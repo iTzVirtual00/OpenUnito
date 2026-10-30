@@ -12,7 +12,6 @@ import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.examdate.ExamDateRepository
 import me.itzvirtual.openunito.data.examresult.ExamResultRepository
 import me.itzvirtual.openunito.ui.feature_career.uberCombine
-import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import org.koin.android.annotation.KoinViewModel
 
 
@@ -33,8 +32,8 @@ class ExamSessionViewModel(
         datesManualError,
         resultsManualError,
         isManualRefreshing,
-        appConfigRepo.config
-    ) { cachedDates, cachedResults, datesError, resultsError, manualRefreshing, config ->
+        appConfigRepo.debug
+    ) { cachedDates, cachedResults, datesError, resultsError, manualRefreshing, debug ->
 
         val isDatesLoading = cachedDates == null
         val isResultsLoading = cachedResults == null
@@ -69,7 +68,7 @@ class ExamSessionViewModel(
         ExamDatesScreenState(
             examDatesState = examDatesUiState,
             isGlobalLoading = isGlobalLoading,
-            debug = config?.debug ?: false,
+            debug = debug,
         )
     }.stateIn(
         scope = viewModelScope,

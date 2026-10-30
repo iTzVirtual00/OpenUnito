@@ -26,6 +26,7 @@ data class HomeScreenState(
     val todaysClasses: DailyClassesUiState = DailyClassesUiState(),
     val tomorrowClasses: DailyClassesUiState = DailyClassesUiState(),
     val isGlobalLoading: Boolean = true,
+    val showAttendance: Boolean = true,
     val debug: Boolean = false,
 )
 

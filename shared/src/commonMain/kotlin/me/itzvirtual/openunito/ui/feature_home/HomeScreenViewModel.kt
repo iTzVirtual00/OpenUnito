@@ -89,14 +89,16 @@ class HomeViewModel(
     val screenState: StateFlow<HomeScreenState> = combine(
         studentUiStateFlow,
         agendaUiStateFlow,
-        appConfigRepo.config,
-    ) { studentState, agendaState, config ->
+        appConfigRepo.debug,
+        appConfigRepo.showAttendance,
+    ) { studentState, agendaState, debug, showAttendance ->
         HomeScreenState(
             studentState = studentState,
             todaysClasses = agendaState.todaysClasses,
             tomorrowClasses = agendaState.tomorrowClasses,
             isGlobalLoading = studentState.isLoading && agendaState.todaysClasses.isLoading,
-            debug = config?.debug ?: false // TODO: change those
+            showAttendance = showAttendance,
+            debug = debug
         )
     }.stateIn(
         scope = viewModelScope,

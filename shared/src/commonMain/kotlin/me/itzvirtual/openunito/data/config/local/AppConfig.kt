@@ -12,4 +12,6 @@ data class AppConfig(
     val selectedCalendarId: Int? = null,
     val selectedCareerId: Int? = null,
     @ColumnInfo(defaultValue = "0") val debug: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val showAttendance: Boolean = true,
+    @ColumnInfo(defaultValue = "0") val showDev: Boolean = false,
 )

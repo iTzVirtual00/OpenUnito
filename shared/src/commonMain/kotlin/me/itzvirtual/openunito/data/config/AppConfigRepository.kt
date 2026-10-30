@@ -66,4 +66,14 @@ class AppConfigRepository(
     val debug: Flow<Boolean> = configDao.getDebug()
 
     suspend fun setDebug(value: Boolean) = configDao.updateDebug(value)
+
+    // ShowAttendance //
+    val showAttendance: Flow<Boolean> = configDao.getShowAttendance()
+
+    suspend fun setShowAttendance(value: Boolean) = configDao.updateShowAttendance(value)
+
+    // ShowDev //
+    val showDev: Flow<Boolean> = configDao.getShowDev()
+
+    suspend fun setShowDev(value: Boolean) = configDao.updateShowDev(value)
 }
