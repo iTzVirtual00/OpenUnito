@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -64,7 +66,9 @@ import me.itzvirtual.openunito.resources.open_schedule
 import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
+import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -106,47 +110,75 @@ fun HomeScreenContent(
 ) {
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+    val insetPadding = 12.dp
 
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
+    Scaffold(
+        modifier = modifier,
+        contentWindowInsets = WindowInsets(
+            insetPadding,
+            insetPadding,
+            insetPadding,
+            insetPadding,
+        ),
+        topBar = {
+            TopBar( // TODO: do this for every screen
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    lerp(
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.onPrimary,
+                        0.2f
+                    ),
+                ),
+            ) {
+                ProfileSection(
+                    modifier = Modifier.padding(12.dp),
+                    data = studentState.data,
+                    stateError = studentState.error,
+                    debug = debug,
+                    onOpenProfile = onOpenProfile
+                )
+            }
+        }
+    ) { paddingValues ->
+
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(paddingValues)
         ) {
-            ProfileSection(
-                data = studentState.data,
-                stateError = studentState.error,
-                debug = debug,
-                modifier = Modifier.clickable { onOpenProfile() }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                ClassesSection(
-                    title = stringResource(Res.string.todays_classes_title),
-                    classes = todayClassesState.classes,
-                    isLoading = todayClassesState.isLoading,
-                    stateError = todayClassesState.error,
-                    onOpenScheduleClick = onNavigateToSchedule,
-                    onEventClick = { event -> selectedEvent = event },
-                    debug = debug,
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-                ClassesSection(
-                    title = stringResource(Res.string.tomorrow_classes_title),
-                    classes = tomorrowClassesState.classes,
-                    isLoading = tomorrowClassesState.isLoading,
-                    stateError = tomorrowClassesState.error,
-                    onOpenScheduleClick = onNavigateToSchedule,
-                    onEventClick = { event -> selectedEvent = event },
-                    debug = debug,
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    ClassesSection(
+                        title = stringResource(Res.string.todays_classes_title),
+                        classes = todayClassesState.classes,
+                        isLoading = todayClassesState.isLoading,
+                        stateError = todayClassesState.error,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = debug,
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ClassesSection(
+                        title = stringResource(Res.string.tomorrow_classes_title),
+                        classes = tomorrowClassesState.classes,
+                        isLoading = tomorrowClassesState.isLoading,
+                        stateError = tomorrowClassesState.error,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = debug,
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
 //            // Attendance Tracking
 //            if (showAttendance ?: false) { // TODO: Uncomment when showAttendance is ready
 //                StdIconTextButton(
@@ -159,23 +191,24 @@ fun HomeScreenContent(
 //                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
 //                )
 //            }
-        }
+            }
 
-        var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-        if (selectedEvent != null) {
-            displayedEvent = selectedEvent
-        }
+            var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+            if (selectedEvent != null) {
+                displayedEvent = selectedEvent
+            }
 
-        AnimatedVisibility(
-            visible = selectedEvent != null,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
-        ) {
-            displayedEvent?.let { event ->
-                EventDetailView(
-                    event = event,
-                    onDismiss = { selectedEvent = null }
-                )
+            AnimatedVisibility(
+                visible = selectedEvent != null,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                displayedEvent?.let { event ->
+                    EventDetailView(
+                        event = event,
+                        onDismiss = { selectedEvent = null }
+                    )
+                }
             }
         }
     }
@@ -195,7 +228,7 @@ fun UserProfileIcon(
             2: Anna // Beta tester #1
             3: Luca Neri // Genetics was cool but not present in this lib
     */
-    val icon = when(special) {
+    val icon = when (special) {
         0 -> Icons.Default.SatelliteAlt
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
@@ -221,20 +254,27 @@ fun UserProfileIcon(
 
 @Composable
 fun ProfileSection( //TODO: pull state to top level
+    modifier: Modifier = Modifier,
     data: StudentData? = null,
     stateError: String?,
     debug: Boolean? = null,
-    modifier: Modifier = Modifier
+    onOpenProfile: () -> Unit,
 ) {
     val firstName = data?.firstname ?: stringResource(Res.string.ND)
     val lastName = data?.lastname ?: ""
 
-    Box(modifier = modifier) {
+    Box(
+        modifier = Modifier
+            .clickable(
+                onClick = onOpenProfile,
+            )
+            .then(modifier)
+    ) {
         if (debug ?: false && stateError != null) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp) // TODO: fix this padding shit
             ) {
                 Text(
                     text = stateError,
@@ -247,7 +287,7 @@ fun ProfileSection( //TODO: pull state to top level
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 8.dp),
+                        .padding(top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {

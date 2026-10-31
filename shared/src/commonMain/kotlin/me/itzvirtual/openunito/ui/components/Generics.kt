@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,11 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -34,6 +39,7 @@ import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
+import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
 
@@ -220,5 +226,30 @@ fun StdSwitch(
             onCheckedChange = onChanged,
             colors = switchColors,
         )
+    }
+}
+
+@Composable
+fun TopBar(
+    modifier: Modifier = Modifier,
+    colors: List<Color>,
+    content: @Composable () ->Unit,
+) {
+    Box( // TODO: when is large the gradient is to the right, make direction indipendent from proportions
+        modifier = modifier
+            .drawWithCache{
+                val brush = Brush.linearGradient(
+                    colors = colors,
+                    start = Offset.Zero,
+                    end = Offset(size.width * (0.5f), size.height) //70, 435
+                )
+                onDrawBehind {
+                    drawRect(brush)
+                }
+            }
+
+
+    ) {
+        content()
     }
 }
