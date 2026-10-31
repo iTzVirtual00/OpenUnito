@@ -65,7 +65,12 @@ class AppConfigRepository(
 
     // Debug //
     val debugState: StateFlow<Boolean?> = config
-        .map { it?.debug }
+        .map {
+            if (it == null) null
+            else {
+                it.debug && it.showDev
+            }
+        }
         .stateIn(
             scope = externalScope,
             started = SharingStarted.Eagerly,

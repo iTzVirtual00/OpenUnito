@@ -39,6 +39,7 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 @Composable
 fun StdButtonEmpty(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
@@ -48,6 +49,7 @@ fun StdButtonEmpty(
 ) {
     Surface(
         shape = shape,
+        enabled = enabled,
         onClick = onClick,
         modifier = modifier,
         color = color,
@@ -62,6 +64,7 @@ fun StdButtonEmpty(
 fun StdTextButton(
     text: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     textModifier: Modifier = Modifier,
     fontSize: TextUnit = TextUnit.Unspecified, //former 20.sp
     internalPadding: Dp = 26.dp,
@@ -72,6 +75,7 @@ fun StdTextButton(
 ) {
     StdButtonEmpty(
         modifier = modifier,
+        enabled = enabled,
         onClick = onClick,
         shape = shape,
         tonalElevation = tonalElevation,
@@ -100,6 +104,7 @@ fun StdIconTextButton(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     tonalElevation: Dp = 2.dp,
@@ -107,6 +112,7 @@ fun StdIconTextButton(
 ) {
     StdButtonEmpty(
         modifier = modifier,
+        enabled = enabled,
         onClick = onClick,
         shape = shape,
         tonalElevation = tonalElevation,
@@ -145,6 +151,7 @@ fun StdArrowButton(
     text: String,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
+    enabled: Boolean = true,
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     tonalElevation: Dp = 2.dp,
@@ -152,6 +159,7 @@ fun StdArrowButton(
 ) {
     StdButtonEmpty(
         modifier = modifier,
+        enabled = enabled,
         onClick = onClick,
         shape = shape,
         tonalElevation = tonalElevation,

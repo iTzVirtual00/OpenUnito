@@ -1,5 +1,6 @@
 package me.itzvirtual.openunito.ui.feature_settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -140,53 +141,43 @@ fun SettingsScreenContent(
 fun SettingsEntries(
     modifier: Modifier = Modifier,
     horPadding: Dp = 14.dp,
-    spacing: Dp = 6.dp,
+    spacing: Dp = 12.dp,
     showDev: Boolean?,
     onClickAppearance: () -> Unit = {},
     onClickLanguage: () -> Unit = {},
     onClickLogout: () -> Unit = {},
     onClickDev: () -> Unit = {},
 ) {
-
-
-    Column {
-        StdSurface {
+    StdSurface {
+        Column {
             StdTextIconEntry(
                 modifier = Modifier
-                    .padding(horizontal = horPadding, vertical = 12.dp),
+                    .padding(horizontal = horPadding, vertical = spacing),
                 text = stringResource(Res.string.settings_customization),
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Palette,
                 iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
                 onClick = onClickAppearance,
             )
-        }
 
-        Spacer(
-            modifier = Modifier.height(spacing)
-        )
+            HorizontalDivider()
 
-        StdSurface {
             StdTextIconEntry(
                 modifier = Modifier
-                    .padding(horizontal = horPadding, vertical = 12.dp),
+                    .padding(horizontal = horPadding, vertical = spacing),
                 text = "Language",
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Language,
                 onClick = onClickLanguage,
                 iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
             )
-        }
 
-        if (showDev ?: false) { // Dev
-            Spacer(
-                modifier = Modifier.height(spacing)
-            )
+            if (showDev ?: false) { // Dev
+                HorizontalDivider()
 
-            StdSurface {
                 StdTextIconEntry(
                     modifier = Modifier
-                        .padding(horizontal = horPadding, vertical = 12.dp),
+                        .padding(horizontal = horPadding, vertical = spacing),
                     text = stringResource(Res.string.dev_tab_title),
                     icon = Icons.Default.LogoDev,
                     onClick = onClickDev,
@@ -194,20 +185,16 @@ fun SettingsEntries(
                     iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
                 )
             }
-        }
 
-        Spacer(
-            modifier = Modifier.height(spacing)
-        )
+            HorizontalDivider()
 
-        StdSurface {
             Row(
                 modifier = Modifier
                     .clickable(
                         onClick = onClickLogout,
                     )
                     .fillMaxWidth()
-                    .padding(horizontal = horPadding, vertical = 12.dp)
+                    .padding(horizontal = horPadding, vertical = spacing)
             ) {
                 val color = MaterialTheme.colorScheme.error
                 Icon(

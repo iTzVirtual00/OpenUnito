@@ -1,17 +1,26 @@
 package me.itzvirtual.openunito.ui.feature_devtools
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,15 +30,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.BuildKonfig
 import me.itzvirtual.openunito.ui.components.StdSurface
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import java.io.File
+
+enum class buttonType{
+    DISABLED,
+    DOWNLOAD,
+    INSTALL,
+}
 
 @Composable
 actual fun UpdateCard(
@@ -40,7 +64,7 @@ actual fun UpdateCard(
 ) {
     val context = LocalContext.current
     val updater = remember { HTTPUpdater(context) }
-    
+
     val currentVersionCode = BuildKonfig.VERSION_CODE
     val currentVersionName = BuildKonfig.VERSION_NAME
 
@@ -53,21 +77,40 @@ actual fun UpdateCard(
 
     StdSurface(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                        MaterialTheme.colorScheme.surface,
+                    ),
+                    start = Offset(0f, 0f),
+                    end = Offset(70f, 435f)
+                )
+            )
             .fillMaxWidth()
             .clickable(
                 onClick = onClick,
             ),
         cornerRadius = cornerRadius,
         border = border,
+        color = Color.Transparent
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(12.dp),
+
         ) {
+            val titleSize = 20.sp
             Text(
                 text = "Updater",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.Bold,
+                fontSize = titleSize,
+                lineHeight = titleSize.times(1.4f)
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
             )
 
             Text(
@@ -75,18 +118,30 @@ actual fun UpdateCard(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
             Text(
                 text = "Status: $updateStatus",
                 style = MaterialTheme.typography.bodySmall, // i feel smart
-                color = MaterialTheme.colorScheme.onSurfaceVariant // i fill smart pt2
+                color = MaterialTheme.colorScheme.outline // i fill smart pt2
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+//                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
+                val checkButtonWeight = 0.6f
+                val textPadding = 12.dp
+
+                Surface(
+                    modifier = Modifier.weight(checkButtonWeight),
                     onClick = {
                         isChecking = true
                         updateStatus = "Checking for updates..."
@@ -111,19 +166,58 @@ actual fun UpdateCard(
                             isChecking = false
                         }
                     },
-                    enabled = !isChecking && !isDownloading
+                    enabled = !isChecking && !isDownloading,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    shape = RoundedCornerShape(25f),
+
                 ) {
-                    Text(if (isChecking) "Checking..." else "Check")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(textPadding),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                        )
+
+                        Spacer(
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Text(
+                            modifier = Modifier,
+                            text = if (isChecking) "Checking..." else "Check",
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Spacer(
+                            modifier = Modifier.weight(1.4f)
+                        )
+                    }
                 }
 
-                // Download Button
-                if (availableVersion != null && downloadedFile == null) {
-                    Spacer(Modifier.width(8.dp))
-                    Button(
-                        onClick = {
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                val selectedButton = when {
+                    downloadedFile != null -> buttonType.INSTALL // Install Button
+                    availableVersion != null && downloadedFile == null -> buttonType.DOWNLOAD // Download Button
+                    else -> buttonType.DISABLED // Download Button (Disabled)
+                }
+
+                // Download / Install Button
+                Surface(
+                    modifier = Modifier.weight(1 - checkButtonWeight),
+                    onClick = {
+                        if (selectedButton == buttonType.DOWNLOAD) {
                             isDownloading = true
                             downloadProgress = 0f
                             updateStatus = "Downloading..."
+
                             CoroutineScope(Dispatchers.Main).launch {
                                 downloadedFile = updater.downloadApk { progress ->
                                     downloadProgress = progress
@@ -136,30 +230,82 @@ actual fun UpdateCard(
                                 }
                                 updater.triggerInstallation(downloadedFile!!)
                             }
-                        },
-                        enabled = !isDownloading
+                        } else if (selectedButton == buttonType.INSTALL) {
+                            updater.triggerInstallation(downloadedFile!!)
+                        }
+                    },
+                    enabled = when (selectedButton) {
+                        buttonType.INSTALL -> true
+                        buttonType.DOWNLOAD -> !isDownloading
+                        else -> false
+                    },
+                    color = when (selectedButton) {
+                        buttonType.DISABLED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                        else -> MaterialTheme.colorScheme.surface
+                    },
+                    border = BorderStroke(
+                        2.dp,
+                        color = when (selectedButton) {
+                            buttonType.DISABLED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                    )
+                    ,
+                    shape = RoundedCornerShape(25f),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(textPadding),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            if (isDownloading) "Downloading ${(downloadProgress * 100).toInt()}%"
-                            else "Download"
-                        )
-                    }
-                }
+                        val color = when (selectedButton) {
+                            buttonType.DISABLED -> Color.White.copy(alpha = 0.5f)
+                            else -> Color.White
+                        }
 
-                // Install Button
-                if (downloadedFile != null) {
-                    Spacer(Modifier.width(8.dp))
-                    Button(
-                        onClick = { updater.triggerInstallation(downloadedFile!!) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        Icon(
+                            imageVector = when (selectedButton) {
+                                buttonType.DISABLED -> Icons.Default.DownloadDone
+                                else -> Icons.Default.FileDownload
+                            },
+                            contentDescription = null,
+                            tint = color,
                         )
-                    ) {
-                        Text("Install")
+
+                        Spacer(
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Text(
+                            text = when (selectedButton) {
+                                buttonType.INSTALL -> "Install" // downloadedFile != null
+                                buttonType.DOWNLOAD if isDownloading -> "Downloading ${(downloadProgress * 100).toInt()}%"
+                                else -> "Download"
+                            },
+                            color = color,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(
+                            modifier = Modifier.weight(1.4f)
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsScreenPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            UpdateCard(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

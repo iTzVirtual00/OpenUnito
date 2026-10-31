@@ -42,13 +42,14 @@ fun StdSurface(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 16.dp,
     border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    color: Color = MaterialTheme.colorScheme.surface,
     content: @Composable (() -> Unit),
 ) {
     Surface(
         modifier = modifier,
 //            .fillMaxWidth(), //TODO: remove these
         shape = RoundedCornerShape(cornerRadius),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        color = color,
         border = border
     ) {
         content()
