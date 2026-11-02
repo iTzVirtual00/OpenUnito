@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -44,7 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -68,7 +70,6 @@ import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
-import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -78,14 +79,15 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateToSchedule: () -> Unit = {},
-    onOpenProfile: () -> Unit = {}
+    onOpenProfile: () -> Unit = {},
+    notchPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val showAttendance = state.showAttendance
 
-
     HomeScreenContent(
         modifier = modifier,
+        notchPadding = notchPadding,
         studentState = state.studentState,
         todayClassesState = state.todaysClasses,
         tomorrowClassesState = state.tomorrowClasses,
@@ -99,6 +101,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
+    notchPadding: PaddingValues = PaddingValues(0.dp),
     todayClassesState: DailyClassesUiState,
     tomorrowClassesState: DailyClassesUiState,
     studentState: StudentDataUiState,
@@ -135,7 +138,10 @@ fun HomeScreenContent(
                 ),
             ) {
                 ProfileSection(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .safeDrawingPadding(), // statusBarPadding
+//                        .padding(notchPadding), // Apply padding only to content
                     data = studentState.data,
                     stateError = studentState.error,
                     debug = debug,
@@ -144,44 +150,38 @@ fun HomeScreenContent(
             }
         }
     ) { paddingValues ->
-
-        Box(
-            modifier = modifier
+        Column(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    ClassesSection(
-                        title = stringResource(Res.string.todays_classes_title),
-                        classes = todayClassesState.classes,
-                        isLoading = todayClassesState.isLoading,
-                        stateError = todayClassesState.error,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                        debug = debug,
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    ClassesSection(
-                        title = stringResource(Res.string.tomorrow_classes_title),
-                        classes = tomorrowClassesState.classes,
-                        isLoading = tomorrowClassesState.isLoading,
-                        stateError = tomorrowClassesState.error,
-                        onOpenScheduleClick = onNavigateToSchedule,
-                        onEventClick = { event -> selectedEvent = event },
-                        debug = debug,
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
+                ClassesSection(
+                    title = stringResource(Res.string.todays_classes_title),
+                    classes = todayClassesState.classes,
+                    isLoading = todayClassesState.isLoading,
+                    stateError = todayClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                ClassesSection(
+                    title = stringResource(Res.string.tomorrow_classes_title),
+                    classes = tomorrowClassesState.classes,
+                    isLoading = tomorrowClassesState.isLoading,
+                    stateError = tomorrowClassesState.error,
+                    onOpenScheduleClick = onNavigateToSchedule,
+                    onEventClick = { event -> selectedEvent = event },
+                    debug = debug,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+            }
 //            // Attendance Tracking
 //            if (showAttendance ?: false) { // TODO: Uncomment when showAttendance is ready
 //                StdIconTextButton(
@@ -194,24 +194,23 @@ fun HomeScreenContent(
 //                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
 //                )
 //            }
-            }
+        }
 
-            var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-            if (selectedEvent != null) {
-                displayedEvent = selectedEvent
-            }
+        var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+        if (selectedEvent != null) {
+            displayedEvent = selectedEvent
+        }
 
-            AnimatedVisibility(
-                visible = selectedEvent != null,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
-            ) {
-                displayedEvent?.let { event ->
-                    EventDetailView(
-                        event = event,
-                        onDismiss = { selectedEvent = null }
-                    )
-                }
+        AnimatedVisibility(
+            visible = selectedEvent != null,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
+        ) {
+            displayedEvent?.let { event ->
+                EventDetailView(
+                    event = event,
+                    onDismiss = { selectedEvent = null }
+                )
             }
         }
     }
@@ -235,7 +234,7 @@ fun UserProfileIcon(
         0 -> Icons.Default.SatelliteAlt
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
-        3 -> Icons.Default.Translate
+        3 -> Icons.Default.Translate // TODO: add library
         else -> Icons.Default.Person
     }
 
@@ -256,7 +255,8 @@ fun UserProfileIcon(
 }
 
 @Composable
-fun ProfileSection( //TODO: pull state to top level
+fun ProfileSection(
+    //TODO: pull state to top level
     modifier: Modifier = Modifier,
     data: StudentData? = null,
     stateError: String?,
@@ -296,7 +296,7 @@ fun ProfileSection( //TODO: pull state to top level
                 ) {
                     UserProfileIcon(
                         special = when {
-                            firstName == "Mario" && lastName == "Rossi" -> 0
+                            firstName == "Mario" && lastName == "Rossi" -> 0 // TODO: REMOVE these name, maybe hash
                             firstName == "Maria" && lastName == "Bianchi" -> 1
                             firstName == "Anna" && lastName == "Verdi" -> 2
                             else -> null
@@ -539,10 +539,9 @@ fun HomeScreenPreview() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                studentState = StudentDataUiState(data = studentDataSample),
                 todayClassesState = DailyClassesUiState(classes = todaysClassesSample),
                 tomorrowClassesState = DailyClassesUiState(classes = tomorrowClassesSample),
-                debug = null,
+                studentState = StudentDataUiState(data = studentDataSample),
                 showAttendance = true,
             )
         }
