@@ -124,15 +124,17 @@ fun SettingsScreenContent(
             TopBar(
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    lerp(
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.onPrimary,
-                        0.2f
-                    ),
+                    Color(0.29f, 0.251f, 0.467f, 1.0f)
+//                    lerp(
+//                        MaterialTheme.colorScheme.surface,
+//                        MaterialTheme.colorScheme.onPrimary,
+//                        0.2f
+//                    ),
                 ),
             ) {
                 UpdateCard(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier
+                        .padding(26.dp),
                     onClick = onCLickUpdateCard
                 )
             }

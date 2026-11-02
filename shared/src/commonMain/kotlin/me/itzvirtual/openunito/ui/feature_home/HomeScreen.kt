@@ -121,14 +121,17 @@ fun HomeScreenContent(
             insetPadding,
         ),
         topBar = {
-            TopBar( // TODO: do this for every screen
+            TopBar(
+                // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    lerp(
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.onPrimary,
-                        0.2f
-                    ),
+                    Color(0.29f, 0.251f, 0.467f, 1.0f)
+//                    MaterialTheme.colorScheme.onTertiary.copy(green = 0.4f), // TODO: find a fucking cool color
+//                    lerp(
+//                        MaterialTheme.colorScheme.surface,
+//                        MaterialTheme.colorScheme.onPrimary,
+//                        0.2f
+//                    ),
                 ),
             ) {
                 ProfileSection(

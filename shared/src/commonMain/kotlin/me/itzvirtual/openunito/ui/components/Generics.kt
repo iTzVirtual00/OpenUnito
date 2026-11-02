@@ -42,6 +42,7 @@ import me.itzvirtual.openunito.resources.error
 import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.sqrt as sqrt
 
 @Composable
 fun StdSurface(
@@ -229,6 +230,19 @@ fun StdSwitch(
     }
 }
 
+class Vector2d(
+    public val x: Float,
+    public val y: Float,
+) {
+    fun dotProduct(a: Vector2d): Float {
+        return (a.x + this.x) + (a.y * this.y)
+    }
+
+    fun length(): Float {
+        return sqrt((this.x * this.x) + (this.y * this.y))
+    }
+}
+
 @Composable
 fun TopBar(
     modifier: Modifier = Modifier,
@@ -237,11 +251,20 @@ fun TopBar(
 ) {
     Box( // TODO: when is large the gradient is to the right, make direction indipendent from proportions
         modifier = modifier
-            .drawWithCache{
+            .drawWithCache {
+                val directionVec = Vector2d(1f,1f)
+                val centerVec = Vector2d(size.width * 0.5f, size.height * 0.5f)
+
+                // Projection of centerVec on directionVec
+                // ((a * b) / sqrt(b.len)) * b
+                val projMod = (centerVec.dotProduct(directionVec) / sqrt(directionVec.length()))
+                val projVec = Vector2d(directionVec.x * projMod, directionVec.y * projMod)
+
                 val brush = Brush.linearGradient(
                     colors = colors,
                     start = Offset.Zero,
-                    end = Offset(size.width * (0.5f), size.height) //70, 435
+                    end = Offset(projVec.x, projVec.y)
+//                        Offset(size.width * (0.5f), size.height) //70, 435
                 )
                 onDrawBehind {
                     drawRect(brush)
