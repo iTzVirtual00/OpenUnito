@@ -44,7 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -68,7 +68,6 @@ import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
-import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
