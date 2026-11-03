@@ -1,7 +1,6 @@
 package me.itzvirtual.openunito.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,18 +19,19 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
@@ -39,7 +39,6 @@ import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
-import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sqrt as sqrt
@@ -231,8 +230,8 @@ fun StdSwitch(
 }
 
 class Vector2d(
-    public val x: Float,
-    public val y: Float,
+    public var x: Float,
+    public var y: Float,
 ) {
     fun dotProduct(a: Vector2d): Float {
         return (a.x + this.x) + (a.y * this.y)
@@ -240,6 +239,16 @@ class Vector2d(
 
     fun length(): Float {
         return sqrt((this.x * this.x) + (this.y * this.y))
+    }
+
+    fun times(a: Float): Vector2d {
+        x *= a
+        y *= a
+        return this
+    }
+
+    fun copy(): Vector2d {
+        return Vector2d(x,y)
     }
 }
 
@@ -258,18 +267,29 @@ fun TopBar(
                 // Projection of centerVec on directionVec
                 // ((a * b) / sqrt(b.len)) * b
                 val projMod = (centerVec.dotProduct(directionVec) / sqrt(directionVec.length()))
-                val projVec = Vector2d(directionVec.x * projMod, directionVec.y * projMod)
+                val projVec = directionVec.times(projMod).times(1f)
+
+                val startVec = projVec.copy().times(0.1f)
+                val endVec = projVec.copy().times(1f)
 
                 val brush = Brush.linearGradient(
                     colors = colors,
-                    start = Offset.Zero,
-                    end = Offset(projVec.x, projVec.y)
-//                        Offset(size.width * (0.5f), size.height) //70, 435
+                    start = Offset(startVec.x, startVec.y),
+                    end = Offset(endVec.x, endVec.y)
                 )
                 onDrawBehind {
                     drawRect(brush)
                 }
             }
+            .innerShadow(
+                shape = RoundedCornerShape(0.dp),
+                shadow = Shadow(
+                    radius = 18.dp,
+                    spread = (-18).dp,
+                    color = Color(0f,0f,0f,0.5f),
+                    offset = DpOffset(x = 0.dp, (-15).dp)
+                )
+            ),
 
 
     ) {

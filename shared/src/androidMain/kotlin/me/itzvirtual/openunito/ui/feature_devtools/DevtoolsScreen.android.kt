@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.feature_devtools
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -70,7 +71,10 @@ actual fun UpdateCard(
     var downloadProgress by remember { mutableFloatStateOf(0f) }
 
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .clickable(
+                onClick = onClick
+            ),
         ) {
         val titleSize = 20.sp
         Text(

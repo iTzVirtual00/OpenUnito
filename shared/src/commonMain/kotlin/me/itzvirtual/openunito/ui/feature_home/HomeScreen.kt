@@ -9,16 +9,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -46,7 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
@@ -68,6 +69,7 @@ import me.itzvirtual.openunito.resources.open_schedule
 import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -80,14 +82,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateToSchedule: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
-    notchPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val showAttendance = state.showAttendance
 
     HomeScreenContent(
         modifier = modifier,
-        notchPadding = notchPadding,
         studentState = state.studentState,
         todayClassesState = state.todaysClasses,
         tomorrowClassesState = state.tomorrowClasses,
@@ -101,7 +101,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
-    notchPadding: PaddingValues = PaddingValues(0.dp),
     todayClassesState: DailyClassesUiState,
     tomorrowClassesState: DailyClassesUiState,
     studentState: StudentDataUiState,
@@ -113,75 +112,66 @@ fun HomeScreenContent(
 ) {
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
-    val insetPadding = 12.dp
 
-    Scaffold(
-        modifier = modifier,
-        contentWindowInsets = WindowInsets(
-            insetPadding,
-            insetPadding,
-            insetPadding,
-            insetPadding,
-        ),
-        topBar = {
-            TopBar(
-                // TODO: do this for every screen
-                colors = listOf(
-                    MaterialTheme.colorScheme.onPrimary,
-                    Color(0.29f, 0.251f, 0.467f, 1.0f)
-//                    MaterialTheme.colorScheme.onTertiary.copy(green = 0.4f), // TODO: find a fucking cool color
-//                    lerp(
-//                        MaterialTheme.colorScheme.surface,
-//                        MaterialTheme.colorScheme.onPrimary,
-//                        0.2f
-//                    ),
-                ),
-            ) {
-                ProfileSection(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .safeDrawingPadding(), // statusBarPadding
-//                        .padding(notchPadding), // Apply padding only to content
-                    data = studentState.data,
-                    stateError = studentState.error,
-                    debug = debug,
-                    onOpenProfile = onOpenProfile
-                )
+    Box(modifier = modifier) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopBar( // TODO: do this for every screen
+                    colors = listOf(
+                        MaterialTheme.colorScheme.onPrimary,
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                    ),
+                ) {
+                    ProfileSection(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .statusBarsPadding(),
+                        data = studentState.data,
+                        stateError = studentState.error,
+                        debug = debug,
+                        onOpenProfile = onOpenProfile
+                    )
+                }
             }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+        ) { paddingValues ->
+
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
             ) {
-                ClassesSection(
-                    title = stringResource(Res.string.todays_classes_title),
-                    classes = todayClassesState.classes,
-                    isLoading = todayClassesState.isLoading,
-                    stateError = todayClassesState.error,
-                    onOpenScheduleClick = onNavigateToSchedule,
-                    onEventClick = { event -> selectedEvent = event },
-                    debug = debug,
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-                ClassesSection(
-                    title = stringResource(Res.string.tomorrow_classes_title),
-                    classes = tomorrowClassesState.classes,
-                    isLoading = tomorrowClassesState.isLoading,
-                    stateError = tomorrowClassesState.error,
-                    onOpenScheduleClick = onNavigateToSchedule,
-                    onEventClick = { event -> selectedEvent = event },
-                    debug = debug,
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+                    ClassesSection(
+                        title = stringResource(Res.string.todays_classes_title),
+                        classes = todayClassesState.classes,
+                        isLoading = todayClassesState.isLoading,
+                        stateError = todayClassesState.error,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = debug,
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ClassesSection(
+                        title = stringResource(Res.string.tomorrow_classes_title),
+                        classes = tomorrowClassesState.classes,
+                        isLoading = tomorrowClassesState.isLoading,
+                        stateError = tomorrowClassesState.error,
+                        onOpenScheduleClick = onNavigateToSchedule,
+                        onEventClick = { event -> selectedEvent = event },
+                        debug = debug,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 //            // Attendance Tracking
 //            if (showAttendance ?: false) { // TODO: Uncomment when showAttendance is ready
 //                StdIconTextButton(
@@ -194,8 +184,8 @@ fun HomeScreenContent(
 //                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
 //                )
 //            }
+            }
         }
-
         var displayedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
         if (selectedEvent != null) {
             displayedEvent = selectedEvent
@@ -215,7 +205,6 @@ fun HomeScreenContent(
         }
     }
 }
-
 
 @Composable
 fun UserProfileIcon(
@@ -292,7 +281,6 @@ fun ProfileSection(
                         .fillMaxWidth()
                         .padding(top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     UserProfileIcon(
                         special = when {
@@ -302,6 +290,11 @@ fun ProfileSection(
                             else -> null
                         }
                     )
+
+                    Spacer(
+                        modifier = Modifier.width(16.dp)
+                    )
+
                     Text(
                         text = "$firstName $lastName",
                         style = MaterialTheme.typography.headlineMedium,

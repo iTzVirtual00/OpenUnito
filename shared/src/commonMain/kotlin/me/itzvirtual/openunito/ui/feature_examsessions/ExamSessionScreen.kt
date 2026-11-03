@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -69,6 +71,7 @@ import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
+import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -133,22 +136,57 @@ fun ExamSessionScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.examsession_title),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
+            TopBar( // TODO: do this for every screen
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .safeDrawingPadding()
+                ) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = stringResource(Res.string.examsession_title),
+                                fontWeight = FontWeight.Bold,
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors().copy(
+                            containerColor = Color.Transparent,
                         )
-                    }
+                    )
+                    FilterTopBar( // TODO: change colors to lighter ones
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        selectedSubject = selectedSubject,
+                        subjectsList = subjectsList,
+                        filter = selectedFilter,
+                        onClickBooked = {
+                            selectedFilter = when (selectedFilter) {
+                                filterState.BOOKED -> filterState.ANY
+                                else -> filterState.BOOKED
+                            }
+                        },
+                        onClickUnbooked = {
+                            selectedFilter = when (selectedFilter) {
+                                filterState.UNBOOKED -> filterState.ANY
+                                else -> filterState.UNBOOKED
+                            }
+                        }
+                    )
                 }
-            )
+            }
         }
 
     ) { paddingValues ->
@@ -157,23 +195,6 @@ fun ExamSessionScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
-            FilterTopBar(
-                selectedSubject = selectedSubject,
-                subjectsList = subjectsList,
-                filter = selectedFilter,
-                onClickBooked = {
-                    selectedFilter = when (selectedFilter) {
-                        filterState.BOOKED -> filterState.ANY
-                        else -> filterState.BOOKED
-                    }
-                },
-                onClickUnbooked = {
-                    selectedFilter = when (selectedFilter) {
-                        filterState.UNBOOKED -> filterState.ANY
-                        else -> filterState.UNBOOKED
-                    }
-                }
-            )
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
@@ -194,6 +215,7 @@ fun ExamSessionScreenContent(
 
 @Composable
 fun FilterTopBar(
+    modifier: Modifier = Modifier,
     selectedSubject: MutableState<Int?>,
     subjectsList: List<String>,
     filter: filterState,
@@ -208,9 +230,7 @@ fun FilterTopBar(
     val unselectedColor = MaterialTheme.colorScheme.surface
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp),
+        modifier = modifier,
     ) {
         SubjectDropdownMenu(
             modifier = Modifier

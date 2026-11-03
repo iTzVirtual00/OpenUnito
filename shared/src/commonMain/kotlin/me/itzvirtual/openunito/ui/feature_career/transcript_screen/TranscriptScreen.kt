@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -44,12 +46,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.domain.examdate.examDateSample
+import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.formatDate
@@ -58,10 +64,13 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.grades_section_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.TopBar
+import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionScreenContent
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -104,43 +113,53 @@ fun TranscriptScreenContent(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.grades_section_title),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
+            TopBar( // TODO: do this for every screen
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                ),
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(Res.string.grades_section_title),
+                            fontWeight = FontWeight.Bold,
                         )
-                    }
-                }
-            )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = Color.Transparent,
+                    )
+                )
+            }
         },
-        contentWindowInsets = WindowInsets(
-            8.dp,
-            0.dp,
-            8.dp,
-            32.dp,
-        )
     ) { paddingValues ->
         CompositionLocalProvider(LocalTranscriptActions provides actions) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
             ) {
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
                 GradesSection(
                     rawGrades = rawGrades,
                     isLoading = isLoading,
                     stateError = stateError,
                     debug = debug,
+                )
+                Spacer(
+                    modifier = Modifier.height(16.dp)
                 )
             }
         }
@@ -248,6 +267,7 @@ fun GradeWrapper(result: ExamResult) {
 
 @Composable
 fun GradesSection(
+    modifier: Modifier = Modifier,
     rawGrades: List<ExamGrade>,
     isLoading: Boolean,
     stateError: String?,
@@ -259,6 +279,7 @@ fun GradesSection(
 
 
     ListWrapper(
+        modifier = modifier,
         isEmpty = grades.isEmpty(),
         debug = debug ?: false,
         isLoading = isLoading,
@@ -326,7 +347,8 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
                         Res.string.date,
                         date
                     ) + if (cfu.isNotBlank() && cfu != "0") " \u2022 $cfu CFU" else "",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -346,3 +368,17 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
         }
     }
 }
+
+//@Composable
+//@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+//fun ProfileScreenPreview() {
+//    OpenUnitoTheme {
+//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//            ExamSessionScreenContent(
+//                modifier = Modifier.padding(innerPadding),
+//                dates = examDateSample,
+//                subjectsList = subjectsListSample,
+//            )
+//        }
+//    }
+//}

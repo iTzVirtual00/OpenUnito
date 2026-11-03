@@ -1,15 +1,8 @@
 package me.itzvirtual.openunito.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CalendarToday
@@ -17,7 +10,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -26,9 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -172,110 +162,101 @@ fun OpenUnitoApp(
                 .fillMaxSize()
         ) { innerPadding ->
 
-            Box {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                // Cool asf ngl
+                NavHost(
+                    navController = navState.navController,
+                    startDestination = HomeGraph,
+                    modifier = Modifier.weight(1f),
+                    // thanks to Gemini for the transitions <3
+                    enterTransition = { tabAwareEnterTransition() },
+                    exitTransition = { tabAwareExitTransition() },
+                    popEnterTransition = { tabAwareEnterTransition() },
+                    popExitTransition = { tabAwareExitTransition() }
                 ) {
-                    // Cool asf ngl
-                    NavHost(
-                        navController = navState.navController,
-                        startDestination = HomeGraph,
-                        modifier = Modifier.weight(1f),
-                        // thanks to Gemini for the transitions <3
-                        enterTransition = { tabAwareEnterTransition() },
-                        exitTransition = { tabAwareExitTransition() },
-                        popEnterTransition = { tabAwareEnterTransition() },
-                        popExitTransition = { tabAwareExitTransition() }
-                    ) {
-                        // Isolated Navigation Subgraph (AWESOME)
-                        // (navController is a beast)
-                        navigation<HomeGraph>(startDestination = HomeScreenRoute) {
-                            composable<HomeScreenRoute> {
-                                HomeScreen(
-                                    onNavigateToSchedule = { navState.navigateToTab(AppDestinations.CALENDAR) },
-                                    onOpenProfile = { navState.navController.navigate(ProfileScreenRoute) },
-                                    notchPadding = innerPadding,
-                                )
-                            }
-
-                            composable<ProfileScreenRoute> {
-                                ProfileScreen(
-                                    onBack = { navState.navController.popBackStack() }
-                                )
-                            }
+                    // Isolated Navigation Subgraph (AWESOME)
+                    // (navController is a beast)
+                    navigation<HomeGraph>(startDestination = HomeScreenRoute) {
+                        composable<HomeScreenRoute> {
+                            HomeScreen(
+                                onNavigateToSchedule = { navState.navigateToTab(AppDestinations.CALENDAR) },
+                                onOpenProfile = { navState.navController.navigate(ProfileScreenRoute) },
+                            )
                         }
 
-                        navigation<CareerGraph>(startDestination = CareerRoute) {
-                            composable<CareerRoute> {
-                                CareerScreen(
-                                    onOpenTranscript = {
-                                        navState.navController.navigate(
-                                            TranscriptRoute
-                                        )
-                                    },
-                                    onOpenInvokes = {
-                                        navState.navController.navigate(
-                                            InvokeRoute
-                                        )
-                                    }
-                                )
-                            }
-                            composable<TranscriptRoute> {
-                                TranscriptScreen(onBack = { navState.navController.popBackStack() })
-                            }
-                            composable<InvokeRoute> {
-                                ExamSessionScreen(onBack = { navState.navController.popBackStack() })
-                            }
-                        }
-
-                        composable<CalendarRoute> {
-                            AgendaScreen()
-                        }
-
-                        navigation<SettingsGraph>(startDestination = SettingsRoute) {
-                            composable<SettingsRoute> {
-                                SettingsScreen(
-                                    onClickAppearance = {
-                                        navState.navController.navigate(
-                                            AppearenceRoute
-                                        )
-                                    },
-                                    onClickLanguage = {
-                                        navState.navController.navigate(
-                                            LanguageRoute
-                                        )
-                                    },
-                                    onClickDev = {
-                                        navState.navController.navigate(
-                                            DevRoute
-                                        )
-                                    },
-                                    onBack = {
-                                        navState.navController.popBackStack()
-                                    },
-                                )
-                            }
-                            composable<AppearenceRoute> {
-                                CustomizationScreen(onBack = { navState.navController.popBackStack() })
-                            }
-                            composable<LanguageRoute> {
-                                LanguageScreen(onBack = { navState.navController.popBackStack() })
-                            }
-                            composable<DevRoute> {
-                                DevScreen(onBack = { navState.navController.popBackStack() })
-                            }
+                        composable<ProfileScreenRoute> {
+                            ProfileScreen(
+                                onBack = { navState.navController.popBackStack() }
+                            )
                         }
                     }
 
-                    OfflineBanner(isOnline = isOnline)
+                    navigation<CareerGraph>(startDestination = CareerRoute) {
+                        composable<CareerRoute> {
+                            CareerScreen(
+                                onOpenTranscript = {
+                                    navState.navController.navigate(
+                                        TranscriptRoute
+                                    )
+                                },
+                                onOpenInvokes = {
+                                    navState.navController.navigate(
+                                        InvokeRoute
+                                    )
+                                }
+                            )
+                        }
+                        composable<TranscriptRoute> {
+                            TranscriptScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                        composable<InvokeRoute> {
+                            ExamSessionScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                    }
+
+                    composable<CalendarRoute> {
+                        AgendaScreen()
+                    }
+
+                    navigation<SettingsGraph>(startDestination = SettingsRoute) {
+                        composable<SettingsRoute> {
+                            SettingsScreen(
+                                onClickAppearance = {
+                                    navState.navController.navigate(
+                                        AppearenceRoute
+                                    )
+                                },
+                                onClickLanguage = {
+                                    navState.navController.navigate(
+                                        LanguageRoute
+                                    )
+                                },
+                                onClickDev = {
+                                    navState.navController.navigate(
+                                        DevRoute
+                                    )
+                                },
+                                onBack = {
+                                    navState.navController.popBackStack()
+                                },
+                            )
+                        }
+                        composable<AppearenceRoute> {
+                            CustomizationScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                        composable<LanguageRoute> {
+                            LanguageScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                        composable<DevRoute> {
+                            DevScreen(onBack = { navState.navController.popBackStack() })
+                        }
+                    }
                 }
-                Surface( // Semi-transparent status bar
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    color = Color(0f,0f,0f,0.5f)
-                ) {}
+
+                OfflineBanner(isOnline = isOnline)
             }
         }
     }
@@ -342,6 +323,7 @@ private object CareerGraph
 
 @Serializable
 private object CareerRoute
+
 @Serializable
 private object TranscriptRoute
 
