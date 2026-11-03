@@ -2,6 +2,7 @@ package me.itzvirtual.openunito.ui.feature_agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,7 +50,8 @@ class AgendaViewModel(
 
     private val selectedWeekFlow = MutableStateFlow(currentWeek)
 
-    // This only populates AgendaUiData (internal structure)
+    // This only populates AgendaUiData (viewmodel-internal structure)
+    // AgendaUiData contains the fetched selected week
     private val agendaDataFlow = combine(
         calendarConfigRepo.selectedCalendarFlow,
         selectedWeekFlow
@@ -57,8 +59,6 @@ class AgendaViewModel(
         selectedCalendar to week
     }
         .distinctUntilChanged()
-        // flatMapLatest automagically cancels the flow we were attached to if the tuple changes.
-        // DAMN
         .flatMapLatest { (calendar, week) ->
             if (calendar == null) {
                 flowOf(
@@ -82,6 +82,7 @@ class AgendaViewModel(
                     endDate = endInstant
                 ).map { cachedAgenda ->
                     val hasCachedData = cachedAgenda != null
+                    Logger.d(tag = "AgendaViewModel") { "hasCachedData: $hasCachedData" }
                     AgendaUiData(
                         week = week,
                         isLoading = !hasCachedData,
@@ -95,6 +96,12 @@ class AgendaViewModel(
             }
         }
 
+    // TODO:
+    //  fix brief loading flash, this is caused by an architectural choice
+    //  the repo already eagerly prefetches data for the current week
+    //  (with 10 second lifetime caused by a side effect)
+    //  The problem lies in `initialState` of ALL the StateFlows in the repo and view models
+    //  more research is needed
     val screenState: StateFlow<AgendaScreenState> = combine(
         calendarConfigRepo.calendarsFlow,
         calendarConfigRepo.selectedCalendarFlow,
@@ -110,9 +117,6 @@ class AgendaViewModel(
             agendaState = agendaData.agendaState
         )
     }.stateIn(
-        // stateIn is so cool (it's the single collector of the above flow,
-        // and it emits the latest value when someone subscribes
-        // (otherwise the above flow will run again every time someone subscribes)
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = AgendaScreenState(
