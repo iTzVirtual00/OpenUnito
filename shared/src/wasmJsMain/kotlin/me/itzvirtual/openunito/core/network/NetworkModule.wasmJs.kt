@@ -10,4 +10,6 @@ actual fun getSystemLanguage(): String {
 }
 
 actual val platformIoDispatcher: CoroutineDispatcher = Dispatchers.Default
-actual val API_URL: String = "REDACTED_PROXY_URL"
+
+// TODO: allow user to use its own cors-proxy
+actual val API_URL: String = "https://unito.app.cineca.it/"
