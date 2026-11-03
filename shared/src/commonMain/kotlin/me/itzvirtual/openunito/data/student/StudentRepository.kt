@@ -91,7 +91,6 @@ class StudentRepository(
             initialValue = null
         )
 
-    // TODO: Start prefetcher or destroy other models or something (old data flashes)
     val careerContextFlow: SharedFlow<CareerContext> = combine(
         studentCacheFlow.filterNotNull().map { it.data },
         appConfigRepo.selectedCareerIdState

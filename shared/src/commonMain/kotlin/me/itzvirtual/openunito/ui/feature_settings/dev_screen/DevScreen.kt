@@ -172,6 +172,7 @@ fun DevScreenContent(
 fun AuthDebuggerCard(
     onSetToken: (String) -> Unit,
     onCopyToken: () -> Unit,
+    showCopyTokenButton: Boolean = true,
 ) {
     var tokenInput by remember { mutableStateOf("") }
 
@@ -202,20 +203,22 @@ fun AuthDebuggerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Secondary button for copying
-                Row(
-                    modifier = Modifier.weight(0.5f),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    TextButton(
-                        onClick = { onCopyToken() }
+                if(showCopyTokenButton){
+                    Row(
+                        modifier = Modifier.weight(0.5f),
+                        horizontalArrangement = Arrangement.Center,
                     ) {
-                        Text("Copy Current")
+                        TextButton(
+                            onClick = { onCopyToken() }
+                        ) {
+                            Text("Copy Current")
+                        }
                     }
                 }
 
                 Row(
                     modifier = Modifier.weight(0.5f),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = if(showCopyTokenButton) Arrangement.Center else Arrangement.End,
                 ) {
                     Button(
                         onClick = { onSetToken(tokenInput) }

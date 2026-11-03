@@ -25,7 +25,9 @@ import me.itzvirtual.openunito.data.grade.local.ExamGradeEntity
 import me.itzvirtual.openunito.data.student.local.StudentDao
 import me.itzvirtual.openunito.data.student.local.StudentEntity
 
-@Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+// RoomKSP populates this
+// https://developer.android.com/kotlin/multiplatform/room#defining-database
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }
