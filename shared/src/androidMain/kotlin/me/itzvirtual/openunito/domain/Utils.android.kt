@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.PersistableBundle
-import androidx.compose.ui.platform.ClipEntry
 
 class AndroidClipboardManagerImpl(
     private val context: Context

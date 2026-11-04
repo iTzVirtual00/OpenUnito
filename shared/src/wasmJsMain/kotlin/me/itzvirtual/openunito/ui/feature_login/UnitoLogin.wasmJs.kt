@@ -12,11 +12,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.itzvirtual.openunito.ui.feature_devtools.AuthDebuggerCard
-import me.itzvirtual.openunito.ui.feature_devtools.DevtoolsActions
-import me.itzvirtual.openunito.ui.feature_devtools.LocalDevtoolsActions
-import me.itzvirtual.openunito.ui.feature_devtools.PurgeCachesCard
-import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
+import me.itzvirtual.openunito.ui.feature_settings.dev_screen.AuthDebuggerCard
+
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 
 @Composable
@@ -25,24 +22,21 @@ actual fun UniToLoginScreen(
     onAuthSuccess: (String) -> Unit,
     modifier: Modifier
 ) {
-    val actions = remember(onAuthSuccess) {
-        DevtoolsActions(
-            setToken = onAuthSuccess,
-        )
-    }
     OpenUnitoTheme {
-        CompositionLocalProvider(LocalDevtoolsActions provides actions) {
-            Scaffold(modifier = modifier) { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .padding(16.dp)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    AuthDebuggerCard()
-                }
+        Scaffold(modifier = modifier) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(16.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AuthDebuggerCard(
+                    onSetToken = onAuthSuccess,
+                    onCopyToken = {},
+                    showCopyTokenButton = false,
+                )
             }
         }
     }

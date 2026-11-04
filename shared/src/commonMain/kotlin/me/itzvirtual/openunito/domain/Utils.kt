@@ -6,6 +6,8 @@ import dev.carcara.kotlinx.locale.Locale
 import dev.carcara.kotlinx.locale.datetime.FormatStyle
 import dev.carcara.kotlinx.locale.datetime.cldr.format
 import dev.carcara.kotlinx.locale.datetime.cldr.skeletons.format
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -116,3 +118,73 @@ interface PlatformClipboardManager {
 // MATH
 fun Double.toRadians(): Double = this * PI / 180.0
 fun Float.toRadians(): Float = (this * PI / 180f).toFloat()
+
+
+class ConcurrentLruMap<K, V>(@PublishedApi internal val maxSize: Int) {
+    // LinkedHashMap keeps insertion order
+    // first is the oldest, last is the newest
+    // PublishedApi is needed to allow `inline` in `getOrPut`
+    @PublishedApi
+    internal val map = LinkedHashMap<K, V>()
+    @PublishedApi
+    internal val mutex = Mutex()
+
+    suspend fun get(key: K): V? = mutex.withLock {
+        val value = map.remove(key) ?: return null
+        map[key] = value // move to end
+        value
+    }
+
+    suspend fun put(key: K, value: V) = mutex.withLock {
+        map.remove(key)
+        map[key] = value
+        if (map.size > maxSize) {
+            val eldestKey = map.keys.first()
+            map.remove(eldestKey)
+        }
+    }
+
+    suspend fun remove(key: K): V? = mutex.withLock {
+        map.remove(key)
+    }
+
+    suspend fun clear() = mutex.withLock {
+        map.clear()
+    }
+
+    suspend fun size(): Int = mutex.withLock {
+        map.size
+    }
+
+    // inline
+    // https://kotlinlang.org/docs/inline-functions.html
+    // https://kotlinlang.org/docs/inline-functions.html#non-local-jump-expressions
+    suspend inline fun getOrPut(key: K, crossinline defaultValue: suspend () -> V): V {
+        // fast
+        mutex.withLock {
+            val existing = map.remove(key)
+            if (existing != null) {
+                map[key] = existing
+                return existing
+            }
+        }
+
+        // compute
+        val value = defaultValue()
+
+        mutex.withLock {
+            // prioritize fast path behavior
+            val existing = map.remove(key)
+            if (existing != null) {
+                map[key] = existing
+                return existing
+            }
+
+            map[key] = value
+            if (map.size > maxSize) {
+                map.remove(map.keys.first())
+            }
+            return value
+        }
+    }
+}

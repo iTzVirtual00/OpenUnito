@@ -686,7 +686,6 @@ fun ExamSessionCardDrawer(
             )
 
             AddCalendarButton(
-                addedToCalendar = exam.addedToCalendar,
                 onAddToCal = {
                     // TODO: Add this exam to system calendar
                 }
@@ -919,7 +918,7 @@ fun PrenotButton(
 @Composable
 fun AddCalendarButton(
     modifier: Modifier = Modifier,
-    addedToCalendar: Boolean,
+    addedToCalendar: Boolean = true, // Future feature
     onAddToCal: () -> Unit = {},
 ) {
     val addString = "Add"

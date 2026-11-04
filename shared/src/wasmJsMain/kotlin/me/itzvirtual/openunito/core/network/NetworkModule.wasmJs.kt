@@ -1,12 +1,15 @@
 package me.itzvirtual.openunito.core.network
 
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 actual fun getSystemLanguage(): String {
-    // TODO: get system language wasm
-    return "it"
+    val fullTag = window.navigator.language
+    return fullTag.substringBefore('-').ifEmpty { "en" }
 }
 
 actual val platformIoDispatcher: CoroutineDispatcher = Dispatchers.Default
-actual val API_URL: String = "REDACTED_PROXY_URL"
+
+// TODO: allow user to use its own cors-proxy
+actual val API_URL: String = "https://unito.app.cineca.it/"

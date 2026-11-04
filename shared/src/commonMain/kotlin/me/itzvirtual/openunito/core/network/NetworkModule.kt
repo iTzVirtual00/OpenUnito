@@ -91,8 +91,9 @@ class CoroutineScopesModule {
 
     @Single
     @Named("ApplicationScope")
-    fun provideApplicationScope(): CoroutineScope =
-        CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    fun provideApplicationScope(
+        @Named("DefaultDispatcher") defaultDispatcher: CoroutineDispatcher
+    ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 }
 
 @Qualifier

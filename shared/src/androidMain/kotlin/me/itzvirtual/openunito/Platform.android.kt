@@ -24,6 +24,6 @@ class AndroidPlatformModule {
     }
 
     @Single
-    fun clipboardManager(context: Context): PlatformClipboardManager =
+    fun clipboardManager(@Provided context: Context): PlatformClipboardManager =
         AndroidClipboardManagerImpl(context)
 }

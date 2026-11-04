@@ -9,7 +9,7 @@ import me.itzvirtual.openunito.domain.getNowMillis
 
 fun ExamDateDto.toDomain() = ExamDate(
     bookingState = ExamBookingState.BOOKABLE, // TODO: change this shit
-    addedToCalendar = false, // TODO: and also this
+
     appId = appId,
     adsceId = adsceId,
     adId = adId,

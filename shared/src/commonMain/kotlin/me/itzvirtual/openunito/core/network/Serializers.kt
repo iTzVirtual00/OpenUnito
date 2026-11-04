@@ -22,8 +22,9 @@ import kotlin.time.Instant
 object MicrosoftDateSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("CinecaDate", PrimitiveKind.STRING)
 
+    // Date(1793660400000+0100)
     private val regex = Regex("""/Date\((\d+)([+-]\d+)?\)/""")
-    private val fixedOffset = UtcOffset(hours = 1) // TODO: think about this
+    private val fixedOffset = UtcOffset(hours = 1) // API seems to always return + 0100
 
     override fun deserialize(decoder: Decoder): Instant = deserializeString(decoder.decodeString())
 
