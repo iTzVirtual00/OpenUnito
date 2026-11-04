@@ -12,13 +12,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +34,7 @@ import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.careers_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.shared.StudentCareerCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -76,33 +80,44 @@ fun ProfileScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.careers_title),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
+            TopBar( // TODO: do this for every screen
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                ),
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(Res.string.careers_title),
+                            fontWeight = FontWeight.Bold,
                         )
-                    }
-                }
-            )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = Color.Transparent,
+                    )
+                )
+            }
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 16.dp)
                 .padding(paddingValues)
         ) {
             // column??
             // Again, yes
             Column(modifier = Modifier.fillMaxSize()) {
-                CareersSection(
+                CareersList(
                     careers = careers,
                     selectedCareerId = selectedCareerId,
                     stateError = stateError,
@@ -117,7 +132,7 @@ fun ProfileScreenContent(
 
 
 @Composable
-fun CareersSection(
+fun CareersList(
     modifier: Modifier = Modifier,
     careers: List<StudentCareer>,
     selectedCareerId: Int? = null,
@@ -131,8 +146,6 @@ fun CareersSection(
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
-                .padding(bottom = 16.dp)
-                .padding(horizontal = 8.dp)
         ) {
             ListWrapper( // TODO Gabriele: no calendar shows No element present, prepone state error
                 isEmpty = careers.isEmpty(),
@@ -142,13 +155,18 @@ fun CareersSection(
             ) {
                 LazyColumn {
                     items(careers) { career ->
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         StudentCareerCard(
                             career = career,
                             isSelected = career.id == selectedCareerId,
                             onCopy = onCopy,
                             onSelectCareer = onSelectCareer,
                         )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

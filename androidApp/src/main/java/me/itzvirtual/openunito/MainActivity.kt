@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.ui.text.intl.Locale
@@ -50,7 +51,11 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark( // Status bar color
+                android.graphics.Color.argb(0.3f, 0f,0f,0f)
+            )
+        )
         val language = if (Locale.current.language.lowercase() == "it") "it" else "en"
         Log.d("MainActivity", "Language: $language" )
         updateAppLanguage(language)

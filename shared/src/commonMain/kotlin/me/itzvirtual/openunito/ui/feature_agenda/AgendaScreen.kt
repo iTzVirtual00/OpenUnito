@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -70,6 +72,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -105,6 +108,7 @@ import me.itzvirtual.openunito.domain.toLocalDate
 import me.itzvirtual.openunito.domain.toLocalTime
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
+import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -174,7 +178,7 @@ fun AgendaScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         // Always render the Agenda grid
-        Agenda(
+        AgendaScreenContent(
             events = screenState.agendaState.agendaEntries,
             modifier = Modifier.fillMaxSize(),
             currentWeekStart = getDayOfWeek(
@@ -238,7 +242,7 @@ fun AgendaScreen(
  * Main Agenda composable that displays a weekly calendar view
  */
 @Composable
-fun Agenda(
+fun AgendaScreenContent(
     events: List<AgendaEntry>,
     modifier: Modifier = Modifier,
     currentWeekStart: LocalDate = getDayOfWeek(DayOfWeek.MONDAY),
@@ -277,35 +281,52 @@ fun Agenda(
 //    }
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            // Header with filter and date navigation
-            AgendaHeader(
-                currentWeekStart = currentWeekStart,
-                currentWeekEnd = currentWeekEnd,
-                onNextWeek = onNextWeek,
-                onPreviousWeek = onPreviousWeek,
-                calendars = calendars,
-                selectedCalendar = selectedCalendar,
-                onCalendarSelected = onCalendarSelected,
-                onCalendarAdd = onCalendarAdd,
-                onCalendarDelete = onCalendarDelete,
-            )
+        Scaffold(
+            containerColor = Color.Transparent,
+            modifier = modifier,
+            topBar = {
+                TopBar( // TODO: do this for every screen
+                    colors = listOf(
+                        MaterialTheme.colorScheme.onPrimary,
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                    ),
+                ) {
+                    AgendaHeader(
+                        modifier = Modifier
+                            .padding(top = 8.dp, bottom = 8.dp)
+                            .statusBarsPadding(),
+                        currentWeekStart = currentWeekStart,
+                        currentWeekEnd = currentWeekEnd,
+                        onNextWeek = onNextWeek,
+                        onPreviousWeek = onPreviousWeek,
+                        calendars = calendars,
+                        selectedCalendar = selectedCalendar,
+                        onCalendarSelected = onCalendarSelected,
+                        onCalendarAdd = onCalendarAdd,
+                        onCalendarDelete = onCalendarDelete,
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(top = 16.dp)
+            ) {
+                // Week days header
+                WeekDaysHeader(currentWeekStart)
 
-            // Week days header
-            WeekDaysHeader(currentWeekStart)
-
-            // Calendar grid with events
-            AgendaGrid(
-                events = filteredEvents,
-                startHour = startHour,
-                weekStartDate = currentWeekStart,
-                onEventClick = { event -> selectedEvent = event },
-                onNextWeek = onNextWeek,
-                onPreviousWeek = onPreviousWeek,
-            )
+                // Calendar grid with events
+                AgendaGrid(
+                    events = filteredEvents,
+                    startHour = startHour,
+                    weekStartDate = currentWeekStart,
+                    onEventClick = { event -> selectedEvent = event },
+                    onNextWeek = onNextWeek,
+                    onPreviousWeek = onPreviousWeek,
+                )
+            }
         }
 
         // Event detail overlay
@@ -333,6 +354,7 @@ fun Agenda(
 
 @Composable
 private fun AgendaHeader(
+    modifier: Modifier = Modifier,
     currentWeekStart: LocalDate,
     currentWeekEnd: LocalDate,
     onPreviousWeek: () -> Unit,
@@ -349,7 +371,7 @@ private fun AgendaHeader(
     var deleteTarget by remember { mutableStateOf<CalendarConfig?>(null) }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -935,6 +957,7 @@ internal fun EventDetailView(
     Surface(
         modifier = Modifier
             .fillMaxSize()
+            .safeDrawingPadding()
             .offset { IntOffset(0, animatedOffset.roundToInt()) }
             .nestedScroll(nestedScrollConnection)
     ) {
@@ -1243,21 +1266,21 @@ private val sampleEvents = listOf(
 )
 
 @Composable
-@Preview(showBackground = true)
-fun AgendaPreview() {
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+fun AgendaScreenContentPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Agenda(
+            AgendaScreenContent(
+                modifier = Modifier.padding(innerPadding),
                 events = sampleEvents,
                 currentWeekStart = getDayOfWeek(DayOfWeek.MONDAY, LocalDate(2026, 2, 16)),
-                modifier = Modifier.padding(innerPadding)
             )
         }
     }
 }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 fun EventDetailPreview() {
     OpenUnitoTheme {
         EventDetailView(

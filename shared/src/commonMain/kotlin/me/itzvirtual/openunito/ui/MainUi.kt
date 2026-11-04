@@ -2,7 +2,6 @@ package me.itzvirtual.openunito.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
@@ -161,12 +160,11 @@ fun OpenUnitoApp(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .safeDrawingPadding()
         ) { innerPadding ->
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
             ) {
                 // Cool asf ngl
                 NavHost(
@@ -185,7 +183,7 @@ fun OpenUnitoApp(
                         composable<HomeScreenRoute> {
                             HomeScreen(
                                 onNavigateToSchedule = { navState.navigateToTab(AppDestinations.CALENDAR) },
-                                onOpenProfile = { navState.navController.navigate(ProfileScreenRoute) }
+                                onOpenProfile = { navState.navController.navigate(ProfileScreenRoute) },
                             )
                         }
 
@@ -325,6 +323,7 @@ private object CareerGraph
 
 @Serializable
 private object CareerRoute
+
 @Serializable
 private object TranscriptRoute
 
