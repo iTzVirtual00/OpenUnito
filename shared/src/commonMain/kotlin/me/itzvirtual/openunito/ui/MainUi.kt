@@ -13,12 +13,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -30,8 +34,11 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import co.touchlab.kermit.Logger
+import dev.carcara.kotlinx.locale.Locale
 import kotlinx.serialization.Serializable
 import me.itzvirtual.openunito.MainViewModel
+import me.itzvirtual.openunito.data.localization.AppLocaleManager
+import me.itzvirtual.openunito.data.localization.ResolvedLocale
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.calendar_tab_title
 import me.itzvirtual.openunito.resources.career_tab_title
@@ -57,15 +64,26 @@ import me.itzvirtual.openunito.ui.shared.tabAwareExitTransition
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.reflect.KClass
 
 // TODO: add recovery points
-
 // TODO: add a background gradient or smth
+
+val LocalResolvedLocale = staticCompositionLocalOf {
+    ResolvedLocale(
+        langCode = "",
+        regionCode = "",
+        locale = Locale.current,
+        apiLanguage = ""
+    )
+}
+
 @Composable
 fun RootNavigation(
-    authViewModel: AuthViewModel = koinViewModel()
+    authViewModel: AuthViewModel = koinViewModel(),
+    localeManager: AppLocaleManager = koinInject()
 ) {
     val navController = rememberNavController()
 
@@ -104,17 +122,25 @@ fun RootNavigation(
             val model: MainViewModel = koinViewModel()
             model.prefetchData(scope)
             val isOnline by model.isOnline.collectAsState(initial = true)
+            val localeState by localeManager.localeState.collectAsStateWithLifecycle()
+            val currentLocale = localeState ?: return@composable
+//            val currentLocale = localeState ?: remember { localeManager.getCurrentLocaleSync() }
+
             OpenUnitoTheme {
-                OpenUnitoApp(
-                    isOnline = isOnline,
-                    onSessionExpired = {
-                        authViewModel.clearToken {
-                            navController.navigate("login") {
-                                popUpTo("main") { inclusive = true }
+                CompositionLocalProvider(
+                    LocalResolvedLocale provides currentLocale,
+                ) {
+                    OpenUnitoApp(
+                        isOnline = isOnline,
+                        onSessionExpired = {
+                            authViewModel.clearToken {
+                                navController.navigate("login") {
+                                    popUpTo("main") { inclusive = true }
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }

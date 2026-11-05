@@ -54,11 +54,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
-import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.domain.grade.ExamGrade
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
@@ -295,25 +295,27 @@ fun GradesSection(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                grades.forEachIndexed { idx, grade ->
-                    GradeRow(
-                        courseName = grade.courseName,
-                        date = grade.score!!.date.formatDate(),
-                        cfu = grade.weight,
-                        grade = grade.score.value.let {
-                            return@let when {
-                                grade.score.value == "0" -> grade.status
-                                grade.score.laude -> "${it}L"
-                                else -> it
+                withDateFormatter {
+                    grades.forEachIndexed { idx, grade ->
+                        GradeRow(
+                            courseName = grade.courseName,
+                            date = grade.score!!.date.formatDate(),
+                            cfu = grade.weight,
+                            grade = grade.score.value.let {
+                                return@let when {
+                                    grade.score.value == "0" -> grade.status
+                                    grade.score.laude -> "${it}L"
+                                    else -> it
+                                }
                             }
-                        }
-                    )
-
-                    if (idx < grades.lastIndex) {
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant
                         )
+
+                        if (idx < grades.lastIndex) {
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        }
                     }
                 }
             }

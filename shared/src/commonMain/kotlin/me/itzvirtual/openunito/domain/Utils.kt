@@ -2,10 +2,6 @@
 
 package me.itzvirtual.openunito.domain
 
-import dev.carcara.kotlinx.locale.Locale
-import dev.carcara.kotlinx.locale.datetime.FormatStyle
-import dev.carcara.kotlinx.locale.datetime.cldr.format
-import dev.carcara.kotlinx.locale.datetime.cldr.skeletons.format
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.DateTimeUnit
@@ -40,61 +36,6 @@ fun getCurrentTimeZone(): TimeZone {
 }
 
 // TODO: replace Locale.current with actual selected app locale (and reactive)
-
-// 12 Oct
-fun LocalDate.formatFriendlyDayMonth(
-    locale: Locale = Locale.current
-): String = this.format("dMMM", locale)
-
-// Mon 12
-fun LocalDate.formatFriendlyDayOfWeek(
-    locale: Locale = Locale.current
-): String = this.format("Ed", locale)
-
-// Monday 12 October 2026
-fun LocalDate.formatFriendlyFullDate(
-    locale: Locale = Locale.current
-): String = this.format("yMMMMEEEEd", locale)
-
-// "14:30" or "2:30 PM"
-fun Instant.formatFriendlyTime(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = Locale.current,
-): String = this.toLocalDateTime(timeZone).time.formatFriendlyTime(locale)
-
-fun LocalTime.formatFriendlyTime(
-    locale: Locale = Locale.current,
-): String = this.format(FormatStyle.SHORT, locale)
-
-// "21 dec 2026"
-fun Instant.formatMediumDate(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = Locale.current,
-): String = this.toLocalDateTime(timeZone).date.formatMediumDate(locale)
-
-fun LocalDate.formatMediumDate(
-    locale: Locale = Locale.current,
-): String = this.format(FormatStyle.MEDIUM, locale)
-
-// "21/10/2026" or "10/21/2026"
-fun Instant.formatDate(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = Locale.current,
-): String = this.toLocalDateTime(timeZone).date.formatDate(locale)
-
-fun LocalDate.formatDate(
-    locale: Locale = Locale.current,
-): String = this.format(FormatStyle.SHORT, locale)
-
-// 11
-fun Instant.formatFullMonth(
-    timeZone: TimeZone = TimeZone.currentSystemDefault(),
-    locale: Locale = Locale.current,
-): String = this.toLocalDateTime(timeZone).date.formatFullMonth(locale)
-
-fun LocalDate.formatFullMonth(
-    locale: Locale = Locale.current
-): String = this.format("MMMM", locale)
 
 fun getDayOfWeek(
     day: DayOfWeek,

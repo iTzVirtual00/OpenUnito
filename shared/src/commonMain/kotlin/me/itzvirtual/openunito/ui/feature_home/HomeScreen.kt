@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
-import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getNowInstant
 import me.itzvirtual.openunito.domain.student.StudentData
 import me.itzvirtual.openunito.domain.student.studentDataSample
@@ -454,13 +454,15 @@ fun ClassCard(
                             modifier = Modifier.size(16.dp),
                             tint = secondaryContentColor
                         )
-                        Text(
-                            text = "${entry.startDateTime.formatFriendlyTime()} - ${
-                                entry.endDateTime.formatFriendlyTime()
-                            }",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = secondaryContentColor
-                        )
+                        withDateFormatter {
+                            Text(
+                                text = "${entry.startDateTime.formatFriendlyTime()} - ${
+                                    entry.endDateTime.formatFriendlyTime()
+                                }",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = secondaryContentColor
+                            )
+                        }
                     }
                 }
             }
@@ -480,13 +482,15 @@ fun ClassCard(
                         modifier = Modifier.size(16.dp),
                         tint = secondaryContentColor
                     )
-                    Text(
-                        text = "${entry.startDateTime.formatFriendlyTime()} - ${
-                            entry.endDateTime.formatFriendlyTime()
-                        }",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = secondaryContentColor
-                    )
+                    withDateFormatter {
+                        Text(
+                            text = "${entry.startDateTime.formatFriendlyTime()} - ${
+                                entry.endDateTime.formatFriendlyTime()
+                            }",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = secondaryContentColor
+                        )
+                    }
 
                     // Location - shown inline if available
                     if (entry.rooms.isNotEmpty()) {

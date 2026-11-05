@@ -5,18 +5,21 @@ import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
+import me.itzvirtual.openunito.data.localization.AppLocaleManager
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.StudentRepository
 import org.koin.core.annotation.Module
@@ -38,12 +41,9 @@ fun Throwable.isNetworkError(): Boolean =
 @Module
 class NetworkModule {
     @Single
-    fun provideCurrentLanguage(): String = getSystemLanguage()
-
-    @Single
     fun provideHttpClient(
-        currentLanguage: String,
         appConfigRepo: AppConfigRepository,
+        appLocaleManager: AppLocaleManager,
         json: Json,
     ): HttpClient = HttpClient {
         install(ContentNegotiation) {
@@ -57,14 +57,15 @@ class NetworkModule {
             }
             level = LogLevel.BODY
         }
+        install(createClientPlugin("InjectAppHeaders") {
+            onRequest { request, _ ->
+                // TODO: invalidate cache on apiLanguage change
+                request.headers["ResultLang"] = appLocaleManager.awaitLocale().apiLanguage
+                request.headers["Authorization"] = appConfigRepo.tokenState.filterNotNull().first()
+            }
+        })
         defaultRequest {
             url(API_URL)
-            header("ResultLang", currentLanguage)
-            appConfigRepo.getToken()?.let { token ->
-                if (token.isNotBlank()) {
-                    header("Authorization", token)
-                }
-            }
         }
     }
 
@@ -88,7 +89,6 @@ annotation class ApplicationScope
 
 @Module
 class CoroutineScopesModule {
-
     @Single
     @Named("ApplicationScope")
     fun provideApplicationScope(
@@ -104,7 +104,6 @@ expect val platformIoDispatcher: CoroutineDispatcher
 
 @Module
 class DispatchersModule {
-
     @Single
     @Named("IoDispatcher")
     fun provideIoDispatcher(): CoroutineDispatcher = platformIoDispatcher

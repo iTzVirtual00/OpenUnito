@@ -53,19 +53,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import me.itzvirtual.openunito.data.localization.rememberDateFormatter
+import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
 import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.examdate.subjectsListSample
-import me.itzvirtual.openunito.domain.formatDate
-import me.itzvirtual.openunito.domain.formatFullMonth
-import me.itzvirtual.openunito.domain.formatMediumDate
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
+import me.itzvirtual.openunito.ui.LocalResolvedLocale
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
@@ -409,7 +409,9 @@ fun ExamBookingList(
     debug: Boolean?,
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
-    val examsByMonth = remember(exams) { exams.groupBy { exam -> exam.date.formatFullMonth() } }
+    val formatter = rememberDateFormatter()
+    val examsByMonth =
+        remember(exams) { with(formatter) { exams.groupBy { exam -> exam.date.formatFullMonth() } } }
 
     ListWrapper(
         modifier = modifier,
@@ -639,11 +641,13 @@ fun ExamSessionCardHeader(
                 text = unShoutCourseName(exam.description),
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = exam.date.formatMediumDate(),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            withDateFormatter {
+                Text(
+                    text = exam.date.formatMediumDate(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -842,17 +846,19 @@ fun BookingStartEndRow(
     Row(
         horizontalArrangement = Arrangement.Start
     ) {
-        Text(
-            text = annotatedStringResource(
-                Res.string.examsession_open_from_to,
-                weakStyle,
-                strongStyle,
-                startDate.formatDate(),
-                endDate.formatDate()
-            ),
-            fontSize = size,
-            lineHeight = size.times(1.4f),
-        )
+        withDateFormatter {
+            Text(
+                text = annotatedStringResource(
+                    Res.string.examsession_open_from_to,
+                    weakStyle,
+                    strongStyle,
+                    startDate.formatDate(),
+                    endDate.formatDate()
+                ),
+                fontSize = size,
+                lineHeight = size.times(1.4f),
+            )
+        }
     }
 }
 

@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import me.itzvirtual.openunito.data.config.local.AppConfig
 import me.itzvirtual.openunito.data.config.local.AppConfigDao
+import me.itzvirtual.openunito.data.localization.SupportedLanguage
+import me.itzvirtual.openunito.data.localization.SupportedRegion
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
@@ -100,4 +102,21 @@ class AppConfigRepository(
         )
 
     suspend fun setShowDev(value: Boolean) = configDao.updateShowDev(value)
+
+    // selected language //
+    val selectedLocaleState: StateFlow<Pair<String, String>?> = config
+        .map { (it?.selectedLanguage ?: "") to (it?.selectedRegion ?: "") }
+        .stateIn(
+            scope = externalScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
+
+    suspend fun setLanguage(language: SupportedLanguage){
+        configDao.updateSelectedLanguage(language.tag)
+    }
+
+    suspend fun setRegion(language: SupportedRegion){
+        configDao.updateSelectedRegion(language.regionCode)
+    }
 }

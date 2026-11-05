@@ -80,12 +80,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.dashboard.DashboardData
 import me.itzvirtual.openunito.domain.dashboard.dashboardDataSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.examresult.examResultsDataSample
-import me.itzvirtual.openunito.domain.formatDate
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
@@ -510,15 +510,17 @@ fun ExamResultRow(result: ExamResult) {
                             maxLines = 2
                         )
 
-                        Text(
-                            text = "${
-                                stringResource(
-                                    Res.string.date,
-                                    result.date.formatDate()
-                                )
-                            } \u2022 ${result.weight} CFU",
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        withDateFormatter {
+                            Text(
+                                text = "${
+                                    stringResource(
+                                        Res.string.date,
+                                        result.date.formatDate()
+                                    )
+                                } \u2022 ${result.weight} CFU",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                     }
 

@@ -15,6 +15,8 @@ import me.itzvirtual.openunito.data.dashboard.local.DashboardDao
 import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
 import me.itzvirtual.openunito.data.examresult.local.ExamResultDao
 import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
+import me.itzvirtual.openunito.data.localization.SupportedLanguage
+import me.itzvirtual.openunito.data.localization.SupportedRegion
 import me.itzvirtual.openunito.data.student.local.StudentDao
 import org.koin.android.annotation.KoinViewModel
 
@@ -43,6 +45,19 @@ class SettingsViewModel (
     fun setShowDev(value: Boolean) {
         viewModelScope.launch {
             appConfigRepo.setShowDev(value)
+        }
+    }
+
+    fun setLanguage(language: SupportedLanguage) {
+        viewModelScope.launch {
+            appConfigRepo.setLanguage(language)
+        }
+
+    }
+
+    fun setRegion(region: SupportedRegion) {
+        viewModelScope.launch {
+            appConfigRepo.setRegion(region)
         }
     }
 

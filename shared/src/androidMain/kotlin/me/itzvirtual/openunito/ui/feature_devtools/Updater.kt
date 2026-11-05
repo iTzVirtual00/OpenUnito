@@ -143,7 +143,6 @@ REDACTED_CA_CERT
                 }
 
                 val body = response.body
-                    ?: return@withContext UpdateCheckResult.Error("HTTP ${response.code}: empty response body")
                 val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                 val versionInfo = json.decodeFromString<VersionInfo>(body.string())
 
@@ -165,7 +164,7 @@ REDACTED_CA_CERT
 
             if (!response.isSuccessful) return@withContext null
 
-            val body = response.body ?: return@withContext null
+            val body = response.body
             val contentLength = body.contentLength()
             val apkFile = File(context.cacheDir, "app-release.apk")
 

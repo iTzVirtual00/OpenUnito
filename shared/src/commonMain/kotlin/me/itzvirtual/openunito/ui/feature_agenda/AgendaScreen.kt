@@ -91,6 +91,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.plus
 import me.itzvirtual.openunito.data.calendar.local.CalendarConfig
+import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.agenda.ActivityType
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.agenda.Building
@@ -98,10 +99,6 @@ import me.itzvirtual.openunito.domain.agenda.Coordinates
 import me.itzvirtual.openunito.domain.agenda.Floor
 import me.itzvirtual.openunito.domain.agenda.Professor
 import me.itzvirtual.openunito.domain.agenda.RoomLocation
-import me.itzvirtual.openunito.domain.formatFriendlyDayMonth
-import me.itzvirtual.openunito.domain.formatFriendlyDayOfWeek
-import me.itzvirtual.openunito.domain.formatFriendlyFullDate
-import me.itzvirtual.openunito.domain.formatFriendlyTime
 import me.itzvirtual.openunito.domain.getDayOfWeek
 import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.toLocalDate
@@ -484,14 +481,15 @@ private fun AgendaHeader(
                     contentDescription = "Previous week"
                 )
             }
-
-            Text(
-                text = "${currentWeekStart.formatFriendlyDayMonth()} - ${
-                    currentWeekEnd.formatFriendlyDayMonth()
-                }",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
+            withDateFormatter {
+                Text(
+                    text = "${currentWeekStart.formatFriendlyDayMonth()} - ${
+                        currentWeekEnd.formatFriendlyDayMonth()
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
             IconButton(onClick = onNextWeek, modifier = Modifier.size(36.dp)) {
                 Icon(
@@ -664,12 +662,14 @@ private fun WeekDaysHeader(weekStartDate: LocalDate) {
                     .padding(horizontal = 2.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = date.formatFriendlyDayOfWeek(),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
+                withDateFormatter {
+                    Text(
+                        text = date.formatFriendlyDayOfWeek(),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }
@@ -1027,19 +1027,21 @@ internal fun EventDetailView(
                         modifier = Modifier.size(24.dp)
                     )
                     Column {
-                        Text(
-                            text = event.getLocalDate().formatFriendlyFullDate()
-                                .replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "${
-                                event.getStartTime().formatFriendlyTime()
-                            } - ${event.getEndTime().formatFriendlyTime()}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        withDateFormatter {
+                            Text(
+                                text = event.getLocalDate().formatFriendlyFullDate()
+                                    .replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "${
+                                    event.getStartTime().formatFriendlyTime()
+                                } - ${event.getEndTime().formatFriendlyTime()}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
