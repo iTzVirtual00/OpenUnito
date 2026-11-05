@@ -35,8 +35,6 @@ fun getCurrentTimeZone(): TimeZone {
     return TimeZone.currentSystemDefault()
 }
 
-// TODO: replace Locale.current with actual selected app locale (and reactive)
-
 fun getDayOfWeek(
     day: DayOfWeek,
     today: LocalDate = getToday(),
