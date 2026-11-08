@@ -17,6 +17,7 @@ object SupportedLocales {
     val languages: List<SupportedLanguage> = listOf(
         SupportedLanguage(
             tag = "",
+            displayName = "System" // Fanculo, lo vedranno tutti in inglese, l'alternativa fa cacare
         ),
         SupportedLanguage(
             tag = "it",
@@ -36,6 +37,7 @@ object SupportedLocales {
     val regions: List<SupportedRegion> = listOf(
         SupportedRegion(
             regionCode = "",
+            displayName = "System"
         ),
         SupportedRegion(
             regionCode = "IT",

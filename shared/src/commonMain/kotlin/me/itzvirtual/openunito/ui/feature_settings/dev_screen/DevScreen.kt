@@ -26,6 +26,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +47,11 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.debug_entry
 import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.show_dev_button
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdSwitch
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -112,22 +115,32 @@ fun DevScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.dev_tab_title),
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back"
+            GradientBackground(
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    LocalCustomColorsPalette.current.devColor.copy(alpha = 0.5f),
+                ),
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(Res.string.dev_tab_title),
+                            fontWeight = FontWeight.Bold,
                         )
-                    }
-                }
-            )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = Color.Transparent,
+                    )
+                )
+            }
         },
         contentWindowInsets = WindowInsets(
             insetPadding,
@@ -141,6 +154,10 @@ fun DevScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
             AuthDebuggerCard(
                 onSetToken = setToken,
                 onCopyToken = copyToken,
@@ -184,7 +201,7 @@ fun AuthDebuggerCard(
             Text(
                 text = "Authentication Debugger",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             OutlinedTextField(
@@ -243,7 +260,7 @@ fun PurgeCachesCard(
             Text(
                 text = "Cache Management",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Text(
                 text = "Purge all cached data (agenda, dashboard, grades, exams, student). The app will restart.",

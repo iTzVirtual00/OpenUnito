@@ -1,9 +1,6 @@
 package me.itzvirtual.openunito.ui.feature_settings
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,29 +13,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,12 +38,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
 import me.itzvirtual.openunito.resources.settings_customization
-import me.itzvirtual.openunito.resources.settings_tab_title
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextIconEntry
-import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -122,15 +112,10 @@ fun SettingsScreenContent(
             insetPadding,
         ),
         topBar = {
-            TopBar(
+            GradientBackground(
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     Color(0.29f, 0.251f, 0.467f, 1.0f)
-//                    lerp(
-//                        MaterialTheme.colorScheme.surface,
-//                        MaterialTheme.colorScheme.onPrimary,
-//                        0.2f
-//                    ),
                 ),
             ) {
                 UpdateCard(
@@ -184,7 +169,7 @@ fun SettingsEntries(
                 text = stringResource(Res.string.settings_customization),
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Palette,
-                iconColor = Color(1.0f, 0.388f, 0.239f, 1.0f),
+                iconColor = LocalCustomColorsPalette.current.customizationColor,
                 onClick = onClickAppearance,
             )
 
@@ -197,7 +182,7 @@ fun SettingsEntries(
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Language,
                 onClick = onClickLanguage,
-                iconColor = Color(0.624f, 0.42f, 0.953f, 1.0f),
+                iconColor = LocalCustomColorsPalette.current.languageColor,
             )
 
             if (showDev ?: false) { // Dev
@@ -210,7 +195,7 @@ fun SettingsEntries(
                     icon = Icons.Default.LogoDev,
                     onClick = onClickDev,
                     fontWeight = FontWeight.Bold,
-                    iconColor = Color(0.235f, 0.957f, 0.576f, 1.0f)
+                    iconColor = LocalCustomColorsPalette.current.devColor,
                 )
             }
 

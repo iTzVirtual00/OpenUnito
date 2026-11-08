@@ -105,7 +105,7 @@ import me.itzvirtual.openunito.domain.toLocalDate
 import me.itzvirtual.openunito.domain.toLocalTime
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
-import me.itzvirtual.openunito.ui.components.TopBar
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -282,7 +282,7 @@ fun AgendaScreenContent(
             containerColor = Color.Transparent,
             modifier = modifier,
             topBar = {
-                TopBar( // TODO: do this for every screen
+                GradientBackground( // TODO: do this for every screen
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
                         MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color

@@ -34,7 +34,7 @@ import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.careers_title
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.TopBar
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.shared.StudentCareerCard
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -80,7 +80,7 @@ fun ProfileScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopBar( // TODO: do this for every screen
+            GradientBackground( // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color

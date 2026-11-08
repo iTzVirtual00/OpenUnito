@@ -1,35 +1,55 @@
 package me.itzvirtual.openunito.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CardTravel
+import androidx.compose.material.icons.filled.LogoDev
+import androidx.compose.material.icons.filled.Man
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
@@ -37,11 +57,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.all
+import me.itzvirtual.openunito.resources.debug_entry
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
+import me.itzvirtual.openunito.resources.show_dev_button
 import me.itzvirtual.openunito.ui.shared.ErrorItem
+import me.itzvirtual.openunito.ui.shared.unShoutCourseName
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.sqrt as sqrt
+import kotlin.math.sqrt
 
 @Composable
 fun StdSurface(
@@ -110,7 +135,7 @@ fun StdEntry(
     arrowWeight: Float = 0.1f,
     content: @Composable () -> Unit,
 ) {
-    Box (
+    Box(
         modifier = Modifier
             .clickable(
                 enabled = clickable,
@@ -151,7 +176,7 @@ fun StdTextIconEntry(
     spacing: Dp = 12.dp,
     arrowWeight: Float = 0.1f,
 ) {
-    StdEntry (
+    StdEntry(
         modifier = modifier,
         clickable = clickable,
         onClick = onClick,
@@ -181,7 +206,7 @@ fun StdTextIconEntry(
 fun StdSwitch(
     modifier: Modifier = Modifier,
     value: Boolean,
-    onChanged: (Boolean) -> Unit,
+    onChanged: (Boolean) -> Unit = {},
     icon: ImageVector,
     iconColor: Color = Color.Unspecified,
     text: String,
@@ -229,9 +254,192 @@ fun StdSwitch(
     }
 }
 
+@Composable
+fun StdDropdownEntry(
+    modifier: Modifier = Modifier,
+    elementList: List<String>,
+    selectedElement: Int? = null,
+    onChangeSelected: (Int) -> Unit,
+    buttonSize: Dp = 120.dp,
+    text: String,
+    textColor: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    fontSize: TextUnit = TextUnit.Unspecified,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+        ) {
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = fontWeight,
+                fontSize = fontSize,
+                lineHeight = when {
+                    fontSize.isSpecified -> fontSize.times(1.4)
+                    else -> TextUnit.Unspecified
+                },
+            )
+        }
+        StdDropdownButton(
+            modifier = Modifier.width(buttonSize),
+            elementList = elementList,
+            selectedElement = selectedElement,
+            onChangeSelected = onChangeSelected,
+        )
+    }
+
+}
+
+@Composable
+fun StdIconDropdownEntry(
+    modifier: Modifier = Modifier,
+    elementList: List<String>,
+    selectedElement: Int? = null,
+    onChangeSelected: (Int) -> Unit,
+    buttonSize: Dp = 120.dp,
+    icon: ImageVector = Icons.Default.Man,
+    iconColor: Color = LocalContentColor.current,
+    text: String,
+    textColor: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    fontSize: TextUnit = TextUnit.Unspecified,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+        ) {
+            Icon(
+                modifier = Modifier,
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .width(12.dp),
+            )
+
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = fontWeight,
+                fontSize = fontSize,
+                lineHeight = when {
+                    fontSize.isSpecified -> fontSize.times(1.4)
+                    else -> TextUnit.Unspecified
+                },
+            )
+        }
+        StdDropdownButton(
+            modifier = Modifier.width(buttonSize),
+            elementList = elementList,
+            selectedElement = selectedElement,
+            onChangeSelected = onChangeSelected,
+        )
+    }
+
+}
+
+@Composable
+fun StdDropdownButton(
+    modifier: Modifier = Modifier,
+    elementList: List<String>,
+    selectedElement: Int?,
+    onChangeSelected: (Int) -> Unit,
+    defaultText: String = stringResource(Res.string.all),
+    fontSize: TextUnit = TextUnit.Unspecified,
+    color: Color = Color.Unspecified,
+) {
+    var isDropDownExpanded by remember { mutableStateOf(false) }
+
+
+    Box(
+        modifier = modifier
+    ) {
+        StdButtonEmpty(
+            modifier = Modifier,
+            onClick = {
+                isDropDownExpanded = true
+            }
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+
+                    Modifier.weight(1f)
+                ) {
+                    Spacer(
+                        modifier = Modifier.width(8.dp)
+                    )
+                    Text(
+                        text = when (selectedElement) {
+                            null -> defaultText
+                            else -> unShoutCourseName(elementList[selectedElement])
+                        },
+                        fontSize = fontSize,
+                        lineHeight = when {
+                            fontSize.isSpecified -> fontSize.times(1.4)
+                            else -> TextUnit.Unspecified
+                        },
+                        color = color
+                    )
+                }
+
+                //Arrow
+                AnimatedContent(
+                    targetState = isDropDownExpanded
+                ) { scope ->
+                    val rot = if (!scope) 90f else 270f
+                    Icon(
+                        modifier = Modifier
+                            .rotate(rot),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
+        }
+
+        DropdownMenu(
+            expanded = isDropDownExpanded,
+            onDismissRequest = { isDropDownExpanded = false },
+        ) {
+            elementList.forEachIndexed { index, string ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = string,
+                        )
+                    },
+                    onClick = {
+                        isDropDownExpanded = false
+                        onChangeSelected(index)
+                    }
+                )
+            }
+        }
+    }
+}
+
 class Vector2d(
-    public var x: Float,
-    public var y: Float,
+    var x: Float,
+    var y: Float,
 ) {
     fun dotProduct(a: Vector2d): Float {
         return (a.x + this.x) + (a.y * this.y)
@@ -248,20 +456,21 @@ class Vector2d(
     }
 
     fun copy(): Vector2d {
-        return Vector2d(x,y)
+        return Vector2d(x, y)
     }
 }
 
 @Composable
-fun TopBar(
+fun GradientBackground(
     modifier: Modifier = Modifier,
     colors: List<Color>,
-    content: @Composable () ->Unit,
+    content: @Composable () -> Unit,
 ) {
-    Box( // TODO: when is large the gradient is to the right, make direction indipendent from proportions
+    Box(
+        // TODO: when is large the gradient is to the right, make direction indipendent from proportions
         modifier = modifier
             .drawWithCache {
-                val directionVec = Vector2d(1f,1f)
+                val directionVec = Vector2d(1f, 1f)
                 val centerVec = Vector2d(size.width * 0.5f, size.height * 0.5f)
 
                 // Projection of centerVec on directionVec
@@ -286,13 +495,67 @@ fun TopBar(
                 shadow = Shadow(
                     radius = 18.dp,
                     spread = (-18).dp,
-                    color = Color(0f,0f,0f,0.5f),
+                    color = Color(0f, 0f, 0f, 0.5f),
                     offset = DpOffset(x = 0.dp, (-15).dp)
                 )
             ),
 
 
-    ) {
+        ) {
         content()
+    }
+}
+
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun GenericsPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            StdSurface {
+                Column {
+                    StdSwitch(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, 2.dp)
+                            .fillMaxWidth(),
+                        value = false,
+                        icon = Icons.Default.BugReport,
+                        iconColor = Color(0.976f, 0.733f, 0.275f, 1.0f),
+                        text = stringResource(Res.string.debug_entry),
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    HorizontalDivider()
+
+                    StdSwitch(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, 2.dp)
+                            .fillMaxWidth(),
+                        value = true,
+                        icon = Icons.Default.LogoDev,
+                        iconColor = MaterialTheme.colorScheme.error,
+                        text = stringResource(Res.string.show_dev_button),
+                        textColor = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                        switchColors = SwitchDefaults.colors().copy(
+                            checkedTrackColor = MaterialTheme.colorScheme.error,
+                            checkedThumbColor = MaterialTheme.colorScheme.onError,
+                        )
+                    )
+
+                    HorizontalDivider()
+
+                    StdIconDropdownEntry(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, 16.dp)
+                            .fillMaxWidth(),
+                        text = "Asd",
+                        icon = Icons.Default.CardTravel,
+                        elementList = emptyList(),
+                        onChangeSelected = {},
+                    )
+                }
+            }
+        }
     }
 }

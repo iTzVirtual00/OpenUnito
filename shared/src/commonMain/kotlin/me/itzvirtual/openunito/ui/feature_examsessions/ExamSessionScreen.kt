@@ -71,7 +71,7 @@ import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.components.TopBar
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -118,10 +118,9 @@ fun ExamSessionScreenContent(
 ) {
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
     var selectedFilter by remember { mutableStateOf(filterState.ANY) }
-    var filteredDates = dates
 
     // Filter dates
-    filteredDates = dates
+    val filteredDates = dates
         .filter { // if selected == null don't, otherwise filter by subject
             selectedSubject.value == null || it.title == subjectsList[selectedSubject.value!!]
         }
@@ -136,7 +135,7 @@ fun ExamSessionScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopBar( // TODO: do this for every screen
+            GradientBackground( // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color

@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -46,8 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
@@ -55,22 +51,18 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.localization.withDateFormatter
-import me.itzvirtual.openunito.domain.examdate.examDateSample
-import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.grade.ExamGrade
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.grades_section_title
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.TopBar
-import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionScreenContent
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
-import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -113,7 +105,7 @@ fun TranscriptScreenContent(
 
     Scaffold(
         topBar = {
-            TopBar( // TODO: do this for every screen
+            GradientBackground( // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color

@@ -44,9 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -54,7 +52,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.data.localization.withDateFormatter
@@ -68,9 +65,8 @@ import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.resources.open_schedule
 import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.StdTextButton
-import me.itzvirtual.openunito.ui.components.TopBar
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -117,7 +113,7 @@ fun HomeScreenContent(
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopBar( // TODO: do this for every screen
+                GradientBackground( // TODO: do this for every screen
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
                         MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color

@@ -71,10 +71,11 @@ actual fun UpdateCard(
     var downloadProgress by remember { mutableFloatStateOf(0f) }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .clickable(
                 onClick = onClick
-            ),
+            )
+            .then(modifier),
         ) {
         val titleSize = 20.sp
         Text(
