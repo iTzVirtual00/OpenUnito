@@ -121,7 +121,7 @@ fun StdIconTextButton(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20f.dp, 0.dp),
+                .padding(16f.dp, 0.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -132,9 +132,11 @@ fun StdIconTextButton(
                     .fillMaxHeight(0.43f)
                     .aspectRatio(1f)
             )
+
             Spacer(
-                modifier = Modifier.width(18.dp)
+                modifier = Modifier.weight(1.1f)
             )
+
             Text(
                 text = text,
                 modifier = textModifier,
@@ -142,6 +144,9 @@ fun StdIconTextButton(
                 fontWeight = FontWeight.Medium
             )
 
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

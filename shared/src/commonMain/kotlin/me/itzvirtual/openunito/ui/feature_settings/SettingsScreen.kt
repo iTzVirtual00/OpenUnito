@@ -121,7 +121,7 @@ fun SettingsScreenContent(
                 UpdateCard(
                     modifier = Modifier
                         .padding(horizontal = 18.dp)
-                        .padding(top = 8.dp,bottom = 18.dp)
+                        .padding(top = 18.dp,bottom = 18.dp)
                         .statusBarsPadding(),
                     onClick = onCLickUpdateCard
                 )

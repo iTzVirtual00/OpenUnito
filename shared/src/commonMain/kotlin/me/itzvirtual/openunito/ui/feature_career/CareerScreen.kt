@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,11 +30,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Book
@@ -42,6 +45,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,6 +55,8 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -69,6 +75,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -91,10 +98,12 @@ import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
 import me.itzvirtual.openunito.resources.exam_results_title
 import me.itzvirtual.openunito.resources.examsession_title
+import me.itzvirtual.openunito.resources.language_screen_title
 import me.itzvirtual.openunito.resources.open_credit_statistics
 import me.itzvirtual.openunito.resources.remaining_cfu_title
 import me.itzvirtual.openunito.resources.transcript_title
 import me.itzvirtual.openunito.resources.yearly_progress_title
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
@@ -107,6 +116,7 @@ import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.LocalTranscriptActions
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptActions
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptViewModel
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -134,9 +144,11 @@ fun CareerScreen(
             modifier = modifier.statusBarsPadding(),
             dashboardState = state.dashboardState,
             examResultsState = state.examResultsState,
-            onClickStatistics = { showStatistics = true },
-            onClickTranscript = onOpenTranscript,
-            onClickInvoke = onOpenInvokes,
+            onChangeGradeStatus = { gradeId, newStatus ->
+                transcriptViewModel.changeGradeStatus(gradeId, newStatus)
+          },
+            onOpenTranscript = onOpenTranscript,
+            onOpenInvoke = onOpenInvokes,
             onOpenStatistics = onOpenStatistics,
         )
     }
@@ -144,79 +156,200 @@ fun CareerScreen(
 
 @Composable
 fun CareerScreenContent(
-//    state: CareerScreenState,
     dashboardState: CareerDashboardUiState,
     examResultsState: ExamResultsUiState,
     modifier: Modifier = Modifier,
     debug: Boolean? = null,
-    onClickStatistics: () -> Unit = {},
-    onClickTranscript: () -> Unit = {},
-    onClickInvoke: () -> Unit = {},
+    onChangeGradeStatus: (String, GradeStatus) -> Unit = {gradeId, newStatus -> },
+    onOpenTranscript: () -> Unit = {},
+    onOpenInvoke: () -> Unit = {},
     onOpenStatistics: () -> Unit = {},
 ) {
-    // column??
-    // Yes, column. Wdym?!
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+//            GradientBackground(
+//                colors = listOf(
+//                    MaterialTheme.colorScheme.onPrimary,
+//                    LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
+//                    // TODO: i don't like that this is half transparent, maybe lerp?
+//                ),
+//            ) {
+                CfooBar(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp, bottom = 2.dp)
+                        .fillMaxWidth(),
+                    currentCredits = 60,
+                    onOpenStatistics = onOpenStatistics,
+                )
+//            }
+        }
+    ) { paddingValues ->
+        // column??
+        // Yes, column. Wdym?!
         Column(
             modifier = modifier
-                .clickable {
-                    onClickStatistics()
-                }
-                .fillMaxWidth()
+                .padding(paddingValues)
+                .fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            CreditsSection(
-                data = dashboardState.data,
-                isLoading = dashboardState.isLoading,
-                stateError = dashboardState.error,
-                debug = debug,
-                onOpenStatistics = onOpenStatistics,
-            )
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+//            CreditsSection(
+//                data = dashboardState.data,
+//                isLoading = dashboardState.isLoading,
+//                stateError = dashboardState.error,
+//                debug = debug,
+//                onOpenStatistics = onOpenStatistics, // TODO: remove this
+//            )
+//
+//            Spacer(Modifier.height(16.dp))
+
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(Res.string.exam_results_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                ExamResultsSection(
+                    results = examResultsState.results,
+                    stateError = examResultsState.error,
+                    isLoading = examResultsState.isLoading,
+                    debug = debug,
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 6.dp)
+            ){
+                StdIconTextButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(80.dp),
+                    icon = Icons.Default.Book,
+                    text = stringResource(Res.string.transcript_title),
+                    onClick = onOpenTranscript,
+                    border = BorderStroke(
+                        2.dp,
+                        Brush.linearGradient(
+                            listOf(
+                                LocalCustomColorsPalette.current.languageColor,
+                                MaterialTheme.colorScheme.onPrimary,
+                                lerp(
+                                    LocalCustomColorsPalette.current.languageColor,
+                                    MaterialTheme.colorScheme.onPrimary,
+                                    0.5f,
+                                ),
+                            ),
+                            start = Offset.Zero,
+                            end = Offset.Infinite,
+                        )
+                    )
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                StdIconTextButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(80.dp),
+                    icon = Icons.Default.AccountBalance,
+                    text = stringResource(Res.string.examsession_title),
+                    onClick = onOpenInvoke,
+                    border = BorderStroke(
+                        2.dp,
+                        Brush.linearGradient(
+                            listOf(
+                                lerp(
+                                    LocalCustomColorsPalette.current.languageColor,
+                                    MaterialTheme.colorScheme.onPrimary,
+                                    0.5f,
+                                ),
+                                MaterialTheme.colorScheme.onPrimary,
+                                LocalCustomColorsPalette.current.languageColor,
+                            ),
+                            start = Offset.Zero,
+                            end = Offset.Infinite,
+                        )
+                    )
+                )
+            }
         }
-        Spacer(Modifier.height(16.dp))
-        StdIconTextButton(
-            icon = Icons.Default.Book,
-            text = stringResource(Res.string.transcript_title),
-            onClick = onClickTranscript,
-            modifier = Modifier
-                .padding(8.dp, 0.dp)
-                .height(80.dp),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-        )
-        Spacer(Modifier.height(8.dp))
-        StdIconTextButton(
-            icon = Icons.Default.AccountBalance,
-            text = stringResource(Res.string.examsession_title),
-            onClick = onClickInvoke,
-            modifier = Modifier
-                .padding(8.dp, 0.dp)
-                .height(80.dp),
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = stringResource(Res.string.exam_results_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        ExamResultsSection(
-            results = examResultsState.results,
-            stateError = examResultsState.error,
-            isLoading = examResultsState.isLoading,
-            debug = debug,
-        )
     }
 }
 
 @Composable
-fun GoToStatisticsSection(
+fun CfooBar(
+    modifier: Modifier = Modifier,
+    currentCredits: Int = 0,
+    totalCredits: Int = 180,
     onOpenStatistics: () -> Unit,
 ) {
+    Column(
+        modifier = Modifier
+            .clickable(
+                onClick = onOpenStatistics,
+            )
+            .then(modifier)
+    ) {
+        Text(
+            text = "CFU TOTALI (Moh! Totaleee!!)",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        StdSurface (
+            modifier = Modifier
+                .height(34.dp)
+                .fillMaxWidth(),
+            cornerRadius = 12.dp
+        ) {
+            Row {
+                GradientBackground(
+                    modifier = Modifier
+                        .weight(currentCredits.toFloat())
+                        .fillMaxHeight()
+                        .background(Color.White),
+                    colors = listOf(
+                        MaterialTheme.colorScheme.onPrimary,
+                        LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
+                    ),
+                ) {}
+                Spacer(
+                    modifier = Modifier
+                        .weight(totalCredits.toFloat() - currentCredits.toFloat())
+                )
+            }
+        }
+
+        Text(
+            text = "60 / 180 CFU" // TODO: Trans
+        )
+
+        GoToStatisticsSection()
+    }
+}
+
+@Composable
+fun GoToStatisticsSection() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -360,9 +493,8 @@ fun CreditsSection(
             }
         }
     }
-    GoToStatisticsSection(
-        onOpenStatistics = onOpenStatistics,
-    )
+
+    GoToStatisticsSection()
 }
 
 
@@ -401,6 +533,7 @@ fun YearlyProgressCard( //TODO: move to components package
 
 @Composable
 fun ExamResultsSection(
+    modifier: Modifier = Modifier,
     results: List<ExamResult>,
     stateError: String?,
     isLoading: Boolean,
@@ -409,8 +542,7 @@ fun ExamResultsSection(
     val cornerRadius = 16.dp
 
     ListWrapper(
-        modifier = Modifier
-            .padding(8.dp),
+        modifier = modifier,
         isEmpty = results.isEmpty(),
         debug = debug,
         isLoading = isLoading,
@@ -639,6 +771,7 @@ fun ExamResultRow(result: ExamResult) {
                                 )
                             )
                             isGradeStatusLoading = false
+                            // TODO: I wanted to do the drilling-thing but don't know what to safely remove
                         }
 
 
