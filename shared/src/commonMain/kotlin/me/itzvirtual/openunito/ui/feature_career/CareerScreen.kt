@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -36,7 +38,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Book
@@ -45,7 +46,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -55,8 +55,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -94,11 +92,11 @@ import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.examresult.examResultsDataSample
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.credits_section_title
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
 import me.itzvirtual.openunito.resources.exam_results_title
 import me.itzvirtual.openunito.resources.examsession_title
-import me.itzvirtual.openunito.resources.language_screen_title
 import me.itzvirtual.openunito.resources.open_credit_statistics
 import me.itzvirtual.openunito.resources.remaining_cfu_title
 import me.itzvirtual.openunito.resources.transcript_title
@@ -107,19 +105,21 @@ import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.shared.CreditProgressIndicator
-import me.itzvirtual.openunito.ui.shared.ErrorItem
-import me.itzvirtual.openunito.ui.shared.toColor
-import me.itzvirtual.openunito.ui.shared.unShoutCourseName
-import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.LocalTranscriptActions
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptActions
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptViewModel
+import me.itzvirtual.openunito.ui.shared.CreditProgressIndicator
+import me.itzvirtual.openunito.ui.shared.ErrorItem
+import me.itzvirtual.openunito.ui.shared.toColor
+import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+
+
 
 @Composable
 fun CareerScreen(
@@ -169,23 +169,34 @@ fun CareerScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-//            GradientBackground(
-//                colors = listOf(
-//                    MaterialTheme.colorScheme.onPrimary,
-//                    LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
-//                    // TODO: i don't like that this is half transparent, maybe lerp?
-//                ),
-//            ) {
-                CfooBar(
+            GradientBackground(
+                colors = listOf(
+                    MaterialTheme.colorScheme.onPrimary,
+                    LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
+                    // TODO: add onColor, lerp with color.black
+                ),
+            ) {
+                CreditsSection(
                     modifier = Modifier
                         .statusBarsPadding()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp, bottom = 2.dp)
-                        .fillMaxWidth(),
-                    currentCredits = 60,
-                    onOpenStatistics = onOpenStatistics,
+                        .padding(16.dp),
+                    data = dashboardState.data,
+                    isLoading = dashboardState.isLoading,
+                    stateError = dashboardState.error,
+                    debug = debug,
+                    onClick = onOpenStatistics,
+                    onOpenStatistics = onOpenStatistics, // TODO: remove this
                 )
-//            }
+//                CfooBar(
+//                    modifier = Modifier
+//                        .statusBarsPadding()
+//                        .padding(horizontal = 16.dp)
+//                        .padding(top = 16.dp, bottom = 2.dp)
+//                        .fillMaxWidth(),
+//                    currentCredits = 60,
+//                    onOpenStatistics = onOpenStatistics,
+//                )
+            }
         }
     ) { paddingValues ->
         // column??
@@ -197,24 +208,11 @@ fun CareerScreenContent(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .weight(1f)
                     .verticalScroll(rememberScrollState()),
             ) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-//            CreditsSection(
-//                data = dashboardState.data,
-//                isLoading = dashboardState.isLoading,
-//                stateError = dashboardState.error,
-//                debug = debug,
-//                onOpenStatistics = onOpenStatistics, // TODO: remove this
-//            )
-//
-//            Spacer(Modifier.height(16.dp))
-
-
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(10.dp))
 
                 Text(
                     text = stringResource(Res.string.exam_results_title),
@@ -231,12 +229,14 @@ fun CareerScreenContent(
                     isLoading = examResultsState.isLoading,
                     debug = debug,
                 )
+
+                Spacer(Modifier.height(16.dp))
             }
 
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 6.dp)
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 8.dp)
             ){
                 StdIconTextButton(
                     modifier = Modifier
@@ -247,19 +247,7 @@ fun CareerScreenContent(
                     onClick = onOpenTranscript,
                     border = BorderStroke(
                         2.dp,
-                        Brush.linearGradient(
-                            listOf(
-                                LocalCustomColorsPalette.current.languageColor,
-                                MaterialTheme.colorScheme.onPrimary,
-                                lerp(
-                                    LocalCustomColorsPalette.current.languageColor,
-                                    MaterialTheme.colorScheme.onPrimary,
-                                    0.5f,
-                                ),
-                            ),
-                            start = Offset.Zero,
-                            end = Offset.Infinite,
-                        )
+                        LocalCustomColorsPalette.current.languageColor,
                     )
                 )
 
@@ -274,19 +262,7 @@ fun CareerScreenContent(
                     onClick = onOpenInvoke,
                     border = BorderStroke(
                         2.dp,
-                        Brush.linearGradient(
-                            listOf(
-                                lerp(
-                                    LocalCustomColorsPalette.current.languageColor,
-                                    MaterialTheme.colorScheme.onPrimary,
-                                    0.5f,
-                                ),
-                                MaterialTheme.colorScheme.onPrimary,
-                                LocalCustomColorsPalette.current.languageColor,
-                            ),
-                            start = Offset.Zero,
-                            end = Offset.Infinite,
-                        )
+                        LocalCustomColorsPalette.current.languageColor,
                     )
                 )
             }
@@ -349,11 +325,11 @@ fun CfooBar(
 }
 
 @Composable
-fun GoToStatisticsSection() {
+fun GoToStatisticsSection(
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -375,10 +351,12 @@ fun GoToStatisticsSection() {
 
 @Composable
 fun CreditsSection(
+    modifier: Modifier = Modifier,
     data: DashboardData?,
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean? = null,
+    onClick:  () -> Unit = {},
     onOpenStatistics: () -> Unit,
 ) {
     val showDebug = debug ?: false && stateError != null
@@ -389,112 +367,137 @@ fun CreditsSection(
     val yearlyProgress: Float
     val remainingCfu: String
 
-    if (data != null) {
-        val stats = data.stats
+//    if (data != null) {
+        val stats = data?.stats
 
-        currentCredits = stats.creditsGained.toInt()
-        totalPlannedCredits = stats.totalPlanCredits
-        totalCredits = stats.totalCredits
-        remainingCfu = (totalCredits - currentCredits).toString()
-        yearlyProgress = currentCredits.toFloat() / totalPlannedCredits.toFloat()
-    } else {
-        currentCredits = -1
-        totalPlannedCredits = -1
-        totalCredits = -1
-        remainingCfu = "--"
-        yearlyProgress = 0f
-    }
+        currentCredits = stats?.creditsGained?.toInt() ?: -1
+        totalPlannedCredits = stats?.totalPlanCredits ?: -1
+        totalCredits = stats?.totalCredits ?: -1
+        remainingCfu = when (stats) {
+            null -> "--"
+            else -> (totalCredits - currentCredits).toString()
+        }
+        yearlyProgress = when (stats) {
+            null -> 0f
+            else -> currentCredits.toFloat() / totalPlannedCredits.toFloat()
+        }
 
-    Row(
+
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .height(IntrinsicSize.Min), // grow based on content
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .clickable(
+                onClick = onClick,
+            )
+            .then(modifier),
     ) {
-        Surface(
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+            Text(
+                text = stringResource(Res.string.credits_section_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+
+            GoToStatisticsSection()
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        Row(
+            modifier = Modifier
+                .height(IntrinsicSize.Min), // grow based on content
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            StdSurface(
+                modifier = Modifier.aspectRatio(1f),
+                border = BorderStroke(
+                    0.dp,
+                    Color.Transparent
+                ),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
             ) {
-                if (showDebug) {
-                    ErrorItem(stateError)
-                } else { // !debug or !error
-                    Box(
-                        modifier = Modifier.padding(20.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CreditProgressIndicator(
-                            modifier = Modifier.size(100.dp),
-                            credits = currentCredits,
-                            totalCredits = totalCredits,
-                            plannedCredits = totalPlannedCredits,
-                            progressColor = MaterialTheme.colorScheme.primary,
-                            plannedProgressColor = MaterialTheme.colorScheme.primary,
-                            backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (showDebug) {
+                        ErrorItem(stateError)
+                    } else { // !debug or !error
+                        Box(
+                            modifier = Modifier.padding(20.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CreditProgressIndicator(
+                                modifier = Modifier.size(100.dp),
+                                credits = currentCredits,
+                                totalCredits = totalCredits,
+                                plannedCredits = totalPlannedCredits,
+                                progressColor = MaterialTheme.colorScheme.primary,
+                                plannedProgressColor = MaterialTheme.colorScheme.primary,
+                                backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier.weight(0.6f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StdSurface(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                    border = BorderStroke(0.dp, Color.Transparent),
+                ) {
+                    //TODO: add refresh button
+                    if (debug ?: false && isLoading) {
+                        ErrorItem("Loading")
+                    } else if (debug ?: false && stateError != null) {
+                        ErrorItem(stateError)
+                    } else { // !debug or !error
+                        YearlyProgressCard(
+                            title = stringResource(Res.string.yearly_progress_title),
+                            current = currentCredits,
+                            total = totalPlannedCredits,
+                            progress = yearlyProgress
                         )
                     }
                 }
-            }
-        }
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.4f),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                ) {
+                    if (debug ?: false && (stateError != null || isLoading)) {
+                        ErrorItem(stateError ?: "Loading")
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    Res.string.remaining_cfu_title,
+                                    remainingCfu
+                                ),
+                                modifier = Modifier.padding(12.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
 
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
-            ) {
-                //TODO: add refresh button
-                if (debug ?: false && isLoading) {
-                    ErrorItem("Loading")
-                } else if (debug ?: false && stateError != null) {
-                    ErrorItem(stateError)
-                } else { // !debug or !error
-                    YearlyProgressCard(
-                        title = stringResource(Res.string.yearly_progress_title),
-                        current = currentCredits,
-                        total = totalPlannedCredits,
-                        progress = yearlyProgress
-                    )
-                }
-            }
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.4f),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-            ) {
-                if (debug ?: false && (stateError != null || isLoading)) {
-                    ErrorItem(stateError ?: "Loading")
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(
-                                Res.string.remaining_cfu_title,
-                                remainingCfu
-                            ),
-                            modifier = Modifier.padding(12.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
-
-                            )
+                                )
+                        }
                     }
                 }
             }
         }
     }
-
-    GoToStatisticsSection()
 }
 
 
