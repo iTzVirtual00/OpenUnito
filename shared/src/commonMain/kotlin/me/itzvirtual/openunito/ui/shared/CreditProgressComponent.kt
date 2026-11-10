@@ -80,7 +80,7 @@ fun CreditProgressIndicator(
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(100.dp)) {
-            val stroke = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Butt)
+            val stroke = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
             val radius = size.minDimension / 2
             val center = this.center
 

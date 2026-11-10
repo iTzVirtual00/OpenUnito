@@ -115,7 +115,7 @@ fun SettingsScreenContent(
             GradientBackground(
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    Color(0.29f, 0.251f, 0.467f, 1.0f)
+                    LocalCustomColorsPalette.current.onSettingsColor
                 ),
             ) {
                 UpdateCard(

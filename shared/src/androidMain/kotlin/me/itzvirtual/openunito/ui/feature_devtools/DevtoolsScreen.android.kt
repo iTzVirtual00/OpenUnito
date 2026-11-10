@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.BuildKonfig
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import java.io.File
 
@@ -79,6 +81,11 @@ actual fun UpdateCard(
         ) {
         val titleSize = 20.sp
         Text(
+            modifier = Modifier
+                .dropShadow(
+                    RoundedCornerShape(16.dp),
+                    shadow = ShadowDefaults.Text
+            ),
             text = "Updater",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
@@ -117,7 +124,12 @@ actual fun UpdateCard(
             val textPadding = 12.dp
 
             Surface(
-                modifier = Modifier.weight(checkButtonWeight),
+                modifier = Modifier
+                    .weight(checkButtonWeight)
+                    .dropShadow(
+                        RoundedCornerShape(16.dp),
+                        shadow = ShadowDefaults.Surface
+                    ),
                 onClick = {
                     isChecking = true
                     updateStatus = "Checking for updates..."
@@ -187,7 +199,12 @@ actual fun UpdateCard(
 
             // Download / Install Button
             Surface(
-                modifier = Modifier.weight(1 - checkButtonWeight),
+                modifier = Modifier
+                    .weight(1 - checkButtonWeight)
+                    .dropShadow(
+                        RoundedCornerShape(16.dp),
+                        shadow = ShadowDefaults.Surface
+                    ),
                 onClick = {
                     if (selectedButton == buttonType.DOWNLOAD) {
                         isDownloading = true

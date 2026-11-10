@@ -68,6 +68,22 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sqrt
 
+object ShadowDefaults {
+    val Text = Shadow(
+        radius = 10.dp,
+        spread = 1.dp,
+        color = Color(0f, 0f, 0f, 0.2f),
+        offset = DpOffset(x = 0.dp, 0.dp)
+    )
+
+    val Surface = Shadow(
+        radius = 10.dp,
+        spread = 1.dp,
+        color = Color(0f, 0f, 0f, 0.5f),
+        offset = DpOffset(x = 0.dp, 0.dp)
+    )
+}
+
 @Composable
 fun StdSurface(
     modifier: Modifier = Modifier,
@@ -467,7 +483,6 @@ fun GradientBackground(
     content: @Composable () -> Unit,
 ) {
     Box(
-        // TODO: when is large the gradient is to the right, make direction indipendent from proportions
         modifier = modifier
             .drawWithCache {
                 val directionVec = Vector2d(1f, 1f)
@@ -495,7 +510,7 @@ fun GradientBackground(
                 shadow = Shadow(
                     radius = 18.dp,
                     spread = (-18).dp,
-                    color = Color(0f, 0f, 0f, 0.5f),
+                    color = Color(0f, 0f, 0f, 0.7f),
                     offset = DpOffset(x = 0.dp, (-15).dp)
                 )
             ),

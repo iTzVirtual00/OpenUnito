@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.HistoryEdu
@@ -21,6 +22,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +34,7 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.attendance_tracking_button_name
 import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.ui.components.GradientBackground
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdSwitch
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
@@ -71,12 +74,17 @@ fun CustomizationScreenContent(
             GradientBackground(
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    LocalCustomColorsPalette.current.customizationColor.copy(alpha = 0.5f),
+                    LocalCustomColorsPalette.current.onSettingsColor,
                 ),
             ) {
                 TopAppBar(
                     title = {
                         Text(
+                            modifier = Modifier
+                                .dropShadow(
+                                    RoundedCornerShape(16.dp),
+                                    shadow = ShadowDefaults.Text
+                            ),
                             text = stringResource(Res.string.settings_customization),
                             fontWeight = FontWeight.Bold,
                         )
@@ -124,9 +132,9 @@ fun CustomizationScreenContent(
                         text = stringResource(Res.string.attendance_tracking_button_name),
                         fontWeight = FontWeight.Bold,
                         switchColors = SwitchDefaults.colors().copy(
-                            checkedTrackColor = LocalCustomColorsPalette.current.customizationColor,
+                            checkedTrackColor = LocalCustomColorsPalette.current.settingsColor,
                             checkedThumbColor = lerp(
-                                LocalCustomColorsPalette.current.customizationColor,
+                                LocalCustomColorsPalette.current.settingsColor,
                                 Color.Black,
                                 0.6f
                             )

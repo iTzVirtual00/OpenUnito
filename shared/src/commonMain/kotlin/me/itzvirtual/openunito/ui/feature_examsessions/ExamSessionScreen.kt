@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -65,22 +67,23 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
-import me.itzvirtual.openunito.ui.LocalResolvedLocale
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.GradientBackground
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
 
-enum class filterState {
+enum class FilterState {
     ANY,
     BOOKED,
     UNBOOKED
@@ -117,7 +120,7 @@ fun ExamSessionScreenContent(
     onBack: () -> Unit = {},
 ) {
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
-    var selectedFilter by remember { mutableStateOf(filterState.ANY) }
+    var selectedFilter by remember { mutableStateOf(FilterState.ANY) }
 
     // Filter dates
     val filteredDates = dates
@@ -126,8 +129,8 @@ fun ExamSessionScreenContent(
         }
         .filter {
             when (selectedFilter) {
-                filterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
-                filterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
+                FilterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
+                FilterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
                 else -> true // ANY
             }
         }
@@ -138,7 +141,7 @@ fun ExamSessionScreenContent(
             GradientBackground( // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                    LocalCustomColorsPalette.current.onCareerColor
                 ),
             ) {
                 Column(
@@ -148,6 +151,11 @@ fun ExamSessionScreenContent(
                     TopAppBar(
                         title = {
                             Text(
+                                modifier = Modifier
+                                    .dropShadow(
+                                        RoundedCornerShape(16.dp),
+                                        shadow = ShadowDefaults.Text
+                                    ),
                                 text = stringResource(Res.string.examsession_title),
                                 fontWeight = FontWeight.Bold,
                             )
@@ -173,14 +181,14 @@ fun ExamSessionScreenContent(
                         filter = selectedFilter,
                         onClickBooked = {
                             selectedFilter = when (selectedFilter) {
-                                filterState.BOOKED -> filterState.ANY
-                                else -> filterState.BOOKED
+                                FilterState.BOOKED -> FilterState.ANY
+                                else -> FilterState.BOOKED
                             }
                         },
                         onClickUnbooked = {
                             selectedFilter = when (selectedFilter) {
-                                filterState.UNBOOKED -> filterState.ANY
-                                else -> filterState.UNBOOKED
+                                FilterState.UNBOOKED -> FilterState.ANY
+                                else -> FilterState.UNBOOKED
                             }
                         }
                     )
@@ -217,7 +225,7 @@ fun FilterTopBar(
     modifier: Modifier = Modifier,
     selectedSubject: MutableState<Int?>,
     subjectsList: List<String>,
-    filter: filterState,
+    filter: FilterState,
     onClickBooked: () -> Unit = {},
     onClickUnbooked: () -> Unit = {},
 ) {
@@ -308,15 +316,20 @@ fun SubjectDropdownMenu(
     var isDropDownExpanded by remember { mutableStateOf(false) }
 
     val color = when (selectedSubject.value) {
-        null -> MaterialTheme.colorScheme.outline
-        else -> Color.Unspecified
+        null -> Color.White
+        else -> Color.White
     }
 
     Box(
         modifier = modifier
     ) {
         StdButtonEmpty(
-            modifier = Modifier,
+            modifier = Modifier
+                .dropShadow(
+                    RoundedCornerShape(16.dp),
+                    shadow = ShadowDefaults.Surface
+                ),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
             onClick = {
                 isDropDownExpanded = true
             }
@@ -333,7 +346,7 @@ fun SubjectDropdownMenu(
 
                     Text(
                         text = "Subjects", // TODO: add translations
-                        color = MaterialTheme.colorScheme.outlineVariant,
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = smallFontSize,
                         lineHeight = smallFontSize.times(1.4),
                     )
@@ -361,7 +374,7 @@ fun SubjectDropdownMenu(
                             .rotate(rot),
                         imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.outline,
+                        tint = Color.White,
                     )
                 }
             }
@@ -594,7 +607,7 @@ fun ExamSessionCard(
 
 
 @Composable
-fun ExamSessionCardContent(
+fun ExamSessionCardContent( // TODO: add booked tag
     modifier: Modifier = Modifier,
     exam: ExamDate,
     expanded: Boolean,
@@ -644,7 +657,7 @@ fun ExamSessionCardHeader(
                 Text(
                     text = exam.date.formatMediumDate(),
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = LocalCustomColorsPalette.current.careerColor
                 )
             }
         }

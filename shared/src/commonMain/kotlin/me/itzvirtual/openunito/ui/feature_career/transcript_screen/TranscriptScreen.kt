@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,10 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
@@ -53,16 +57,20 @@ import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
+import me.itzvirtual.openunito.domain.getNowInstant
 import me.itzvirtual.openunito.domain.grade.ExamGrade
+import me.itzvirtual.openunito.domain.grade.Score
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.grades_section_title
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
+import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -94,7 +102,7 @@ fun TranscriptScreenContent(
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean?,
-    changeGradeStatus: (String, GradeStatus) ->Job,
+    changeGradeStatus: (String, GradeStatus) -> Job,
     onBack: () -> Unit = {},
 ) {
     val actions = TranscriptActions(
@@ -108,12 +116,17 @@ fun TranscriptScreenContent(
             GradientBackground( // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                    LocalCustomColorsPalette.current.onCareerColor
                 ),
             ) {
                 TopAppBar(
                     title = {
                         Text(
+                            modifier = Modifier
+                                .dropShadow(
+                                    shape = RoundedCornerShape(16.dp),
+                                    shadow = ShadowDefaults.Text,
+                                ),
                             text = stringResource(Res.string.grades_section_title),
                             fontWeight = FontWeight.Bold,
                         )
@@ -363,16 +376,137 @@ fun GradeRow(courseName: String, grade: String, date: String, cfu: String) {
     }
 }
 
-//@Composable
-//@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-//fun ProfileScreenPreview() {
-//    OpenUnitoTheme {
-//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//            ExamSessionScreenContent(
-//                modifier = Modifier.padding(innerPadding),
-//                dates = examDateSample,
-//                subjectsList = subjectsListSample,
-//            )
-//        }
-//    }
-//}
+@Composable
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+fun TranscriptScreenPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            TranscriptScreenContent(
+                modifier = Modifier.padding(innerPadding),
+                isLoading = false,
+                stateError = null,
+                debug = false,
+                rawGrades =  listOf(
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                    ExamGrade(
+                        id = "suca",
+                        courseName = "Matematica",
+                        score = Score(getNowInstant(),"30",true),
+                        teaching = "Sucatica",
+                        status = "CazzSacc",
+                        passYear = 2,
+                        yearFreq = "Boh",
+                        ordAdCod = "aaa",
+                        ordAdDes = "fff",
+                        yearIdx = 27,
+                        weight = "9"
+                    ),
+                ),
+                changeGradeStatus = {s,f -> Job()},
+            )
+        }
+    }
+}

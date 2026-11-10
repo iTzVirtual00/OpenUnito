@@ -64,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -106,7 +107,9 @@ import me.itzvirtual.openunito.domain.toLocalTime
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.ui.components.GradientBackground
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -285,7 +288,7 @@ fun AgendaScreenContent(
                 GradientBackground( // TODO: do this for every screen
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                        LocalCustomColorsPalette.current.onAgendaColor, // TODO: find a fucking cool color
                     ),
                 ) {
                     AgendaHeader(
@@ -472,6 +475,11 @@ private fun AgendaHeader(
 
         // Date navigation
         Row(
+            modifier = Modifier
+                .dropShadow(
+                RoundedCornerShape(16.dp),
+                shadow = ShadowDefaults.Text
+            ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {

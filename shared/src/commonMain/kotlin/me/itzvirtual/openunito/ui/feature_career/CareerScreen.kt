@@ -1,6 +1,5 @@
 package me.itzvirtual.openunito.ui.feature_career
 
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -55,7 +53,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -67,13 +64,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -103,6 +100,7 @@ import me.itzvirtual.openunito.resources.transcript_title
 import me.itzvirtual.openunito.resources.yearly_progress_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
@@ -118,7 +116,6 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
-
 
 
 @Composable
@@ -153,7 +150,6 @@ fun CareerScreen(
         )
     }
 }
-
 @Composable
 fun CareerScreenContent(
     dashboardState: CareerDashboardUiState,
@@ -165,15 +161,13 @@ fun CareerScreenContent(
     onOpenInvoke: () -> Unit = {},
     onOpenStatistics: () -> Unit = {},
 ) {
-
     Scaffold(
         modifier = modifier,
         topBar = {
             GradientBackground(
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
-                    LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
-                    // TODO: add onColor, lerp with color.black
+                    LocalCustomColorsPalette.current.onCareerColor,
                 ),
             ) {
                 CreditsSection(
@@ -212,7 +206,7 @@ fun CareerScreenContent(
                     .weight(1f)
                     .verticalScroll(rememberScrollState()),
             ) {
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(16.dp))
 
                 Text(
                     text = stringResource(Res.string.exam_results_title),
@@ -247,7 +241,7 @@ fun CareerScreenContent(
                     onClick = onOpenTranscript,
                     border = BorderStroke(
                         2.dp,
-                        LocalCustomColorsPalette.current.languageColor,
+                        LocalCustomColorsPalette.current.careerColor,
                     )
                 )
 
@@ -262,7 +256,7 @@ fun CareerScreenContent(
                     onClick = onOpenInvoke,
                     border = BorderStroke(
                         2.dp,
-                        LocalCustomColorsPalette.current.languageColor,
+                        LocalCustomColorsPalette.current.careerColor,
                     )
                 )
             }
@@ -306,7 +300,7 @@ fun CfooBar(
                         .background(Color.White),
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
-                        LocalCustomColorsPalette.current.languageColor.copy(alpha = 0.5f),
+                        LocalCustomColorsPalette.current.careerColor.copy(alpha = 0.5f),
                     ),
                 ) {}
                 Spacer(
@@ -329,7 +323,11 @@ fun GoToStatisticsSection(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .dropShadow(
+                RoundedCornerShape(16.dp),
+                shadow = ShadowDefaults.Text
+            ),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -393,14 +391,19 @@ fun CreditsSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .dropShadow(
+                        RoundedCornerShape(16.dp),
+                        shadow = ShadowDefaults.Text
+                    ),
                 text = stringResource(Res.string.credits_section_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp)
             )
 
             GoToStatisticsSection()
@@ -414,12 +417,17 @@ fun CreditsSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             StdSurface(
-                modifier = Modifier.aspectRatio(1f),
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .dropShadow(
+                        RoundedCornerShape(16.dp),
+                        shadow = ShadowDefaults.Surface
+                    ),
                 border = BorderStroke(
                     0.dp,
                     Color.Transparent
                 ),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -437,8 +445,8 @@ fun CreditsSection(
                                 credits = currentCredits,
                                 totalCredits = totalCredits,
                                 plannedCredits = totalPlannedCredits,
-                                progressColor = MaterialTheme.colorScheme.primary,
-                                plannedProgressColor = MaterialTheme.colorScheme.primary,
+                                progressColor = LocalCustomColorsPalette.current.careerColor,
+                                plannedProgressColor = LocalCustomColorsPalette.current.careerColor,
                                 backgroundTrackColor = MaterialTheme.colorScheme.secondaryContainer,
                             )
                         }
@@ -451,6 +459,11 @@ fun CreditsSection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StdSurface(
+                    modifier = Modifier
+                        .dropShadow(
+                            RoundedCornerShape(16.dp),
+                            shadow = ShadowDefaults.Surface
+                        ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
                     border = BorderStroke(0.dp, Color.Transparent),
                 ) {
@@ -468,12 +481,16 @@ fun CreditsSection(
                         )
                     }
                 }
-                Surface(
+                StdSurface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(0.4f),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                        .weight(0.4f)
+                        .dropShadow(
+                            RoundedCornerShape(16.dp),
+                            shadow = ShadowDefaults.Surface
+                        ),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                    border = BorderStroke(1.dp, LocalCustomColorsPalette.current.careerColor)
                 ) {
                     if (debug ?: false && (stateError != null || isLoading)) {
                         ErrorItem(stateError ?: "Loading")
@@ -489,9 +506,9 @@ fun CreditsSection(
                                 ),
                                 modifier = Modifier.padding(12.dp),
                                 style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center,
-
-                                )
+                            )
                         }
                     }
                 }
@@ -520,7 +537,7 @@ fun YearlyProgressCard( //TODO: move to components package
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = LocalCustomColorsPalette.current.careerColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round
         )
@@ -535,7 +552,7 @@ fun YearlyProgressCard( //TODO: move to components package
 
 
 @Composable
-fun ExamResultsSection(
+fun ExamResultsSection( // TODO: Move editable until, now it is not very readable
     modifier: Modifier = Modifier,
     results: List<ExamResult>,
     stateError: String?,
@@ -672,7 +689,10 @@ fun ExamResultRow(result: ExamResult) {
                     Text(
                         text = stringResource(Res.string.editable_until),
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (isGradeEditable) MaterialTheme.colorScheme.primary else Color.Gray,
+                        color = when {
+                            isGradeEditable -> LocalCustomColorsPalette.current.careerColor
+                            else -> Color.Gray
+                        },
                     )
                     //                Spacer(modifier = Modifier.weight(1f))
                     Text(
@@ -876,7 +896,9 @@ fun ExamResultRow(result: ExamResult) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = { showDialog = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = LocalCustomColorsPalette.current.careerColor
+                            )
                         ) {
                             Text("Confirm Selection")
                         }
