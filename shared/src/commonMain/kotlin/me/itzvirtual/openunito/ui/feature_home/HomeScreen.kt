@@ -25,12 +25,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RollerSkating
-import androidx.compose.material.icons.filled.SatelliteAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.SatelliteAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -67,7 +68,9 @@ import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -116,12 +119,12 @@ fun HomeScreenContent(
                 GradientBackground( // TODO: do this for every screen
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f), // TODO: find a fucking cool color
+                        LocalCustomColorsPalette.current.onHomeColor
                     ),
                 ) {
                     ProfileSection(
                         modifier = Modifier
-                            .padding(12.dp)
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                             .statusBarsPadding(),
                         data = studentState.data,
                         stateError = studentState.error,
@@ -216,18 +219,24 @@ fun UserProfileIcon(
             3: Luca Neri // Genetics was cool but not present in this lib
     */
     val icon = when (special) {
-        0 -> Icons.Default.SatelliteAlt
+        0 -> Icons.Outlined.SatelliteAlt
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
         3 -> Icons.Default.Translate // TODO: add library
-        else -> Icons.Default.Person
+        else -> Icons.Outlined.Person
     }
 
     Surface(
-        modifier = modifier.size(size),
+        modifier = modifier
+            .size(size)
+            .dropShadow(
+                shape = RoundedCornerShape(16.dp),
+                shadow = ShadowDefaults.Surface,
+            ),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        color = LocalCustomColorsPalette.current.onHomeColor.copy(alpha = 0.8f),
+        border = BorderStroke(1.dp, Color.Transparent),
+        contentColor = Color.White
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -279,6 +288,7 @@ fun ProfileSection(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     UserProfileIcon(
+                        size = 44.dp,
                         special = when {
                             firstName == "Mario" && lastName == "Rossi" -> 0 // TODO: REMOVE these name, maybe hash
                             firstName == "Maria" && lastName == "Bianchi" -> 1
@@ -288,10 +298,15 @@ fun ProfileSection(
                     )
 
                     Spacer(
-                        modifier = Modifier.width(16.dp)
+                        modifier = Modifier.width(20.dp)
                     )
 
                     Text(
+                        modifier = Modifier
+                            .dropShadow(
+                                shape = RoundedCornerShape(16.dp),
+                                shadow = ShadowDefaults.Text
+                            ),
                         text = "$firstName $lastName",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
@@ -401,7 +416,7 @@ fun ClassCard(
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     val borderStroke = if (isInProgress) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        BorderStroke(1.dp, LocalCustomColorsPalette.current.homeColor)
     } else {
         null
     }

@@ -138,7 +138,7 @@ fun CareerScreen(
 
     CompositionLocalProvider(LocalTranscriptActions provides actions) {
         CareerScreenContent(
-            modifier = modifier.statusBarsPadding(),
+            modifier = modifier,
             dashboardState = state.dashboardState,
             examResultsState = state.examResultsState,
             onChangeGradeStatus = { gradeId, newStatus ->
@@ -181,15 +181,6 @@ fun CareerScreenContent(
                     onClick = onOpenStatistics,
                     onOpenStatistics = onOpenStatistics, // TODO: remove this
                 )
-//                CfooBar(
-//                    modifier = Modifier
-//                        .statusBarsPadding()
-//                        .padding(horizontal = 16.dp)
-//                        .padding(top = 16.dp, bottom = 2.dp)
-//                        .fillMaxWidth(),
-//                    currentCredits = 60,
-//                    onOpenStatistics = onOpenStatistics,
-//                )
             }
         }
     ) { paddingValues ->

@@ -38,18 +38,18 @@ val GradeNotPassedDark = Color(color = 0xFFBD4E12)
 //    0.3f
 //)
 
-val HomeColor = Color(0xFFA3E359)
+val HomeColor = Color(0xFF977BE5)
 val OnHomeColor = lerp(
     HomeColor,
     Color.Black,
-    0.3f
+    0.4f
 )
 
-val CareerColor = Color(0xFFA3E359)
+val CareerColor = Color(0xFF977BE5)
 val OnCareerColor = lerp(
     CareerColor,
     Color.Black,
-    0.3f
+    0.4f
 )
 
 val AgendaColor = Color(0xFFDE8129)

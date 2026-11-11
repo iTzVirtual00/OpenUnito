@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -70,9 +71,9 @@ import kotlin.math.sqrt
 
 object ShadowDefaults {
     val Text = Shadow(
-        radius = 10.dp,
-        spread = 1.dp,
-        color = Color(0f, 0f, 0f, 0.2f),
+        radius = 12.dp,
+        spread = 0.5f.dp,
+        color = Color(0f, 0f, 0f, 0.1f),
         offset = DpOffset(x = 0.dp, 0.dp)
     )
 
@@ -83,6 +84,23 @@ object ShadowDefaults {
         offset = DpOffset(x = 0.dp, 0.dp)
     )
 }
+
+fun Shadow.copy(
+    radius: Dp = this.radius,
+    color: Color = this.color,
+    spread: Dp = this.spread,
+    offset: DpOffset = this.offset,
+    alpha: Float = this.alpha,
+    blendMode: BlendMode = this.blendMode
+    ): Shadow =
+        Shadow(
+            radius = radius,
+            color = color,
+            spread = spread,
+            offset = offset,
+            alpha = alpha,
+            blendMode = blendMode,
+        )
 
 @Composable
 fun StdSurface(
