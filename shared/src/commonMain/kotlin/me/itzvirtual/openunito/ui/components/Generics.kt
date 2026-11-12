@@ -62,6 +62,7 @@ import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.debug_entry
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
+import me.itzvirtual.openunito.resources.loading
 import me.itzvirtual.openunito.resources.show_dev_button
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
@@ -140,12 +141,11 @@ fun ListWrapper(
                 ErrorItem(stateError)
             } else {
                 val msg = when {
-                    isEmpty -> emptyMessage
+                    stateError != null -> stringResource(Res.string.error)
                     isLoading -> {
-                        stringResource(Res.string.ND)
+                        stringResource(Res.string.loading)
                     }
-                    // state error is not null
-                    else -> stringResource(Res.string.error)
+                    else -> emptyMessage // state error is not null
                 }
 
                 ErrorItem(msg, Color.Gray)
