@@ -16,13 +16,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.BookOnline
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.EventNote
+import androidx.compose.material.icons.filled.LaptopChromebook
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SafetyCheck
+import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -47,7 +57,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -67,14 +76,15 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
+import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
-import me.itzvirtual.openunito.ui.components.MeasureWidthLayout
+import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.components.GradientBackground
-import me.itzvirtual.openunito.ui.components.ShadowDefaults
+import me.itzvirtual.openunito.ui.shared.CalendarEventModel
+import me.itzvirtual.openunito.ui.shared.CalendarLauncher
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
+import me.itzvirtual.openunito.ui.shared.rememberCalendarLauncher
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -138,7 +148,8 @@ fun ExamSessionScreenContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            GradientBackground( // TODO: do this for every screen
+            GradientBackground(
+                // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     LocalCustomColorsPalette.current.onCareerColor
@@ -230,7 +241,6 @@ fun FilterTopBar(
     onClickUnbooked: () -> Unit = {},
 ) {
     // TODO: translation
-    val horPadding = 6.dp
     val fontSize = 16.sp
 
     val selectedColor = MaterialTheme.colorScheme.primary
@@ -242,7 +252,7 @@ fun FilterTopBar(
         SubjectDropdownMenu(
             modifier = Modifier
                 .weight(0.9f)
-                .padding(horizontal = horPadding),
+                .padding(horizontal = 12.dp),
             selectedSubject = selectedSubject,
             subjectsList = subjectsList,
             fontSize = fontSize,
@@ -483,33 +493,42 @@ fun MonthCard(
     Column(
         modifier = modifier,
     ) {
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(6.dp))
 
-        HorizontalDivider(
-            color = color,
-            thickness = 1.dp
-        )
-
-        Spacer(Modifier.height(4.dp))
-
+//        HorizontalDivider(
+//            color = color,
+//            thickness = 1.dp
+//        )
+//
+//        Spacer(Modifier.height(4.dp))
+        // TODO: find a better fucking design, it terribly sucks
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.Top
         ) {
+            Icon(
+                modifier = Modifier.size(20.dp),
+                imageVector = Icons.Default.CalendarMonth,
+                contentDescription = null,
+                tint = LocalCustomColorsPalette.current.careerColor,
+            )
             Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp),
                 text = month,
-                fontWeight = FontWeight.Light,
-                color = MaterialTheme.colorScheme.outline,
+                fontWeight = FontWeight.Medium,
+                color = Color.White,
             )
         }
-        Spacer(Modifier.height(2.dp))
+//        Spacer(Modifier.height(2.dp))
 
-        HorizontalDivider(
-            color = color,
-            thickness = 1.dp
-        )
+//        HorizontalDivider(
+//            color = color,
+//            thickness = 1.dp
+//        )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
     }
 }
 
@@ -556,7 +575,7 @@ fun ExamSessionCard(
             ExamSessionCardContent(
                 modifier = Modifier
                     .padding(vertical = verPadding)
-                    .padding(start = horPadding, end = horPadding * 2),
+                    .padding(start = horPadding, end = horPadding),
                 exam = exam,
                 expanded = expanded,
             )
@@ -583,31 +602,32 @@ fun ExamSessionCard(
             // 3 - Sidebar Option
 
             // Measure Content height and feed it to the sidebar
-            MeasureHeightLayout(
-                viewToMeasure = {
-                    ExamSessionCardContent(
-                        modifier = Modifier
-                            .padding(vertical = verPadding)
-                            .padding(start = horPadding, end = horPadding * 2),
-                        exam = exam,
-                        expanded = expanded,
-                    )
-                }
-            ) { measuredHeight ->
-                Surface(
-                    modifier = Modifier
-                        .width(horPadding)
-                        .height(measuredHeight),
-                    color = sideColor
-                ) {}
-            }
+//            MeasureHeightLayout(
+//                viewToMeasure = {
+//                    ExamSessionCardContent(
+//                        modifier = Modifier
+//                            .padding(vertical = verPadding)
+//                            .padding(start = horPadding, end = horPadding * 2),
+//                        exam = exam,
+//                        expanded = expanded,
+//                    )
+//                }
+//            ) { measuredHeight ->
+//                Surface(
+//                    modifier = Modifier
+//                        .width(horPadding)
+//                        .height(measuredHeight),
+//                    color = sideColor
+//                ) {}
+//            }
         }
     }
 }
 
 
 @Composable
-fun ExamSessionCardContent( // TODO: add booked tag
+fun ExamSessionCardContent(
+    // TODO: add booked tag
     modifier: Modifier = Modifier,
     exam: ExamDate,
     expanded: Boolean,
@@ -669,6 +689,8 @@ fun ExamSessionCardDrawer(
     modifier: Modifier = Modifier,
     exam: ExamDate,
 ) {
+    val prenotWeight = 0.7f
+
     Column(
         modifier = modifier,
     ) {
@@ -693,36 +715,53 @@ fun ExamSessionCardDrawer(
         Spacer(Modifier.height(12.dp))
 
         // Buttons
+        val prenotWeight = 0.58f
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Spacer(
-                modifier = Modifier.weight(0.1f)
-            )
+//            Spacer(
+//                modifier = Modifier.weight(0.1f)
+//            )
+
+            val calendarLauncher = rememberCalendarLauncher()
 
             AddCalendarButton(
+                modifier = Modifier
+                    .weight(1f - prenotWeight),
                 onAddToCal = {
+                    val event = CalendarEventModel(
+                        title = exam.title,
+                        description = exam.description,
+                        startTimeMillis = exam.date.toEpochMilliseconds(),
+                        endTimeMillis = exam.date.toEpochMilliseconds() + (60 * 60 * 1000),
+                    )
+
+                    calendarLauncher.addEvent(event)
                     // TODO: Add this exam to system calendar
                 }
             )
 
+
             Spacer(
-                modifier = Modifier.weight(0.15f)
+                modifier = Modifier.width(10.dp)
             )
 
             PrenotButton(
                 // TODO: Add real vars
-                modifier = Modifier,
+                modifier = Modifier
+                    .weight(prenotWeight),
                 editable = true,
                 booked = exam.bookingState == ExamBookingState.BOOKED,
                 onClick = { },
             )
 
-            Spacer(
-                modifier = Modifier.weight(0.1f)
-            )
+//            Spacer(
+//                modifier = Modifier.weight(0.1f)
+//            )
         }
+
+        Spacer(Modifier.height(12.dp))
     }
 }
 
@@ -881,7 +920,7 @@ fun PrenotButton(
     booked: Boolean,
     onClick: () -> Unit,
 ) {
-    val bookString = "PRENOT"
+    val bookString = "Prenota"
     val revokeString = "UNPRENOT"
 
     val goodRedColor = Color( // TODO: Make this into fkn error color, now it sucks
@@ -890,45 +929,49 @@ fun PrenotButton(
         85f / 256f
     )
 
-    val borderColor = if (editable) goodRedColor else goodRedColor.copy(alpha = 0.5f)
-    val textColor = if (editable) Color.Unspecified else Color.White.copy(alpha = 0.5f)
-    val textString = if (!booked) bookString else revokeString
+    val borderColor = when {
+        editable -> LocalCustomColorsPalette.current.careerColor
+        else -> LocalCustomColorsPalette.current.careerColor.copy(alpha = 0.5f)
+    }
+    val textColor = when {
+        editable -> Color.Unspecified
+        else -> Color.White.copy(alpha = 0.5f)
+    }
+    val textString = when {
+        !booked -> bookString
+        else -> revokeString
+    }
 
-
-    // Ensure that Prenot button is large enough to contain both strings
-    MeasureWidthLayout(
-        viewToMeasure = {
-            StdButtonEmpty(
-                modifier = modifier
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 9.dp),
-                    text = if (bookString.length > revokeString.length) bookString else revokeString,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    ) { measuredWidth ->
-        StdButtonEmpty(
-            modifier = modifier
-                .width(measuredWidth),
-            border = BorderStroke(1.5.dp, borderColor),
-            onClick = onClick
+    StdButtonEmpty(
+        modifier = modifier,
+        border = BorderStroke(2.dp, borderColor),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 9.dp),
-                    text = textString,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Check, // TODO: make this addtoCal
+                contentDescription = null,
+            )
+
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+
+            Text(
+                modifier = Modifier,
+                text = textString,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+
+            Spacer(
+                modifier = Modifier.weight(1.4f)
+            )
         }
     }
 }
@@ -936,57 +979,59 @@ fun PrenotButton(
 @Composable
 fun AddCalendarButton(
     modifier: Modifier = Modifier,
-    addedToCalendar: Boolean = true, // Future feature
     onAddToCal: () -> Unit = {},
 ) {
-    val addString = "Add"
-    val removeString = "Remove"
-
-    val goodRedColor = Color(
-        217f / 256f,
-        85f / 256f,
-        85f / 256f
-    ) // TODO: Make this into fkn error color, now it sucks
 
     // Ensure that Prenot button is large enough to contain both strings
-    MeasureWidthLayout(
-        viewToMeasure = {
+    StdButtonEmpty(
+        modifier = modifier,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        onClick = onAddToCal,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.EditCalendar, // TODO: make this addtoCal
+                contentDescription = null,
+            )
+
+            Spacer(
+                modifier = Modifier.weight(1f)
+            )
+
             Text(
-                modifier = Modifier,
-                text = if (addString.length > removeString.length) addString else removeString,
+                text = "Aggiungi",
                 fontWeight = FontWeight.Bold
             )
+            Spacer(
+                modifier = Modifier.weight(1.4f)
+            )
         }
-    ) { measuredWidth ->
-        StdButtonEmpty(
-            modifier = modifier,
-            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
-            onClick = onAddToCal,
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 9.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-
-                ) {
-                Icon(
-                    modifier = Modifier,
-                    imageVector = Icons.Default.EditCalendar,
-                    contentDescription = "suca",
-                )
-                Spacer(
-                    modifier = Modifier.width(4.dp),
-                )
-                Text(
-                    modifier = Modifier
-                        .width(measuredWidth),
-                    text = if (!addedToCalendar) addString else removeString,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+//        Row(
+//            modifier = Modifier
+//                .padding(8.dp)
+//                .padding(vertical = 4.dp),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Center
+//        ) {
+//            Icon(
+//                imageVector = Icons.Default.EventNote,
+//                contentDescription = null,
+//            )
+//
+//            Spacer(
+//                Modifier.width(6.dp)
+//            )
+//
+//            Text(
+//                text = "Aggiungi",
+//                fontWeight = FontWeight.Bold
+//            )
+//        }
     }
 }
 
@@ -1108,3 +1153,16 @@ fun ProfileScreenPreview() {
     }
 }
 
+@Composable
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+fun ExamCardPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            ExamSessionCard(
+                exam = examDateSample[0],
+                expanded = true,
+                onClick = {},
+            )
+        }
+    }
+}

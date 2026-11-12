@@ -46,6 +46,21 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 
+// StackOverflow + slop
+data class CalendarEventModel(
+    val title: String,
+    val description: String?,
+    val startTimeMillis: Long,
+    val endTimeMillis: Long
+)
+
+expect class CalendarLauncher {
+    fun addEvent(event: CalendarEventModel)
+}
+
+expect @Composable fun rememberCalendarLauncher(): CalendarLauncher
+// End StackOverflow + slop
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingIconItem(modifier: Modifier) {
