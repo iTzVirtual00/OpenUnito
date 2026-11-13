@@ -23,16 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.BookOnline
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.EventNote
-import androidx.compose.material.icons.filled.LaptopChromebook
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SafetyCheck
-import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -82,7 +75,6 @@ import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.CalendarEventModel
-import me.itzvirtual.openunito.ui.shared.CalendarLauncher
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.rememberCalendarLauncher
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
@@ -954,7 +946,7 @@ fun PrenotButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Default.Check, // TODO: make this addtoCal
+                imageVector = Icons.Default.Check,
                 contentDescription = null,
             )
 

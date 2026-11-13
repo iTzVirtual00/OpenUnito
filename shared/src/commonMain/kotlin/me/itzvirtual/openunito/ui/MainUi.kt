@@ -1,5 +1,6 @@
 package me.itzvirtual.openunito.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -8,6 +9,10 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -16,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -169,15 +173,24 @@ fun OpenUnitoApp(
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach { dest ->
+                val isSelected = dest == navState.activeTab
+
                 item(
                     icon = {
-                        Icon(
-                            imageVector = dest.icon,
-                            contentDescription = dest.label
-                        )
+                        AnimatedContent(
+                            targetState = isSelected
+                        ) { scope ->
+                            Icon(
+                                imageVector = when {
+                                    scope -> dest.activeIcon
+                                    else -> dest.inactiveIcon
+                                },
+                                contentDescription = dest.label
+                            )
+                        }
                     },
                     label = { Text(dest.label) },
-                    selected = dest == navState.activeTab,
+                    selected = isSelected,
                     onClick = { navState.navigateToTab(dest) }
                 )
             }
@@ -290,35 +303,40 @@ fun OpenUnitoApp(
 
 enum class AppDestinations(
     private val labelRes: StringResource,
-    val icon: ImageVector,
+    val activeIcon: ImageVector,
+    val inactiveIcon: ImageVector,
     val route: Any,
     val graphClass: KClass<*>,
     val rootRouteClass: KClass<*>
 ) {
     HOME(
         Res.string.home_tab_title,
-        Icons.Default.Home,
+        activeIcon = Icons.Default.Home,
+        inactiveIcon = Icons.Outlined.Home,
         HomeGraph,
         HomeGraph::class,
         HomeScreenRoute::class
     ),
     CAREER(
         Res.string.career_tab_title,
-        Icons.Default.AccountBox,
+        activeIcon = Icons.Default.AccountBox,
+        inactiveIcon = Icons.Outlined.AccountBox,
         CareerRoute,
         CareerGraph::class,
         CareerRoute::class
     ),
     CALENDAR(
         Res.string.calendar_tab_title,
-        Icons.Default.CalendarToday,
+        activeIcon = Icons.Default.CalendarToday,
+        inactiveIcon = Icons.Outlined.CalendarToday,
         CalendarRoute,
         CalendarRoute::class,
         CalendarRoute::class
     ),
     SETTINGS(
         Res.string.settings_tab_title,
-        Icons.Default.Settings,
+        activeIcon = Icons.Default.Settings,
+        inactiveIcon = Icons.Outlined.Settings,
         SettingsRoute,
         SettingsGraph::class,
         SettingsRoute::class

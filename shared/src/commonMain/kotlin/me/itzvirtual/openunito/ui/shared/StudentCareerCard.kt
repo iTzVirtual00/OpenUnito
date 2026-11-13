@@ -59,6 +59,7 @@ import me.itzvirtual.openunito.resources.regulation_year_label
 import me.itzvirtual.openunito.resources.select_career_button
 import me.itzvirtual.openunito.resources.selected_career_label
 import me.itzvirtual.openunito.resources.student_id_label
+import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -89,7 +90,7 @@ fun StudentCareerCard(
                         text = career.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = LocalCustomColorsPalette.current.homeColor
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(

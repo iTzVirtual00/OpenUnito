@@ -330,8 +330,6 @@ fun ClassesSection(
     onEventClick: (AgendaEntry) -> Unit,
     debug: Boolean?,
 ) {
-
-
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -365,7 +363,9 @@ fun ClassesSection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
 
                 ListWrapper(
                     isEmpty = classes.isEmpty(),
