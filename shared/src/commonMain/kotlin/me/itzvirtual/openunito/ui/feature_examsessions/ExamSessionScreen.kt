@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -67,8 +67,10 @@ import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
+import me.itzvirtual.openunito.resources.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
+import me.itzvirtual.openunito.resources.ic_launcher_foreground
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
@@ -81,6 +83,7 @@ import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Instant
 
@@ -704,23 +707,21 @@ fun ExamSessionCardDrawer(
 
         BookingStartEndRow(exam.bookingStartDate, exam.bookingEndDate)
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(14.dp))
 
         // Buttons
         val prenotWeight = 0.58f
         Row(
             modifier = Modifier
+                .height(45.dp)
                 .fillMaxWidth(),
         ) {
-//            Spacer(
-//                modifier = Modifier.weight(0.1f)
-//            )
-
             val calendarLauncher = rememberCalendarLauncher()
 
             AddCalendarButton(
                 modifier = Modifier
-                    .weight(1f - prenotWeight),
+//                    .weight(1f - prenotWeight)
+                    .fillMaxHeight(),
                 onAddToCal = {
                     val event = CalendarEventModel(
                         title = exam.title,
@@ -730,7 +731,6 @@ fun ExamSessionCardDrawer(
                     )
 
                     calendarLauncher.addEvent(event)
-                    // TODO: Add this exam to system calendar
                 }
             )
 
@@ -742,18 +742,15 @@ fun ExamSessionCardDrawer(
             PrenotButton(
                 // TODO: Add real vars
                 modifier = Modifier
+                    .fillMaxHeight()
                     .weight(prenotWeight),
                 editable = true,
                 booked = exam.bookingState == ExamBookingState.BOOKED,
                 onClick = { },
             )
-
-//            Spacer(
-//                modifier = Modifier.weight(0.1f)
-//            )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(2.dp))
     }
 }
 
@@ -941,7 +938,8 @@ fun PrenotButton(
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp),
+                .fillMaxHeight()
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -976,54 +974,36 @@ fun AddCalendarButton(
 
     // Ensure that Prenot button is large enough to contain both strings
     StdButtonEmpty(
-        modifier = modifier,
+        modifier = modifier
+            .height(40.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         onClick = onAddToCal,
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp),
+                .fillMaxHeight()
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Default.EditCalendar, // TODO: make this addtoCal
+                modifier = Modifier.size(28.dp),
+                imageVector = vectorResource(Res.drawable.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40),
                 contentDescription = null,
             )
 
-            Spacer(
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = "Aggiungi",
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(
-                modifier = Modifier.weight(1.4f)
-            )
-        }
-//        Row(
-//            modifier = Modifier
-//                .padding(8.dp)
-//                .padding(vertical = 4.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Center
-//        ) {
-//            Icon(
-//                imageVector = Icons.Default.EventNote,
-//                contentDescription = null,
-//            )
-//
 //            Spacer(
-//                Modifier.width(6.dp)
+//                modifier = Modifier.weight(1f)
 //            )
 //
 //            Text(
 //                text = "Aggiungi",
 //                fontWeight = FontWeight.Bold
 //            )
-//        }
+//            Spacer(
+//                modifier = Modifier.weight(1.4f)
+//            )
+        }
     }
 }
 
