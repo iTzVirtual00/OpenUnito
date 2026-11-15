@@ -108,6 +108,14 @@ class ExamDateRepository(
         }
     }
 
+    suspend fun bookExam(examDate: ExamDate){
+        api.bookExam(examDate)
+    }
+
+    suspend fun unbookExam(examDate: ExamDate){
+        api.unbookExam(examDate)
+    }
+
     suspend fun clearCache() {
         dao.clearAll()
     }

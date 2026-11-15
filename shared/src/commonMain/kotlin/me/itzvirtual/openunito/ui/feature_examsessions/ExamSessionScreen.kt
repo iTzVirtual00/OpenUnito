@@ -109,6 +109,12 @@ fun ExamSessionScreen(
         stateError = uiState.error,
         debug = state.debug,
         onBack = onBack,
+        onExamBooked = {
+            viewModel.bookExam(it)
+        },
+        onExamUnbooked = {
+            viewModel.unbookExam(it)
+        }
     )
 }
 
@@ -121,6 +127,8 @@ fun ExamSessionScreenContent(
     stateError: String? = null,
     debug: Boolean? = null,
     onBack: () -> Unit = {},
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
     var selectedFilter by remember { mutableStateOf(FilterState.ANY) }
@@ -218,6 +226,8 @@ fun ExamSessionScreenContent(
                     isLoading = isLoading,
                     stateError = stateError,
                     debug = debug,
+                    onExamBooked = onExamBooked,
+                    onExamUnbooked = onExamUnbooked,
                 )
             }
         }
@@ -422,6 +432,8 @@ fun ExamBookingList(
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean?,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
     val formatter = rememberDateFormatter()
@@ -466,7 +478,10 @@ fun ExamBookingList(
                             onClick = {
                                 val id = exam.id()
                                 expandedExamId = if (expandedExamId != id) id else null
-                            }
+                            },
+                            onExamBooked = onExamBooked,
+                            onExamUnbooked = onExamUnbooked,
+
                         )
                     }
                 }
@@ -531,6 +546,8 @@ fun ExamSessionCard(
     exam: ExamDate,
     expanded: Boolean,
     onClick: () -> Unit,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
     // yellow: prenotable but not prenoted
@@ -569,6 +586,8 @@ fun ExamSessionCard(
                     .padding(start = horPadding, end = horPadding),
                 exam = exam,
                 expanded = expanded,
+                onExamBooked = onExamBooked,
+                onExamUnbooked = onExamUnbooked,
             )
 
             // 2 - Circle Option
@@ -622,6 +641,8 @@ fun ExamSessionCardContent(
     modifier: Modifier = Modifier,
     exam: ExamDate,
     expanded: Boolean,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -637,6 +658,8 @@ fun ExamSessionCardContent(
         ) {
             ExamSessionCardDrawer(
                 exam = exam,
+                onExamBooked = onExamBooked,
+                onExamUnbooked = onExamUnbooked
             )
         }
     }
@@ -679,6 +702,8 @@ fun ExamSessionCardHeader(
 fun ExamSessionCardDrawer(
     modifier: Modifier = Modifier,
     exam: ExamDate,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     val prenotWeight = 0.7f
 
@@ -742,7 +767,11 @@ fun ExamSessionCardDrawer(
                     .weight(prenotWeight),
                 editable = exam.canEdit,
                 booked = exam.isBooked,
-                onClick = { },
+                onClick = {
+                    if (!exam.canEdit) return@PrenotButton
+                    if (exam.isBooked) onExamUnbooked(exam)
+                    else onExamBooked(exam)
+                },
             )
         }
 

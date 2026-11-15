@@ -80,7 +80,7 @@ class UnitoApi(
     ): ExamBookingResponse{
         val ctx = context ?: getCareerContext()
         val requestBody = BookExamRequest()
-        return client.put("students/${ctx.registrationId}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}") {
+        return client.put("students/${ctx.id}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}") {
             contentType(ContentType.Application.Json)
             setBody(requestBody)
         }.body()
@@ -91,6 +91,6 @@ class UnitoApi(
         context: CareerContext? = null,
     ): ExamBookingResponse{
         val ctx = context ?: getCareerContext()
-        return client.delete("students/${ctx.registrationId}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}").body()
+        return client.delete("students/${ctx.id}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}").body()
     }
 }
