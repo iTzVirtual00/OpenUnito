@@ -11,6 +11,7 @@ import me.itzvirtual.openunito.core.network.isNetworkError
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.examdate.ExamDateRepository
 import me.itzvirtual.openunito.data.examresult.ExamResultRepository
+import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.ui.feature_career.uberCombine
 import org.koin.android.annotation.KoinViewModel
 
@@ -40,20 +41,7 @@ class ExamSessionViewModel(
 
         val sortedDates = cachedDates?.dates?.sortedBy { it.date } ?: emptyList()
 
-        val subjects = buildList(
-            builderAction = {
-                sortedDates.forEach { date ->
-                    val sub = date.title
-                    val found = find { el ->
-                        el == sub
-                    }
-
-                    if (found == null) {
-                        add(sub)
-                    }
-                }
-            }
-        )
+        val subjects = sortedDates.map { it.title }.distinct()
 
         val examDatesUiState = ExamDatesUiState(
             dates = sortedDates,
@@ -87,6 +75,18 @@ class ExamSessionViewModel(
             } finally {
                 isManualRefreshing.value = false
             }
+        }
+    }
+
+    fun bookExam(examDate: ExamDate){
+        viewModelScope.launch {
+            examDateRepo.bookExam(examDate)
+        }
+    }
+
+    fun unbookExam(examDate: ExamDate){
+        viewModelScope.launch {
+            examDateRepo.unbookExam(examDate)
         }
     }
 

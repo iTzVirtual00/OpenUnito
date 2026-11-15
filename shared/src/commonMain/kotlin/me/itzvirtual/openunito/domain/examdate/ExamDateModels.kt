@@ -1,22 +1,10 @@
-@file:OptIn(ExperimentalTime::class)
-
 package me.itzvirtual.openunito.domain.examdate
 
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-// BOOKABLE: bookingEnabled
-// BOOKED: !bookableExam && unbookingEnabled
-// UNBOOKED: !BOOKED
-// also UNBOOKABLE maybe?
-enum class ExamBookingState() {
-    BOOKABLE,
-    BOOKED,
-} // TODO: Mario add in viewModel
-
-
 data class ExamDate(
-    val bookingState: ExamBookingState,
+    val isBooked: Boolean,
+    val canEdit: Boolean,
 
     val appId: Long,
 
@@ -30,10 +18,6 @@ data class ExamDate(
     val date: Instant,
     val bookingStartDate: Instant,
     val bookingEndDate: Instant,
-
-    val bookableExam: Boolean, // Selezionati nel piano carriera. Fuck Cineca
-    val bookingEnabled: Boolean,
-    val unbookingEnabled: Boolean,
 
     val cdsAppId: Long,
     val adAppId: Long,
@@ -54,7 +38,8 @@ fun ExamDate.id(): ExamDateId {
 
 val examDateSample: List<ExamDate> = listOf(
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = true,
+        canEdit = true,
         appId = 1,
         adsceId = 23948175L,
         adId = 95183L,
@@ -65,9 +50,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1800313200000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1798585200000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1799708400000L),
-        bookableExam = true,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 95183L,
         subscribedStudents = 0,
@@ -75,7 +57,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKED,
+        isBooked = false,
+        canEdit = true,
         appId = 2,
         adsceId = 23948176L,
         adId = 95183L,
@@ -86,9 +69,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1802905200000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1801177200000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1802300400000L),
-        bookableExam = true,
-        bookingEnabled = true,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 95183L,
         subscribedStudents = 24,
@@ -96,7 +76,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKED,
+        isBooked = false,
+        canEdit = false,
         appId = 3,
         adsceId = 23948177L,
         adId = 95183L,
@@ -107,9 +88,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1807442400000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1805714400000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1806837600000L),
-        bookableExam = true,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 95183L,
         subscribedStudents = 5,
@@ -117,7 +95,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 0
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = true,
+        canEdit = false,
         appId = 4,
         adsceId = 24183920L,
         adId = 91385L,
@@ -128,9 +107,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1800918000000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1799190000000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1800313200000L),
-        bookableExam = true,
-        bookingEnabled = true,
-        unbookingEnabled = true,
         cdsAppId = 14928L,
         adAppId = 91385L,
         subscribedStudents = 58,
@@ -138,7 +114,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = false,
+        canEdit = false,
         appId = 5,
         adsceId = 24183921L,
         adId = 91385L,
@@ -149,9 +126,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1803510000000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1801782000000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1802905200000L),
-        bookableExam = true,
-        bookingEnabled = true,
-        unbookingEnabled = true,
         cdsAppId = 14928L,
         adAppId = 91385L,
         subscribedStudents = 42,
@@ -159,7 +133,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = false,
+        canEdit = false,
         appId = 6,
         adsceId = 25839104L,
         adId = 93847L,
@@ -170,9 +145,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1801522800000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1799794800000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1800918000000L),
-        bookableExam = true,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 93847L,
         subscribedStudents = 77,
@@ -180,7 +152,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKED,
+        isBooked = false,
+        canEdit = false,
         appId = 7,
         adsceId = 25839105L,
         adId = 93847L,
@@ -191,9 +164,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1801954800000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1800140400000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1801349900000L),
-        bookableExam = false,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 93847L,
         subscribedStudents = 19,
@@ -201,7 +171,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKED,
+        isBooked = false,
+        canEdit = false,
         appId = 8,
         adsceId = 26194832L,
         adId = 97421L,
@@ -212,9 +183,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1804114800000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1802386800000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1803510000000L),
-        bookableExam = true,
-        bookingEnabled = true,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 97421L,
         subscribedStudents = 112,
@@ -222,7 +190,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = false,
+        canEdit = false,
         appId = 9,
         adsceId = 27391845L,
         adId = 98519L,
@@ -233,9 +202,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1799708400000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1797980400000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1799103600000L),
-        bookableExam = false,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 98519L,
         subscribedStudents = 145,
@@ -243,7 +209,8 @@ val examDateSample: List<ExamDate> = listOf(
         questionnaire = 1
     ),
     ExamDate(
-        bookingState = ExamBookingState.BOOKABLE,
+        isBooked = false,
+        canEdit = false,
         appId = 10,
         adsceId = 27391846L,
         adId = 98519L,
@@ -254,9 +221,6 @@ val examDateSample: List<ExamDate> = listOf(
         date = Instant.fromEpochMilliseconds(1800140400000L),
         bookingStartDate = Instant.fromEpochMilliseconds(1798412400000L),
         bookingEndDate = Instant.fromEpochMilliseconds(1799535600000L),
-        bookableExam = false,
-        bookingEnabled = false,
-        unbookingEnabled = false,
         cdsAppId = 14928L,
         adAppId = 98519L,
         subscribedStudents = 38,

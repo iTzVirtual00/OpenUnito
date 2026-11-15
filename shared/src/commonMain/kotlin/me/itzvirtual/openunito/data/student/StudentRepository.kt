@@ -140,6 +140,7 @@ class StudentRepository(
 
     suspend fun refresh(): Result<StudentEntity> = runCatching {
         withContext(ioDispatcher) {
+            // TODO: Do something with an unsuccessful response
             val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17")
                 .body<AppInitDto>()
             val session = appInit.session ?: throw Exception("No auth session")

@@ -51,3 +51,16 @@ data class ExamDateDto(
     @SerialName("chkQuestVal") val chkQuestVal: String = "0",
     @SerialName("visCancPren") val visCancPren: Boolean = false
 )
+
+@Serializable
+data class BookExamRequest(
+    @SerialName("misureComp") val misureComp: Boolean = false,
+    @SerialName("tipoSvolgimentoEsame") val tipoSvolgimentoEsame: Nothing? = null,
+)
+
+@Serializable
+data class ExamBookingResponse(
+    @SerialName("is_successfull") val isSuccessfull: Boolean = false,
+//    @SerialName("message") val message: String? = null // not tested!
+)
+

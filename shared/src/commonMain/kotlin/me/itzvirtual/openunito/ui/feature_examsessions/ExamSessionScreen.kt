@@ -68,7 +68,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.localization.rememberDateFormatter
 import me.itzvirtual.openunito.data.localization.withDateFormatter
-import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
@@ -79,7 +78,6 @@ import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
-import me.itzvirtual.openunito.resources.ic_launcher_foreground
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
@@ -121,6 +119,12 @@ fun ExamSessionScreen(
         stateError = uiState.error,
         debug = state.debug,
         onBack = onBack,
+        onExamBooked = {
+            viewModel.bookExam(it)
+        },
+        onExamUnbooked = {
+            viewModel.unbookExam(it)
+        }
     )
 }
 
@@ -133,6 +137,8 @@ fun ExamSessionScreenContent(
     stateError: String? = null,
     debug: Boolean? = null,
     onBack: () -> Unit = {},
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     val selectedSubject = remember { mutableStateOf<Int?>(null) }
     var selectedFilter by remember { mutableStateOf(FilterState.ANY) }
@@ -144,8 +150,8 @@ fun ExamSessionScreenContent(
         }
         .filter {
             when (selectedFilter) {
-                FilterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
-                FilterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
+                FilterState.BOOKED -> it.isBooked
+                FilterState.UNBOOKED -> !it.isBooked
                 else -> true // ANY
             }
         }
@@ -230,6 +236,8 @@ fun ExamSessionScreenContent(
                     isLoading = isLoading,
                     stateError = stateError,
                     debug = debug,
+                    onExamBooked = onExamBooked,
+                    onExamUnbooked = onExamUnbooked,
                 )
             }
         }
@@ -434,6 +442,8 @@ fun ExamBookingList(
     isLoading: Boolean,
     stateError: String?,
     debug: Boolean?,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     var expandedExamId by remember { mutableStateOf<ExamDateId?>(null) }
     val formatter = rememberDateFormatter()
@@ -513,7 +523,9 @@ fun ExamBookingList(
                                         listState.animateScrollToItem(id)
                                     }
                                 }
-                            }
+                            },
+                            onExamBooked = onExamBooked,
+                            onExamUnbooked = onExamUnbooked,
                         )
                     }
                 }
@@ -577,16 +589,16 @@ fun ExamSessionCard(
     exam: ExamDate,
     expanded: Boolean,
     onClick: () -> Unit,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     // TODO: Add *gesture on the face* etiquette to say if prenoted, not prenoted, prenotable
     // yellow: prenotable but not prenoted
     //  green: prenoted
     //   grey: unprenotable
     // italien!
-    val sideColor = when (exam.bookingState) {
-        ExamBookingState.BOOKED -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outlineVariant
-    }
+    val sideColor = if (exam.isBooked) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.outlineVariant
 
     val verPadding = 10.dp
     val horPadding = 16.dp
@@ -617,6 +629,8 @@ fun ExamSessionCard(
                     .padding(start = horPadding, end = horPadding),
                 exam = exam,
                 expanded = expanded,
+                onExamBooked = onExamBooked,
+                onExamUnbooked = onExamUnbooked,
             )
 
             // 2 - Circle Option
@@ -670,6 +684,8 @@ fun ExamSessionCardContent(
     modifier: Modifier = Modifier,
     exam: ExamDate,
     expanded: Boolean,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -691,6 +707,8 @@ fun ExamSessionCardContent(
         ) {
             ExamSessionCardDrawer(
                 exam = exam,
+                onExamBooked = onExamBooked,
+                onExamUnbooked = onExamUnbooked
             )
         }
     }
@@ -733,6 +751,8 @@ fun ExamSessionCardHeader(
 fun ExamSessionCardDrawer(
     modifier: Modifier = Modifier,
     exam: ExamDate,
+    onExamBooked: (ExamDate) -> Unit = {},
+    onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
     val prenotWeight = 0.7f
 
@@ -790,13 +810,19 @@ fun ExamSessionCardDrawer(
             )
 
             PrenotButton(
-                // TODO: Add real vars
+                // TODO: Disable and show loading state on the button, the state is automatically
+                //  updated by the repository
+                //  Proposal: also disable all the exams cards while the backend is loading
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(prenotWeight),
-                editable = true,
-                booked = exam.bookingState == ExamBookingState.BOOKED,
-                onClick = { },
+                editable = exam.canEdit,
+                booked = exam.isBooked,
+                onClick = {
+                    if (!exam.canEdit) return@PrenotButton
+                    if (exam.isBooked) onExamUnbooked(exam)
+                    else onExamBooked(exam)
+                },
             )
         }
 

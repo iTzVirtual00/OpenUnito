@@ -2,6 +2,7 @@ package me.itzvirtual.openunito.core.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -13,10 +14,13 @@ import kotlinx.coroutines.flow.first
 import me.itzvirtual.openunito.data.agenda.remote.AgendaEntryDto
 import me.itzvirtual.openunito.data.agenda.remote.PublicAgendaRequest
 import me.itzvirtual.openunito.data.dashboard.remote.DashboardDataResponseDto
+import me.itzvirtual.openunito.data.examdate.remote.BookExamRequest
+import me.itzvirtual.openunito.data.examdate.remote.ExamBookingResponse
 import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
 import me.itzvirtual.openunito.data.examresult.remote.ExamResultDto
 import me.itzvirtual.openunito.data.grade.remote.ExamGradeDto
 import me.itzvirtual.openunito.data.student.StudentRepository
+import me.itzvirtual.openunito.domain.examdate.ExamDate
 
 data class CareerContext(
     val id: Int,
@@ -68,5 +72,25 @@ class UnitoApi(
             contentType(ContentType.Application.Json)
             setBody(body)
         }.body()
+    }
+
+    suspend fun bookExam(
+        exam: ExamDate,
+        context: CareerContext? = null,
+    ): ExamBookingResponse{
+        val ctx = context ?: getCareerContext()
+        val requestBody = BookExamRequest()
+        return client.put("students/${ctx.id}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}") {
+            contentType(ContentType.Application.Json)
+            setBody(requestBody)
+        }.body()
+    }
+
+    suspend fun unbookExam(
+        exam: ExamDate,
+        context: CareerContext? = null,
+    ): ExamBookingResponse{
+        val ctx = context ?: getCareerContext()
+        return client.delete("students/${ctx.id}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}").body()
     }
 }
