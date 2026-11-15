@@ -3,12 +3,37 @@ package me.itzvirtual.openunito.data.examdate.mapper
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.data.examdate.local.ExamDateEntity
 import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
-import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.getNowMillis
 
+/*
+My understanding of the holy cryptic Cineca logic:
+
+booked & modifiable:
+"bookingEnabled": true,
+
+"bookableExam": false,
+"unbookingEnabled": true,
+
+booked & not modifiable:
+???
+
+not booked & modifiable
+"bookingEnabled": true,
+
+"bookableExam": true,
+"unbookingEnabled": false,
+
+not booked & unmodifiable
+"bookingEnabled": false,
+
+"bookableExam": true,
+"unbookingEnabled": false,
+ */
+
 fun ExamDateDto.toDomain() = ExamDate(
-    bookingState = ExamBookingState.BOOKABLE, // TODO: change this shit
+    isBooked = !bookableExam,
+    canEdit = bookingEnabled,
 
     appId = appId,
     adsceId = adsceId,
@@ -21,10 +46,6 @@ fun ExamDateDto.toDomain() = ExamDate(
     date = date,
     bookingStartDate = bookingStartDate,
     bookingEndDate = bookingEndDate,
-
-    bookableExam = bookableExam,
-    bookingEnabled = bookingEnabled,
-    unbookingEnabled = unbookingEnabled,
 
     cdsAppId = cdsAppId,
     adAppId = adAppId,

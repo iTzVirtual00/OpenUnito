@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.data.localization.rememberDateFormatter
 import me.itzvirtual.openunito.data.localization.withDateFormatter
-import me.itzvirtual.openunito.domain.examdate.ExamBookingState
 import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.domain.examdate.ExamDateId
 import me.itzvirtual.openunito.domain.examdate.examDateSample
@@ -70,7 +69,6 @@ import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
-import me.itzvirtual.openunito.resources.ic_launcher_foreground
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
@@ -134,8 +132,8 @@ fun ExamSessionScreenContent(
         }
         .filter {
             when (selectedFilter) {
-                FilterState.BOOKED -> it.bookingState == ExamBookingState.BOOKED
-                FilterState.UNBOOKED -> it.bookingState != ExamBookingState.BOOKED
+                FilterState.BOOKED -> it.isBooked
+                FilterState.UNBOOKED -> !it.isBooked
                 else -> true // ANY
             }
         }
@@ -539,10 +537,8 @@ fun ExamSessionCard(
     //  green: prenoted
     //   grey: unprenotable
     // italien!
-    val sideColor = when (exam.bookingState) {
-        ExamBookingState.BOOKED -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outlineVariant
-    }
+    val sideColor = if (exam.isBooked) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.outlineVariant
 
     val verPadding = 10.dp
     val horPadding = 16.dp
@@ -744,8 +740,8 @@ fun ExamSessionCardDrawer(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(prenotWeight),
-                editable = true,
-                booked = exam.bookingState == ExamBookingState.BOOKED,
+                editable = exam.canEdit,
+                booked = exam.isBooked,
                 onClick = { },
             )
         }
