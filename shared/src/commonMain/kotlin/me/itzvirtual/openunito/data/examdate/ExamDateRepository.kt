@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -82,9 +83,12 @@ class ExamDateRepository(
             initialValue = null
         )
 
-    private fun triggerBackgroundRefresh(careerId: Int) {
+    private fun triggerBackgroundRefresh(careerId: Int, replace: Boolean = false) {
         val currentJob = activeRefreshJob.load()
-        if (currentJob?.isActive == true) return
+        if (currentJob?.isActive == true){
+            if(!replace) return
+            currentJob.cancel()
+        }
 
         val newJob = externalScope.launch(ioDispatcher) {
             try {
@@ -110,10 +114,12 @@ class ExamDateRepository(
 
     suspend fun bookExam(examDate: ExamDate){
         api.bookExam(examDate)
+        triggerBackgroundRefresh(studentRepo.careerContextFlow.first().id, true)
     }
 
     suspend fun unbookExam(examDate: ExamDate){
         api.unbookExam(examDate)
+        triggerBackgroundRefresh(studentRepo.careerContextFlow.first().id, false)
     }
 
     suspend fun clearCache() {

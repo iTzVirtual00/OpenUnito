@@ -761,7 +761,9 @@ fun ExamSessionCardDrawer(
             )
 
             PrenotButton(
-                // TODO: Add real vars
+                // TODO: Disable and show loading state on the button, the state is automatically
+                //  updated by the repository
+                //  Proposal: also disable all the exams cards while the backend is loading
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(prenotWeight),

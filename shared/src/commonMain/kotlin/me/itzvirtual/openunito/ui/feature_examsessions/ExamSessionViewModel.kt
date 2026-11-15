@@ -41,20 +41,7 @@ class ExamSessionViewModel(
 
         val sortedDates = cachedDates?.dates?.sortedBy { it.date } ?: emptyList()
 
-        val subjects = buildList(
-            builderAction = {
-                sortedDates.forEach { date ->
-                    val sub = date.title
-                    val found = find { el ->
-                        el == sub
-                    }
-
-                    if (found == null) {
-                        add(sub)
-                    }
-                }
-            }
-        )
+        val subjects = sortedDates.map { it.title }.distinct()
 
         val examDatesUiState = ExamDatesUiState(
             dates = sortedDates,
