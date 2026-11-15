@@ -3,8 +3,12 @@ package me.itzvirtual.openunito.ui.feature_examsessions
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +24,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
@@ -42,6 +47,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +63,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.localization.rememberDateFormatter
 import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.examdate.ExamBookingState
@@ -73,6 +82,7 @@ import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.resources.ic_launcher_foreground
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
@@ -85,8 +95,8 @@ import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
-
 
 enum class FilterState {
     ANY,
@@ -430,6 +440,14 @@ fun ExamBookingList(
     val examsByMonth =
         remember(exams) { with(formatter) { exams.groupBy { exam -> exam.date.formatFullMonth() } } }
 
+    val monthsList = examsByMonth.keys
+
+    var log by remember { mutableStateOf(0) }
+    // exams = list
+    // examsByMonth = map (month, list)
+
+    //id = pos di exam in exams + num di mesi passti compreso questo
+
     ListWrapper(
         modifier = modifier,
         isEmpty = examsByMonth.isEmpty(),
@@ -437,29 +455,44 @@ fun ExamBookingList(
         isLoading = isLoading,
         stateError = stateError
     ) {
+
+        val listState = rememberLazyListState()
+// Remember a CoroutineScope to be able to launch
+        val coroutineScope = rememberCoroutineScope()
+
+
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
+            state = listState,
         ) {
             item {
                 Spacer(
                     modifier = Modifier.height(8.dp)
                 )
+                Text(
+                    text = log.toString()
+                )
             }
 
             examsByMonth.forEach { (month, examList) ->
-                item {
-                    MonthCard(
-                        modifier = Modifier
-                            .padding(),
-                        month = month.replaceFirstChar { // Capitalize month
-                            if (it.isLowerCase()) it.titlecase() else it.toString()
-                        }
-                    )
-                }
+//                item {
+//
+//                }
 
-                examList.forEach { exam ->
-                    item {
+                examList.forEachIndexed { index, exam ->
+                    item(exam.id()) {
+                        if (index == 0) {
+                            MonthCard(
+                                modifier = Modifier
+                                    .padding(),
+                                month = month.replaceFirstChar { // Capitalize month
+                                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                                }
+                            )
+                        }
+
                         ExamSessionCard(
                             modifier = Modifier
                                 .padding(bottom = 10.dp),
@@ -468,11 +501,22 @@ fun ExamBookingList(
                             onClick = {
                                 val id = exam.id()
                                 expandedExamId = if (expandedExamId != id) id else null
+
+                                if (expandedExamId != null) { // Only when expanding
+                                    coroutineScope.launch {
+                                        // TODO: make it concurrent to the animation
+                                        delay(300L.milliseconds)
+
+                                        val id = exams.indexOf(exam)
+
+                                        log = id
+                                        listState.animateScrollToItem(id)
+                                    }
+                                }
                             }
                         )
                     }
                 }
-
             }
         }
     }
@@ -638,6 +682,12 @@ fun ExamSessionCardContent(
 
         AnimatedVisibility(
             visible = expanded,
+//            enter = fadeIn(
+//                animationSpec = tween(
+//                    durationMillis = 250,
+//                    delayMillis = animationDelay
+//                ),
+//            ) + expandVertically()
         ) {
             ExamSessionCardDrawer(
                 exam = exam,
