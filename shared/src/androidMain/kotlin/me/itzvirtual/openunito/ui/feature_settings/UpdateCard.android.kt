@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.feature_devtools
+package me.itzvirtual.openunito.ui.feature_settings
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -52,6 +52,18 @@ enum class buttonType {
     INSTALL,
 }
 
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsScreenPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            UpdateCard(
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
+    }
+}
+
 @Composable
 actual fun UpdateCard(
     modifier: Modifier,
@@ -78,14 +90,14 @@ actual fun UpdateCard(
                 onClick = onClick
             )
             .then(modifier),
-        ) {
+    ) {
         val titleSize = 20.sp
         Text(
             modifier = Modifier
                 .dropShadow(
                     RoundedCornerShape(16.dp),
                     shadow = ShadowDefaults.Text
-            ),
+                ),
             text = "Updater",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
@@ -127,7 +139,7 @@ actual fun UpdateCard(
                 modifier = Modifier
                     .weight(checkButtonWeight)
                     .dropShadow(
-                        RoundedCornerShape(16.dp),
+                        androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                         shadow = ShadowDefaults.Surface
                     ),
                 onClick = {
@@ -157,7 +169,7 @@ actual fun UpdateCard(
                 enabled = !isChecking && !isDownloading,
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                shape = RoundedCornerShape(25f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(25f),
 
                 ) {
                 Row(
@@ -177,7 +189,7 @@ actual fun UpdateCard(
                     )
 
                     Text(
-                        modifier = Modifier,
+                        modifier = Modifier.Companion,
                         text = if (isChecking) "Checking..." else "Check",
                         fontWeight = FontWeight.Bold,
                     )
@@ -202,7 +214,7 @@ actual fun UpdateCard(
                 modifier = Modifier
                     .weight(1 - checkButtonWeight)
                     .dropShadow(
-                        RoundedCornerShape(16.dp),
+                        androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                         shadow = ShadowDefaults.Surface
                     ),
                 onClick = {
@@ -243,7 +255,7 @@ actual fun UpdateCard(
                         else -> MaterialTheme.colorScheme.primary
                     }
                 ),
-                shape = RoundedCornerShape(25f),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(25f),
             ) {
                 Row(
                     modifier = Modifier
@@ -285,18 +297,6 @@ actual fun UpdateCard(
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun SettingsScreenPreview() {
-    OpenUnitoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            UpdateCard(
-                modifier = Modifier.padding(innerPadding)
-            )
         }
     }
 }

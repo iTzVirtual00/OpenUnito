@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.feature_devtools
+package me.itzvirtual.openunito.ui.feature_settings
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Composable
