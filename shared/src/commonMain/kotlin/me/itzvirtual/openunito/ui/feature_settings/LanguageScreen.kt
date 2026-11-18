@@ -128,7 +128,7 @@ fun LanguageScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 16.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Spacer(
@@ -178,7 +178,7 @@ fun LanguageScreenContent(
                         StdDropdownEntry(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal= 16.dp, vertical= 8.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             text = "Language", // TODO: Add translation and change names
                             fontWeight = FontWeight.Bold,
                             elementList = languageList,
@@ -195,7 +195,7 @@ fun LanguageScreenContent(
                         StdDropdownEntry(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal= 16.dp, vertical= 8.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             text = "Date Format", // TODO: Add translation and change names
                             fontWeight = FontWeight.Bold,
                             elementList = regionsList,
@@ -217,55 +217,49 @@ fun LanguageScreenContent(
 fun LanguageUserPreview(
     modifier: Modifier = Modifier
 ) {
-    StdSurface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.background,
-        border = BorderStroke(2.dp, LocalCustomColorsPalette.current.settingsColor)
+
+    Column(
+        modifier = modifier
     ) {
-        Column(
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = "Preview", // TODO: translation
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        StdSurface(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp,),
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+            border = BorderStroke(2.dp, LocalCustomColorsPalette.current.settingsColor),
         ) {
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = "Preview", // TODO: translation
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-            )
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
-            StdSurface(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.good_morning),
-                        fontWeight = FontWeight.Bold
-                    )
+                Text(
+                    text = stringResource(Res.string.good_morning),
+                    fontWeight = FontWeight.Bold
+                )
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
-                    val today = getToday()
-                    withDateFormatter {
-                        Text(today.formatFriendlyDayMonth())
-                        Text(today.formatFriendlyDayOfWeek())
-                        Text(today.formatFriendlyFullDate())
-                        Text(Clock.System.now().formatDate())
-                        Text(Clock.System.now().formatFriendlyTime())
-                        Text(Clock.System.now().formatFullMonth())
-                        Text(Clock.System.now().formatMediumDate())
-                    }
+                val today = getToday()
+                withDateFormatter {
+                    Text(today.formatFriendlyDayMonth())
+                    Text(today.formatFriendlyDayOfWeek())
+                    Text(today.formatFriendlyFullDate())
+                    Text(Clock.System.now().formatDate())
+                    Text(Clock.System.now().formatFriendlyTime())
+                    Text(Clock.System.now().formatFullMonth())
+                    Text(Clock.System.now().formatMediumDate())
                 }
             }
         }
