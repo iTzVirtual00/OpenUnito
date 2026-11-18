@@ -3,12 +3,8 @@ package me.itzvirtual.openunito.ui.feature_examsessions
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,7 +58,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.localization.rememberDateFormatter
@@ -80,8 +74,8 @@ import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.MeasureHeightLayout
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.components.StdButtonEmpty
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.shared.CalendarEventModel
@@ -117,6 +111,7 @@ fun ExamSessionScreen(
         subjectsList = uiState.subjects,
         isLoading = uiState.isLoading,
         stateError = uiState.error,
+        isCacheStale = uiState.isStale,
         debug = state.debug,
         onBack = onBack,
         onExamBooked = {
@@ -135,6 +130,7 @@ fun ExamSessionScreenContent(
     subjectsList: List<String>,
     isLoading: Boolean = false,
     stateError: String? = null,
+    isCacheStale: Boolean = false,
     debug: Boolean? = null,
     onBack: () -> Unit = {},
     onExamBooked: (ExamDate) -> Unit = {},
@@ -160,7 +156,6 @@ fun ExamSessionScreenContent(
         modifier = modifier,
         topBar = {
             GradientBackground(
-                // TODO: do this for every screen
                 colors = listOf(
                     MaterialTheme.colorScheme.onPrimary,
                     LocalCustomColorsPalette.current.onCareerColor
@@ -219,28 +214,19 @@ fun ExamSessionScreenContent(
         }
 
     ) { paddingValues ->
-        Column(
+        ExamBookingList(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(0.dp),
-            ) {
-                ExamBookingList(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    exams = filteredDates,
-                    isLoading = isLoading,
-                    stateError = stateError,
-                    debug = debug,
-                    onExamBooked = onExamBooked,
-                    onExamUnbooked = onExamUnbooked,
-                )
-            }
-        }
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            exams = filteredDates,
+            isLoading = isLoading,
+            stateError = stateError,
+            debug = debug,
+            isCacheStale = isCacheStale,
+            onExamBooked = onExamBooked,
+            onExamUnbooked = onExamUnbooked,
+        )
     }
 }
 
@@ -441,6 +427,7 @@ fun ExamBookingList(
     exams: List<ExamDate>,
     isLoading: Boolean,
     stateError: String?,
+    isCacheStale: Boolean,
     debug: Boolean?,
     onExamBooked: (ExamDate) -> Unit = {},
     onExamUnbooked: (ExamDate) -> Unit = {},
@@ -449,14 +436,8 @@ fun ExamBookingList(
     val formatter = rememberDateFormatter()
     val examsByMonth =
         remember(exams) { with(formatter) { exams.groupBy { exam -> exam.date.formatFullMonth() } } }
-
-    val monthsList = examsByMonth.keys
-
-    var log by remember { mutableStateOf(0) }
-    // exams = list
-    // examsByMonth = map (month, list)
-
-    //id = pos di exam in exams + num di mesi passti compreso questo
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     ListWrapper(
         modifier = modifier,
@@ -465,32 +446,23 @@ fun ExamBookingList(
         isLoading = isLoading,
         stateError = stateError
     ) {
-
-        val listState = rememberLazyListState()
-// Remember a CoroutineScope to be able to launch
-        val coroutineScope = rememberCoroutineScope()
-
-
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
             state = listState,
         ) {
             item {
+                StaleCacheBanner(
+                    modifier = Modifier.padding(top = 8.dp),
+                    visible = isCacheStale,
+                )
+
                 Spacer(
                     modifier = Modifier.height(8.dp)
-                )
-                Text(
-                    text = log.toString()
                 )
             }
 
             examsByMonth.forEach { (month, examList) ->
-//                item {
-//
-//                }
-
                 examList.forEachIndexed { index, exam ->
                     item(exam.id()) {
                         if (index == 0) {
@@ -518,8 +490,6 @@ fun ExamBookingList(
                                         delay(300L.milliseconds)
 
                                         val id = exams.indexOf(exam)
-
-                                        log = id
                                         listState.animateScrollToItem(id)
                                     }
                                 }

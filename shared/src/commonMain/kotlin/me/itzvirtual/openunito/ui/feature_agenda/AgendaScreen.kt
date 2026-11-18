@@ -108,6 +108,7 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.shared.LoadingIconItem
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -190,6 +191,7 @@ fun AgendaScreen(
             onPreviousWeek = { viewModel.onPreviousWeek() },
             calendars = screenState.calendars,
             selectedCalendar = screenState.selectedCalendar,
+            isCacheStale = false, // TODO: this screenState does not have isStale parameter
             onCalendarSelected = { viewModel.selectCalendar(it) },
             onCalendarAdd = { name, linkId, calendarId, onResult ->
                 viewModel.upsertCalendar(
@@ -246,6 +248,7 @@ fun AgendaScreenContent(
     events: List<AgendaEntry>,
     modifier: Modifier = Modifier,
     currentWeekStart: LocalDate = getDayOfWeek(DayOfWeek.MONDAY),
+    isCacheStale: Boolean = false,
     onNextWeek: () -> Unit = {},
     goToToday: () -> Unit = {},
     onPreviousWeek: () -> Unit = {},
@@ -312,12 +315,20 @@ fun AgendaScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(top = 16.dp)
             ) {
-                // Week days header
-                WeekDaysHeader(currentWeekStart)
+                StaleCacheBanner(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .padding(horizontal = 16.dp),
+                    visible = true//isCacheStale,
+                )
 
-                // Calendar grid with events
+                WeekDaysHeader(
+                    modifier = Modifier
+                        .padding(top = 8.dp),
+                    weekStartDate = currentWeekStart,
+                )
+
                 AgendaGrid(
                     events = filteredEvents,
                     startHour = startHour,
@@ -654,9 +665,12 @@ private fun UpsertCalendarDialog(
 }
 
 @Composable
-private fun WeekDaysHeader(weekStartDate: LocalDate) {
+private fun WeekDaysHeader(
+    modifier: Modifier = Modifier,
+    weekStartDate: LocalDate
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 48.dp) // Space for time column
     ) {

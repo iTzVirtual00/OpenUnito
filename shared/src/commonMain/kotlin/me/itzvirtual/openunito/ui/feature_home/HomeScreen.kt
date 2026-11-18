@@ -2,6 +2,8 @@ package me.itzvirtual.openunito.ui.feature_home
 
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
@@ -25,7 +27,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RollerSkating
+import androidx.compose.material.icons.filled.SatelliteAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
@@ -69,6 +73,7 @@ import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
@@ -112,6 +117,9 @@ fun HomeScreenContent(
 ) {
     // State for selected event detail view
     var selectedEvent by remember { mutableStateOf<AgendaEntry?>(null) }
+    val isCacheStale = todayClassesState.isStale // Should this be a remember i don't think so
+            || tomorrowClassesState.isStale
+            || studentState.isStale
 
     Box(modifier = modifier) {
         Scaffold(
@@ -148,9 +156,15 @@ fun HomeScreenContent(
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
                 ) {
+                    StaleCacheBanner(
+                        modifier = Modifier.padding(top = 8.dp),
+                        visible = isCacheStale,
+                    )
+
                     Spacer(
                         modifier = Modifier.height(16.dp)
                     )
+
                     ClassesSection(
                         title = stringResource(Res.string.todays_classes_title),
                         classes = todayClassesState.classes,
@@ -220,7 +234,7 @@ fun UserProfileIcon(
             3: Luca Neri // Genetics was cool but not present in this lib
     */
     val icon = when (special) {
-        0 -> Icons.Outlined.SatelliteAlt
+        0 -> Icons.Default.Person
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
         3 -> Icons.Default.Translate // TODO: add library
@@ -235,8 +249,8 @@ fun UserProfileIcon(
                 shadow = ShadowDefaults.Surface,
             ),
         shape = CircleShape,
-        color = LocalCustomColorsPalette.current.onHomeColor.copy(alpha = 0.8f),
-        border = BorderStroke(1.dp, Color.Transparent),
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp), // LocalCustomColorsPalette.current.onHomeColor.copy(alpha = 0.8f),
+        border = BorderStroke(1.dp, LocalCustomColorsPalette.current.homeColor),
         contentColor = Color.White
     ) {
         Box(contentAlignment = Alignment.Center) {

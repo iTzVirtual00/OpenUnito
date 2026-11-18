@@ -65,4 +65,5 @@
     <string name="all">Tutte</string>
     <string name="debug_entry">Debug</string>
     <string name="show_dev_button">Mostra Opzioni Sviluppatore</string>
+    <string name="data_is_old">I dati sono obsoleti!</string>
 </resources>

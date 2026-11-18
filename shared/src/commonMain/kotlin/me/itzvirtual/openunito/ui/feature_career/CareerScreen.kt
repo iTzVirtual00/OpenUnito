@@ -101,6 +101,7 @@ import me.itzvirtual.openunito.resources.yearly_progress_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
@@ -152,15 +153,17 @@ fun CareerScreen(
 }
 @Composable
 fun CareerScreenContent(
+    modifier: Modifier = Modifier,
     dashboardState: CareerDashboardUiState,
     examResultsState: ExamResultsUiState,
-    modifier: Modifier = Modifier,
     debug: Boolean? = null,
     onChangeGradeStatus: (String, GradeStatus) -> Unit = {gradeId, newStatus -> },
     onOpenTranscript: () -> Unit = {},
     onOpenInvoke: () -> Unit = {},
     onOpenStatistics: () -> Unit = {},
 ) {
+    val isCacheStale = dashboardState.isStale || examResultsState.isStale
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -197,6 +200,11 @@ fun CareerScreenContent(
                     .weight(1f)
                     .verticalScroll(rememberScrollState()),
             ) {
+                StaleCacheBanner(
+                    modifier = Modifier.padding(top = 8.dp),
+                    visible = isCacheStale,
+                )
+
                 Spacer(Modifier.height(16.dp))
 
                 Text(

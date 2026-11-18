@@ -66,4 +66,5 @@
     <string name="all">All</string>
     <string name="debug_entry">Debug</string>
     <string name="show_dev_button">Show Developer Section</string>
+    <string name="data_is_old">Data is old!</string>
 </resources>

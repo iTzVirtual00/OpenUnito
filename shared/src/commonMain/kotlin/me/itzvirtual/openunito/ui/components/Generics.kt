@@ -1,6 +1,11 @@
 package me.itzvirtual.openunito.ui.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,6 +26,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CardTravel
 import androidx.compose.material.icons.filled.LogoDev
 import androidx.compose.material.icons.filled.Man
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +55,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,15 +64,17 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
-import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
+import me.itzvirtual.openunito.resources.data_is_old
 import me.itzvirtual.openunito.resources.debug_entry
 import me.itzvirtual.openunito.resources.empty_list
 import me.itzvirtual.openunito.resources.error
+import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.loading
 import me.itzvirtual.openunito.resources.show_dev_button
 import me.itzvirtual.openunito.ui.shared.ErrorItem
+import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -93,15 +103,52 @@ fun Shadow.copy(
     offset: DpOffset = this.offset,
     alpha: Float = this.alpha,
     blendMode: BlendMode = this.blendMode
-    ): Shadow =
-        Shadow(
-            radius = radius,
-            color = color,
-            spread = spread,
-            offset = offset,
-            alpha = alpha,
-            blendMode = blendMode,
-        )
+    ): Shadow = Shadow(
+        radius = radius,
+        color = color,
+        spread = spread,
+        offset = offset,
+        alpha = alpha,
+        blendMode = blendMode,
+    )
+
+@Composable
+fun StaleCacheBanner( // TODO: UI may be better
+    modifier: Modifier = Modifier,
+    visible: Boolean,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium
+) {
+    val iconSize = textStyle.lineHeight.value.dp
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically(),
+    ) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(iconSize),
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = null,
+                tint = Color(0.976f, 0.733f, 0.275f, 1.0f),
+            )
+
+            Spacer(
+                modifier = Modifier.width(iconSize.times(0.2f)),
+            )
+
+            Text(
+                text = stringResource(Res.string.data_is_old), // TODO: add "3 days old" if we really need it,
+                style = textStyle,
+            )
+        }
+    }
+
+}
 
 @Composable
 fun StdSurface(
@@ -546,48 +593,55 @@ fun GradientBackground(
 fun GenericsPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            StdSurface {
-                Column {
-                    StdSwitch(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, 2.dp)
-                            .fillMaxWidth(),
-                        value = false,
-                        icon = Icons.Default.BugReport,
-                        iconColor = Color(0.976f, 0.733f, 0.275f, 1.0f),
-                        text = stringResource(Res.string.debug_entry),
-                        fontWeight = FontWeight.Bold
-                    )
+            Column {
+                StaleCacheBanner(
+                    modifier = Modifier.padding(16.dp),
+                    visible = true,
+                )
 
-                    HorizontalDivider()
-
-                    StdSwitch(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, 2.dp)
-                            .fillMaxWidth(),
-                        value = true,
-                        icon = Icons.Default.LogoDev,
-                        iconColor = MaterialTheme.colorScheme.error,
-                        text = stringResource(Res.string.show_dev_button),
-                        textColor = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold,
-                        switchColors = SwitchDefaults.colors().copy(
-                            checkedTrackColor = MaterialTheme.colorScheme.error,
-                            checkedThumbColor = MaterialTheme.colorScheme.onError,
+                StdSurface {
+                    Column {
+                        StdSwitch(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, 2.dp)
+                                .fillMaxWidth(),
+                            value = false,
+                            icon = Icons.Default.BugReport,
+                            iconColor = Color(0.976f, 0.733f, 0.275f, 1.0f),
+                            text = stringResource(Res.string.debug_entry),
+                            fontWeight = FontWeight.Bold
                         )
-                    )
 
-                    HorizontalDivider()
+                        HorizontalDivider()
 
-                    StdIconDropdownEntry(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, 16.dp)
-                            .fillMaxWidth(),
-                        text = "Asd",
-                        icon = Icons.Default.CardTravel,
-                        elementList = emptyList(),
-                        onChangeSelected = {},
-                    )
+                        StdSwitch(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, 2.dp)
+                                .fillMaxWidth(),
+                            value = true,
+                            icon = Icons.Default.LogoDev,
+                            iconColor = MaterialTheme.colorScheme.error,
+                            text = stringResource(Res.string.show_dev_button),
+                            textColor = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            switchColors = SwitchDefaults.colors().copy(
+                                checkedTrackColor = MaterialTheme.colorScheme.error,
+                                checkedThumbColor = MaterialTheme.colorScheme.onError,
+                            )
+                        )
+
+                        HorizontalDivider()
+
+                        StdIconDropdownEntry(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, 16.dp)
+                                .fillMaxWidth(),
+                            text = "Asd",
+                            icon = Icons.Default.CardTravel,
+                            elementList = emptyList(),
+                            onChangeSelected = {},
+                        )
+                    }
                 }
             }
         }

@@ -66,6 +66,7 @@ import me.itzvirtual.openunito.resources.grades_section_title
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
@@ -81,11 +82,13 @@ fun TranscriptScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val uiState = state.gradesState
 
     TranscriptScreenContent(
-        rawGrades = state.gradesState.grades,
-        isLoading = state.gradesState.isLoading,
-        stateError = state.gradesState.error,
+        rawGrades = uiState.grades,
+        isLoading = uiState.isLoading,
+        stateError = uiState.error,
+        isCacheStale = uiState.isStale,
         debug = state.debug,
         changeGradeStatus = { gradeId, newStatus ->
             viewModel.changeGradeStatus(gradeId, newStatus)
@@ -101,6 +104,7 @@ fun TranscriptScreenContent(
     rawGrades: List<ExamGrade>,
     isLoading: Boolean,
     stateError: String?,
+    isCacheStale: Boolean,
     debug: Boolean?,
     changeGradeStatus: (String, GradeStatus) -> Job,
     onBack: () -> Unit = {},
@@ -154,6 +158,11 @@ fun TranscriptScreenContent(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState()),
             ) {
+                StaleCacheBanner(
+                    modifier = Modifier.padding(top = 8.dp),
+                    visible = isCacheStale,
+                )
+
                 Spacer(
                     modifier = Modifier.height(16.dp)
                 )
@@ -505,6 +514,7 @@ fun TranscriptScreenPreview() {
                         weight = "9"
                     ),
                 ),
+                isCacheStale = false,
                 changeGradeStatus = {s,f -> Job()},
             )
         }
