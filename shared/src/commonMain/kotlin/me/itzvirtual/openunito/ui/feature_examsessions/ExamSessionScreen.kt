@@ -698,12 +698,6 @@ fun ExamSessionCardContent(
 
         AnimatedVisibility(
             visible = expanded,
-//            enter = fadeIn(
-//                animationSpec = tween(
-//                    durationMillis = 250,
-//                    delayMillis = animationDelay
-//                ),
-//            ) + expandVertically()
         ) {
             ExamSessionCardDrawer(
                 exam = exam,

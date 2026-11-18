@@ -129,6 +129,7 @@ fun ListWrapper(
     debug: Boolean?,
     isLoading: Boolean,
     stateError: String?,
+    errorMessage: String = stringResource(Res.string.error),
     emptyMessage: String = stringResource(Res.string.empty_list),
     content: @Composable () -> Unit,
 ) {
@@ -141,7 +142,7 @@ fun ListWrapper(
                 ErrorItem(stateError)
             } else {
                 val msg = when {
-                    stateError != null -> stringResource(Res.string.error)
+                    stateError != null -> errorMessage
                     isLoading -> {
                         stringResource(Res.string.loading)
                     }

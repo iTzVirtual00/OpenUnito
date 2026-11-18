@@ -62,6 +62,7 @@ import me.itzvirtual.openunito.domain.student.StudentData
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.ND
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.error
 import me.itzvirtual.openunito.resources.error_no_calendar_configured
 import me.itzvirtual.openunito.resources.open_schedule
 import me.itzvirtual.openunito.resources.todays_classes_title
@@ -371,9 +372,11 @@ fun ClassesSection(
                     isEmpty = classes.isEmpty(),
                     debug = debug,
                     isLoading = isLoading,
-                    stateError =
-                        if (stateError == "NO_CALENDAR") stringResource(Res.string.error_no_calendar_configured)
-                        else stateError
+                    stateError = stateError,
+                    errorMessage = when (stateError) {
+                        "NO_CALENDAR" -> stringResource(Res.string.error_no_calendar_configured)
+                        else -> stringResource(Res.string.error)
+                    },
                 ) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
