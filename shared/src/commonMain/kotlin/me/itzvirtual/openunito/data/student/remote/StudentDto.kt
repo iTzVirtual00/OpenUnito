@@ -1,5 +1,6 @@
 package me.itzvirtual.openunito.data.student.remote
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import me.itzvirtual.openunito.core.network.MicrosoftDateSerializer
@@ -43,3 +44,8 @@ data class AuthSessionDto(
 data class AppInitDto(
     @SerialName("auth_session") val session: AuthSessionDto?,
 )
+
+sealed class AppInitError(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    class HttpError(val status: HttpStatusCode) : AppInitError("/app/init returned $status")
+    class Generic(message: String = "Generic error", cause: Throwable? = null) : AppInitError(message, cause)
+}

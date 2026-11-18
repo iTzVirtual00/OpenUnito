@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.feature_devtools
+package me.itzvirtual.openunito.ui.feature_settings
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,9 @@ import android.util.Base64
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.ByteArrayInputStream
@@ -17,11 +20,11 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class VersionInfo(
-    @kotlinx.serialization.SerialName("versionCode")
+    @SerialName("versionCode")
     val versionCode: Int,
-    @kotlinx.serialization.SerialName("versionName")
+    @SerialName("versionName")
     val versionName: String
 )
 
@@ -143,7 +146,7 @@ REDACTED_CA_CERT
                 }
 
                 val body = response.body
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val json = Json { ignoreUnknownKeys = true }
                 val versionInfo = json.decodeFromString<VersionInfo>(body.string())
 
                 if (versionInfo.versionCode > currentVersionCode) {

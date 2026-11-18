@@ -25,12 +25,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.core.cache.CacheConfig
 import me.itzvirtual.openunito.core.network.CareerContext
+import me.itzvirtual.openunito.data.DataUtils
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.local.StudentDao
 import me.itzvirtual.openunito.data.student.local.StudentEntity
 import me.itzvirtual.openunito.data.student.mapper.toDomain
 import me.itzvirtual.openunito.data.student.mapper.toEntity
 import me.itzvirtual.openunito.data.student.remote.AppInitDto
+import me.itzvirtual.openunito.data.student.remote.AppInitError
 import me.itzvirtual.openunito.domain.getNowMillis
 import me.itzvirtual.openunito.domain.student.StudentData
 import org.koin.core.annotation.Named
@@ -50,6 +52,8 @@ class StudentRepository(
     private val dao: StudentDao,
     private val json: Json,
     private val appConfigRepo: AppConfigRepository,
+
+    private val dataUtils: DataUtils,
 
     @Named("ApplicationScope") private val externalScope: CoroutineScope,
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
@@ -141,14 +145,22 @@ class StudentRepository(
     suspend fun refresh(): Result<StudentEntity> = runCatching {
         withContext(ioDispatcher) {
             // TODO: Do something with an unsuccessful response
-            val appInit = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17")
-                .body<AppInitDto>()
-            val session = appInit.session ?: throw Exception("No auth session")
+            val resp = client.get("app/init?os=android&os_version=16&app_version=25.7.0.0.17")
+            if(resp.status.value != 200) throw AppInitError.HttpError(resp.status)
+
+            val appInit = resp.body<AppInitDto>()
+            val session = appInit.session ?: throw AppInitError.Generic("Session is null")
 
             val entity = session.toEntity(json)
             dao.upsert(entity)
             entity
         }
+    }.onFailure { err ->
+        Logger.e(tag = "StudentRepository") {
+            "Init failed with `${err.message}`; deauthenticating and purging caches"
+        }
+        appConfigRepo.clearAuth()
+        dataUtils.purgeAllCaches()
     }
 
     suspend fun clearCache() {

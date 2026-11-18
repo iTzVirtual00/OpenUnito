@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import me.itzvirtual.openunito.data.DataUtils
 import me.itzvirtual.openunito.data.agenda.local.AgendaDao
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.dashboard.local.DashboardDao
@@ -23,12 +24,8 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class SettingsViewModel (
     private val appConfigRepo: AppConfigRepository,
-    private val agendaDao: AgendaDao,
-    private val dashboardDao: DashboardDao,
-    private val studentDao: StudentDao,
-    private val examResultDao: ExamResultDao,
-    private val examDateDao: ExamDateDao,
-    private val examGradeDao: ExamGradeDao,
+
+    private val dataUtils: DataUtils,
 ): ViewModel() {
     val screenState: StateFlow<SettingsScreenState> = appConfigRepo.showDevState
         .map{ showDev, ->
@@ -67,12 +64,7 @@ class SettingsViewModel (
 
     fun purgeAllCaches(onComplete: () -> Unit = {}) {
         viewModelScope.launch {
-            agendaDao.clearAll()
-            dashboardDao.clearAll()
-            studentDao.clearAll()
-            examResultDao.clearAll()
-            examDateDao.clearAll()
-            examGradeDao.clearAll()
+            dataUtils.purgeAllCaches()
             onComplete()
         }
     }

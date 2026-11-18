@@ -41,7 +41,7 @@ import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextIconEntry
-import me.itzvirtual.openunito.ui.feature_devtools.UpdateCard
+import me.itzvirtual.openunito.ui.feature_settings.UpdateCard
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -236,7 +236,7 @@ fun SettingsEntries(
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun SettingsScreenPreview() {
+fun UpdateCardPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             SettingsScreenContent(
