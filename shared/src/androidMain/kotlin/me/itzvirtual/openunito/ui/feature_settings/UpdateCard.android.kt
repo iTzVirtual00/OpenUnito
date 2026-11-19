@@ -52,17 +52,6 @@ enum class buttonType {
     INSTALL,
 }
 
-@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun SettingsScreenPreview() {
-    OpenUnitoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            UpdateCard(
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-}
 
 @Composable
 actual fun UpdateCard(
@@ -297,6 +286,19 @@ actual fun UpdateCard(
                     )
                 }
             }
+        }
+    }
+}
+
+
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun UpdateCardPreview() {
+    OpenUnitoTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            UpdateCard(
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }
