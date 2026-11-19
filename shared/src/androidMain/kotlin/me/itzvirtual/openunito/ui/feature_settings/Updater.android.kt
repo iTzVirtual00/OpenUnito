@@ -2,30 +2,38 @@ package me.itzvirtual.openunito.ui.feature_settings
 
 import android.content.Context
 import android.content.Intent
-import android.util.Base64
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.ByteArrayInputStream
 import java.io.File
-import java.security.KeyStore
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
+
 
 @Serializable
+data class GitHubRelease(
+    @SerialName("tag_name")
+    val tagName: String,
+    @SerialName("assets")
+    val assets: List<GitHubAsset> = emptyList()
+)
+
+@Serializable
+data class GitHubAsset(
+    @SerialName("name")
+    val name: String,
+    @SerialName("browser_download_url")
+    val browserDownloadUrl: String
+)
+
 data class VersionInfo(
-    @SerialName("versionCode")
     val versionCode: Int,
-    @SerialName("versionName")
-    val versionName: String
+    val versionName: String,
+    val downloadUrl: String
 )
 
 sealed class UpdateCheckResult {
@@ -36,135 +44,84 @@ sealed class UpdateCheckResult {
 
 class HTTPUpdater(private val context: Context) {
     companion object {
-        private const val WEBHOOK_BASE_URL =
-            "REDACTED_WEBHOOK_URL"
-        private const val USERNAME = "REDACTED_USERNAME"
-        private const val PASSWORD = "REDACTED_PASSWORD"
-
-        private const val CUSTOM_CA_CERT = """
-REDACTED_CA_CERT
-"""
+        private const val GITHUB_LATEST_RELEASE_URL =
+            "https://api.github.com/repos/iTzVirtual00/OpenUnito/releases/latest"
     }
 
-    private val client: OkHttpClient by lazy {
-        createClientWithCustomCA()
-    }
+    private val client = OkHttpClient()
+    private val json = Json { ignoreUnknownKeys = true }
+    private var lastFetchedVersion: VersionInfo? = null
 
-    // system cas OR custom ca
-    private fun createClientWithCustomCA(): OkHttpClient {
-        return try {
-            // Load the custom CA certificate
-            val certificateFactory = CertificateFactory.getInstance("X.509")
-            val caInputStream = ByteArrayInputStream(CUSTOM_CA_CERT.trimIndent().toByteArray())
-            val customCa = certificateFactory.generateCertificate(caInputStream) as X509Certificate
-            caInputStream.close()
+    // e.g. v1.0.0+50
+    private fun parseTagName(tagName: String): Pair<String, Int>? {
+        val parts = tagName.split("+")
+        if (parts.size != 2) return null
 
-            val defaultTrustManagerFactory =
-                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-            defaultTrustManagerFactory.init(null as KeyStore?) // null = use system default
-            val defaultTrustManager = defaultTrustManagerFactory.trustManagers
-                .filterIsInstance<X509TrustManager>()
-                .first()
-
-            // Create a KeyStore containing the custom CA
-            val customKeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-            customKeyStore.load(null, null)
-            customKeyStore.setCertificateEntry("custom-ca", customCa)
-
-            // Create a TrustManager for the custom CA
-            val customTrustManagerFactory =
-                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-            customTrustManagerFactory.init(customKeyStore)
-            val customTrustManager = customTrustManagerFactory.trustManagers
-                .filterIsInstance<X509TrustManager>()
-                .first()
-
-            // Create a composite TrustManager that trusts both system and custom CA
-            val compositeTrustManager = object : X509TrustManager {
-                override fun checkClientTrusted(
-                    chain: Array<out X509Certificate>?,
-                    authType: String?
-                ) {
-                    try {
-                        defaultTrustManager.checkClientTrusted(chain, authType)
-                    } catch (e: Exception) {
-                        customTrustManager.checkClientTrusted(chain, authType)
-                    }
-                }
-
-                override fun checkServerTrusted(
-                    chain: Array<out X509Certificate>?,
-                    authType: String?
-                ) {
-                    try {
-                        defaultTrustManager.checkServerTrusted(chain, authType)
-                    } catch (e: Exception) {
-                        customTrustManager.checkServerTrusted(chain, authType)
-                    }
-                }
-
-                override fun getAcceptedIssuers(): Array<X509Certificate> {
-                    return defaultTrustManager.acceptedIssuers + customTrustManager.acceptedIssuers
-                }
-            }
-
-            // Create an SSLContext with the composite TrustManager
-            val sslContext = SSLContext.getInstance("TLS")
-            sslContext.init(null, arrayOf(compositeTrustManager), null)
-
-            OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.socketFactory, compositeTrustManager)
-                .build()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            OkHttpClient()
-        }
-    }
-
-    private fun createBasicAuthHeader(): String {
-        val credentials = "$USERNAME:$PASSWORD"
-        val encodedCredentials = Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP)
-        return "Basic $encodedCredentials"
-    }
-
-    private fun authenticatedRequest(fileName: String): Request {
-        val url = "$WEBHOOK_BASE_URL?file=$fileName"
-        return Request.Builder()
-            .url(url)
-            .addHeader("Authorization", createBasicAuthHeader())
-            .build()
+        val versionName = parts[0].removePrefix("v")
+        val versionCode = parts[1].toIntOrNull() ?: return null
+        return versionName to versionCode
     }
 
     suspend fun checkForUpdates(currentVersionCode: Int): UpdateCheckResult =
         withContext(Dispatchers.IO) {
             try {
-                val request = authenticatedRequest("version.json")
+                // https://docs.github.com/en/rest/about-the-rest-api/api-versions?apiVersion=2022-11-28#specifying-an-api-version
+                val request = Request.Builder()
+                    .url(GITHUB_LATEST_RELEASE_URL)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("X-GitHub-Api-Version", "2022-11-28")
+                    .build()
                 val response = client.newCall(request).execute()
 
                 if (!response.isSuccessful) {
-                    return@withContext UpdateCheckResult.Error("HTTP ${response.code}: ${response.message}")
+                    return@withContext UpdateCheckResult.Error(
+                        "HTTP ${response.code}: ${response.message}"
+                    )
                 }
 
-                val body = response.body
-                val json = Json { ignoreUnknownKeys = true }
-                val versionInfo = json.decodeFromString<VersionInfo>(body.string())
+                val bodyString = response.body.string()
 
-                if (versionInfo.versionCode > currentVersionCode) {
-                    UpdateCheckResult.UpdateAvailable(versionInfo)
-                } else {
-                    UpdateCheckResult.NoUpdateAvailable
+                val release = json.decodeFromString<GitHubRelease>(bodyString)
+
+                val (versionName, versionCode) = parseTagName(release.tagName)
+                    ?: return@withContext UpdateCheckResult.Error(
+                        "Invalid tag format: ${release.tagName}"
+                    )
+
+                if (versionCode <= currentVersionCode) {
+                    return@withContext UpdateCheckResult.NoUpdateAvailable
                 }
+
+                val expectedAssetName = "OpenUnito-${release.tagName}.apk"
+                val apkAsset = release.assets.firstOrNull { it.name == expectedAssetName }
+                    ?: return@withContext UpdateCheckResult.Error(
+                        "Asset '$expectedAssetName' not found in release"
+                    )
+
+                val versionInfo = VersionInfo(
+                    versionCode = versionCode,
+                    versionName = versionName,
+                    downloadUrl = apkAsset.browserDownloadUrl
+                )
+                lastFetchedVersion = versionInfo
+
+                UpdateCheckResult.UpdateAvailable(versionInfo)
             } catch (e: Exception) {
                 e.printStackTrace()
                 UpdateCheckResult.Error(e.message ?: "Unknown error")
             }
         }
 
-    suspend fun downloadApk(onProgress: (Float) -> Unit): File? = withContext(Dispatchers.IO) {
+    suspend fun downloadApk(
+        onProgress: (Float) -> Unit
+    ): File? = withContext(Dispatchers.IO) {
+        val downloadUrl = lastFetchedVersion?.downloadUrl ?: return@withContext null
         try {
-            val request = authenticatedRequest("app-release.apk")
-            val response = client.newCall(request).execute()
+            val request = Request.Builder()
+                .url(downloadUrl)
+                .build()
 
+            val response = client.newCall(request).execute()
             if (!response.isSuccessful) return@withContext null
 
             val body = response.body
