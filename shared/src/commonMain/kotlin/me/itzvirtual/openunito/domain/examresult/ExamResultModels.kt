@@ -143,7 +143,7 @@ val examResultsDataSample = listOf(
     ),
     ExamResult(
         id = "6",
-        courseName = "Analisi Matematica",
+        courseName = "Sucatica",
         courseCode = "ANMAT",
         date = oneHourAgo,
         weight = 9,

@@ -239,7 +239,7 @@ fun SettingsEntries(
 
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun UpdateCardPreview() {
+fun SettingsPreview() {
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             SettingsScreenContent(

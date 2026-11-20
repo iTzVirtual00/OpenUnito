@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.feature_career
+package me.itzvirtual.openunito.ui.feature_career.career_screen
 
 import me.itzvirtual.openunito.domain.dashboard.DashboardData
 import me.itzvirtual.openunito.domain.examresult.ExamResult

@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.feature_career
+package me.itzvirtual.openunito.ui.feature_career.career_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.core.network.isNetworkError
@@ -23,7 +24,7 @@ inline fun <T1, T2, T3, T4, T5, T6, R> uberCombine(
     flow6: Flow<T6>, // Scalable!!
     crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
 ): Flow<R> {
-    return kotlinx.coroutines.flow.combine(
+    return combine(
         flow,
         flow2,
         flow3,

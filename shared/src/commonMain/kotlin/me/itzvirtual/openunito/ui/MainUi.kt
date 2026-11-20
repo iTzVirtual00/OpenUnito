@@ -49,7 +49,7 @@ import me.itzvirtual.openunito.resources.career_tab_title
 import me.itzvirtual.openunito.resources.home_tab_title
 import me.itzvirtual.openunito.resources.settings_tab_title
 import me.itzvirtual.openunito.ui.feature_agenda.AgendaScreen
-import me.itzvirtual.openunito.ui.feature_career.CareerScreen
+import me.itzvirtual.openunito.ui.feature_career.career_screen.CareerScreen
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptScreen
 import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionScreen
 import me.itzvirtual.openunito.ui.feature_home.HomeScreen
