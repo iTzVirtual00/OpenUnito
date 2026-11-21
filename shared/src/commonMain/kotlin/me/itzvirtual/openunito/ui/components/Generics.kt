@@ -96,6 +96,15 @@ object ShadowDefaults {
     )
 }
 
+object StdSurfaceDefaults {
+    val CornerRadius = 16.dp
+    val Border : BorderStroke
+        @Composable get() = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+
+    val Color : Color
+        @Composable get() = MaterialTheme.colorScheme.surface
+}
+
 fun Shadow.copy(
     radius: Dp = this.radius,
     color: Color = this.color,
@@ -153,9 +162,9 @@ fun StaleCacheBanner( // TODO: UI may be better
 @Composable
 fun StdSurface(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 16.dp,
-    border: BorderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    color: Color = MaterialTheme.colorScheme.surface,
+    cornerRadius: Dp = StdSurfaceDefaults.CornerRadius,
+    border: BorderStroke = StdSurfaceDefaults.Border,
+    color: Color = StdSurfaceDefaults.Color,
     content: @Composable (() -> Unit),
 ) {
     Surface(
