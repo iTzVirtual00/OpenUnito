@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.core.cache.CacheConfig
 import me.itzvirtual.openunito.core.network.CareerContext
+import me.itzvirtual.openunito.core.network.UnitoApi
 import me.itzvirtual.openunito.data.DataUtils
 import me.itzvirtual.openunito.data.config.AppConfigRepository
 import me.itzvirtual.openunito.data.student.local.StudentDao
@@ -35,8 +36,11 @@ import me.itzvirtual.openunito.data.student.remote.AppInitDto
 import me.itzvirtual.openunito.data.student.remote.AppInitError
 import me.itzvirtual.openunito.domain.getNowMillis
 import me.itzvirtual.openunito.domain.student.StudentData
+import org.koin.compose.koinInject
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -57,7 +61,12 @@ class StudentRepository(
 
     @Named("ApplicationScope") private val externalScope: CoroutineScope,
     @Named("IoDispatcher") private val ioDispatcher: CoroutineDispatcher
-) {
+): KoinComponent {
+
+    // deferred injection to prevent circular dep
+    // : KoinComponent is needed to call inject
+    private val api: UnitoApi by inject()
+
     private val activeRefreshJob = AtomicReference<Job?>(null)
 
     // React to appConfigRepo.tokenState (on login)
@@ -161,6 +170,11 @@ class StudentRepository(
         }
         appConfigRepo.clearAuth()
         dataUtils.purgeAllCaches()
+    }
+
+    suspend fun logout() {
+        api.logout()
+        appConfigRepo.clearAuth()
     }
 
     suspend fun clearCache() {

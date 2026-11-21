@@ -30,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,7 +42,6 @@ import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdTextIconEntry
-import me.itzvirtual.openunito.ui.feature_settings.UpdateCard
 import me.itzvirtual.openunito.ui.shared.rememberRestartApp
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -65,7 +63,7 @@ fun SettingsScreen(
 
     // I can do WHAT??
     val restartApp = rememberRestartApp()
-    val doLogout = { viewModel.clearToken { viewModel.purgeAllCaches { restartApp() } } }
+    val doLogout = { viewModel.logout { viewModel.purgeAllCaches { restartApp() } } }
 
 
     SettingsScreenContent(
