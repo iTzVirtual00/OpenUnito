@@ -649,7 +649,7 @@ fun ExamSessionCard(
 
 
 @Composable
-fun ExamSessionCardContent(
+fun ExamSessionCardContent( // TODO: add
     // TODO: add booked tag
     modifier: Modifier = Modifier,
     exam: ExamDate,
@@ -669,6 +669,12 @@ fun ExamSessionCardContent(
         AnimatedVisibility(
             visible = expanded,
         ) {
+            Spacer(Modifier.height(8.dp))
+
+            HorizontalDivider()
+
+            Spacer(Modifier.height(8.dp))
+
             ExamSessionCardDrawer(
                 exam = exam,
                 onExamBooked = onExamBooked,
@@ -723,11 +729,6 @@ fun ExamSessionCardDrawer(
     Column(
         modifier = modifier,
     ) {
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider()
-
-        Spacer(Modifier.height(8.dp))
 
         InfoSection(
             activityCode = exam.activityCode,

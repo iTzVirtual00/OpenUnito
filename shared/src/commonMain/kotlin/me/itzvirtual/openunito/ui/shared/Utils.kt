@@ -143,9 +143,9 @@ fun AnimatedSymmetricalBorder(
     val infiniteTransition = rememberInfiniteTransition(label = "BorderChase")
     val phase by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 1f,
+        targetValue = 0.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = CubicBezierEasing(0.4f, 0.2f, 0.6f, 0.8f)),
+            animation = tween(1000, easing = CubicBezierEasing(0.4f, 0.2f, 0.6f, 0.8f)),
             repeatMode = RepeatMode.Restart
         ),
         label = "Phase"

@@ -11,8 +11,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,12 +59,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
@@ -104,7 +109,21 @@ object ShadowDefaults {
 object StdSurfaceDefaults {
     val CornerRadius = 16.dp
 
-    val InternalPadding = 16.dp
+    val InternalPadding = PaddingValues(16.dp)
+
+    @Composable fun InternalPadding(
+        start: Dp = InternalPadding.calculateStartPadding(LocalLayoutDirection.current),
+        top: Dp = InternalPadding.calculateTopPadding(),
+        end: Dp = InternalPadding.calculateEndPadding(LocalLayoutDirection.current),
+        bottom: Dp = InternalPadding.calculateBottomPadding(),
+    ) {
+        PaddingValues(
+            start = start,
+            top = top,
+            end = end,
+            bottom = bottom,
+        )
+    }
 
     val BorderColor : Color
         @Composable get() = MaterialTheme.colorScheme.outlineVariant
@@ -612,42 +631,28 @@ fun GradientBackground(
 fun StdDrawerCard(
     modifier: Modifier = Modifier,
     expanded: Boolean,
-    onClickEnabled: Boolean = true,
-    onClick: () -> Unit,
     border: BorderStroke? = StdSurfaceDefaults.Border,
-    internalPadding: Dp = StdSurfaceDefaults.InternalPadding,
+    internalPadding: PaddingValues = StdSurfaceDefaults.InternalPadding,
     headerContent: @Composable () -> Unit,
     drawerContent: @Composable () -> Unit,
 ) {
     StdSurface(
-        modifier = modifier
-            .clickable(
-                enabled = onClickEnabled,
-                onClick = onClick
-            ),
+        modifier = modifier,
         border = border,
     ) {
-
-        Box(
+        Column(
             modifier = Modifier
-                .padding(vertical = internalPadding)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.TopEnd,
+                .padding(internalPadding),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(internalPadding),
+            headerContent()
+
+            AnimatedVisibility(
+                visible = expanded,
             ) {
-                headerContent()
-
-                AnimatedVisibility(
-                    visible = expanded,
-                ) {
-                    Spacer(Modifier.height(8.dp))
-
-                    HorizontalDivider()
-
-                    Spacer(Modifier.height(8.dp))
+                Column {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
 
                     drawerContent()
                 }
@@ -661,7 +666,7 @@ fun StdDrawerCard(
 @Composable
 fun GenericsPreview() {
     OpenUnitoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
             Column {
                 StaleCacheBanner(
                     modifier = Modifier.padding(16.dp),

@@ -1,18 +1,5 @@
 package me.itzvirtual.openunito.ui.feature_career.career_screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,20 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -62,17 +39,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
@@ -80,18 +49,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.dashboard.DashboardData
 import me.itzvirtual.openunito.domain.dashboard.dashboardDataSample
-import me.itzvirtual.openunito.domain.examresult.ExamResult
 import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.domain.examresult.examResultsDataSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.credits_section_title
-import me.itzvirtual.openunito.resources.date
-import me.itzvirtual.openunito.resources.editable_until
 import me.itzvirtual.openunito.resources.exam_results_title
 import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.resources.open_credit_statistics
@@ -99,19 +63,13 @@ import me.itzvirtual.openunito.resources.remaining_cfu_title
 import me.itzvirtual.openunito.resources.transcript_title
 import me.itzvirtual.openunito.resources.yearly_progress_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
-import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.components.StdIconTextButton
 import me.itzvirtual.openunito.ui.components.StdSurface
-import me.itzvirtual.openunito.ui.feature_career.transcript_screen.GradeWrapper
-import me.itzvirtual.openunito.ui.feature_career.transcript_screen.LocalTranscriptActions
-import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptActions
 import me.itzvirtual.openunito.ui.feature_career.transcript_screen.TranscriptViewModel
 import me.itzvirtual.openunito.ui.shared.CreditProgressIndicator
 import me.itzvirtual.openunito.ui.shared.ErrorItem
-import me.itzvirtual.openunito.ui.shared.toColor
-import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
@@ -131,13 +89,13 @@ fun CareerScreen(
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     var showStatistics by remember { mutableStateOf(false) }
 
-    val actions = TranscriptActions(
+    val actions = ExamResultActions(
         changeGradeStatus = { gradeId, newStatus ->
             transcriptViewModel.changeGradeStatus(gradeId, newStatus)
         }
     )
 
-    CompositionLocalProvider(LocalTranscriptActions provides actions) {
+    CompositionLocalProvider(LocalExamResultActions provides actions) {
         CareerScreenContent(
             modifier = modifier,
             dashboardState = state.dashboardState,
@@ -217,7 +175,7 @@ fun CareerScreenContent(
                 Spacer(Modifier.height(6.dp))
 
                 ExamResultsSection(
-                    results = examResultsState.results,
+                    gradesList = examResultsState.results,
                     stateError = examResultsState.error,
                     isLoading = examResultsState.isLoading,
                     debug = debug,
@@ -576,7 +534,7 @@ fun CareerScreenPreview() {
     val previewScope = rememberCoroutineScope()
 
     val mockActions = remember {
-        TranscriptActions(
+        ExamResultActions(
             changeGradeStatus = { id, newStatus ->
                 previewScope.launch {
                     delay(600.milliseconds)
@@ -598,7 +556,7 @@ fun CareerScreenPreview() {
 
     OpenUnitoTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            CompositionLocalProvider(LocalTranscriptActions provides mockActions) {
+            CompositionLocalProvider(LocalExamResultActions provides mockActions) {
                 CareerScreenContent(
                     dashboardState = previewState.dashboardState,
                     examResultsState = previewState.examResultsState,

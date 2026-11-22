@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -27,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -62,8 +65,9 @@ fun StdButtonEmpty(
 
 @Composable
 fun StdTextButton(
-    text: String,
     modifier: Modifier = Modifier,
+    text: String,
+    textStyle: TextStyle = LocalTextStyle.current,
     enabled: Boolean = true,
     textModifier: Modifier = Modifier,
     fontSize: TextUnit = TextUnit.Unspecified, //former 20.sp
@@ -83,14 +87,16 @@ fun StdTextButton(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(internalPadding, 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = text,
                 modifier = textModifier,
+                text = text,
+                style = textStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Medium
             )
