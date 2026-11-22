@@ -168,8 +168,10 @@ class StudentRepository(
         Logger.e(tag = "StudentRepository") {
             "Init failed with `${err.message}`; deauthenticating and purging caches"
         }
-        appConfigRepo.clearAuth()
-        dataUtils.purgeAllCaches()
+        if(err is AppInitError){
+            appConfigRepo.clearAuth()
+            dataUtils.purgeAllCaches()
+        }
     }
 
     suspend fun logout() {
