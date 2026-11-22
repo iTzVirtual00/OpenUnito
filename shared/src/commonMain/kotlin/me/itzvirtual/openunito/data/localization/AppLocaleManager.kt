@@ -1,6 +1,5 @@
 package me.itzvirtual.openunito.data.localization
 
-import co.touchlab.kermit.Logger
 import dev.carcara.kotlinx.locale.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,8 +19,12 @@ import org.koin.core.annotation.Single
 data class ResolvedLocale(
     val langCode: String,
     val regionCode: String,
-    val locale: Locale,
-    val apiLanguage: String
+
+    val uiLocale: Locale,
+    val formattingLocale: Locale,
+    val systemLocale: Locale,
+
+    val apiLanguage: String,
 )
 
 @Single
@@ -62,33 +65,24 @@ class AppLocaleManager(
         )
 
     fun resolveTag(langCode: String, regionCode: String): ResolvedLocale {
+        val systemLocale = Locale.current
 
-        val locale = let {
-            val systemLocale = Locale.current
+        val effectiveLang = langCode.ifBlank { systemLocale.language }
+        val uiLocale = Locale.forLanguageTag(effectiveLang)
 
-            // region tag not included here
-            var fullTag = langCode.ifBlank { systemLocale.language }
+        val effectiveFormattingLang = regionCode.ifBlank { systemLocale.language }
+        val formattingLocale = Locale.forLanguageTag(effectiveFormattingLang)
 
-            if (regionCode.isBlank()) {
-                fullTag += "-${systemLocale.region}"
-            } else {
-                if(langCode.contains("-x-")){
-                    fullTag = langCode.substringBefore("-x-") +
-                            "-"+ regionCode +
-                            "-x-" + langCode.substringAfter("-x-")
-                } else {
-                    fullTag += "-$regionCode"
-                }
-            }
-            Locale.forLanguageTag(fullTag)
-        }
-
-        val baseLang = locale.language
+        val baseLang = uiLocale.language
         return ResolvedLocale(
             langCode = langCode,
             regionCode = regionCode,
-            locale = locale,
-            apiLanguage = if (baseLang.lowercase() in safeApiLanguages) baseLang else fallbackApiLanguage
+
+            uiLocale = uiLocale,
+            formattingLocale = formattingLocale,
+            systemLocale = systemLocale,
+
+            apiLanguage = if (baseLang.lowercase() in safeApiLanguages) baseLang else fallbackApiLanguage,
         )
     }
 

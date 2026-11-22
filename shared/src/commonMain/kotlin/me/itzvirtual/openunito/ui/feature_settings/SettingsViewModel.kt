@@ -4,26 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.data.DataUtils
-import me.itzvirtual.openunito.data.agenda.local.AgendaDao
 import me.itzvirtual.openunito.data.config.AppConfigRepository
-import me.itzvirtual.openunito.data.dashboard.local.DashboardDao
-import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
-import me.itzvirtual.openunito.data.examresult.local.ExamResultDao
-import me.itzvirtual.openunito.data.grade.local.ExamGradeDao
 import me.itzvirtual.openunito.data.localization.SupportedLanguage
 import me.itzvirtual.openunito.data.localization.SupportedRegion
-import me.itzvirtual.openunito.data.student.local.StudentDao
+import me.itzvirtual.openunito.data.student.StudentRepository
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class SettingsViewModel (
     private val appConfigRepo: AppConfigRepository,
+    private val studentRepo: StudentRepository,
 
     private val dataUtils: DataUtils,
 ): ViewModel() {
@@ -58,8 +52,8 @@ class SettingsViewModel (
         }
     }
 
-    fun clearToken(onComplete: () -> Unit = {}) {
-        viewModelScope.launch { appConfigRepo.clearAuth(); onComplete() }
+    fun logout(onComplete: () -> Unit = {}) {
+        viewModelScope.launch { studentRepo.logout(); onComplete() }
     }
 
     fun purgeAllCaches(onComplete: () -> Unit = {}) {

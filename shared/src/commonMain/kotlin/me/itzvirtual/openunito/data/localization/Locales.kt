@@ -20,15 +20,15 @@ object SupportedLocales {
             displayName = "System" // Fanculo, lo vedranno tutti in inglese, l'alternativa fa cacare
         ),
         SupportedLanguage(
-            tag = "it",
+            tag = "it-IT",
             displayName = "Italiano"
         ),
         SupportedLanguage(
-            tag = "en",
+            tag = "en-US",
             displayName = "English"
         ),
         SupportedLanguage(
-            tag = "it-x-pugliese",
+            tag = "it-IT-x-pugliese",
             displayName = "PUGLIËSAH",
             isCustom = true,
         )
@@ -40,11 +40,11 @@ object SupportedLocales {
             displayName = "System"
         ),
         SupportedRegion(
-            regionCode = "IT",
+            regionCode = "it-IT",
             displayName = "Italy (IT)",
         ),
         SupportedRegion(
-            regionCode = "US",
+            regionCode = "en-US",
             displayName = "United States (US)",
         ),
     )

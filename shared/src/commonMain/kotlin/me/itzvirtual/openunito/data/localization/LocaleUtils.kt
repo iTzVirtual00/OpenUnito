@@ -2,7 +2,6 @@ package me.itzvirtual.openunito.data.localization
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import co.touchlab.kermit.Logger
 import dev.carcara.kotlinx.locale.Locale
 import dev.carcara.kotlinx.locale.datetime.FormatStyle
 import dev.carcara.kotlinx.locale.datetime.cldr.format
@@ -57,13 +56,13 @@ class DateFormatterScope(val locale: Locale = Locale.current) {
 @Composable
 @ReadOnlyComposable
 inline fun <R> withDateFormatter(
-    locale: Locale = LocalResolvedLocale.current.locale,
+    locale: Locale = LocalResolvedLocale.current.formattingLocale,
     block: DateFormatterScope.() -> R
 ): R = DateFormatterScope(locale).block() // Crazy features from kotlin right here
 
 @Composable
 @ReadOnlyComposable
 fun rememberDateFormatter(
-    locale: Locale = LocalResolvedLocale.current.locale
+    locale: Locale = LocalResolvedLocale.current.formattingLocale
 ): DateFormatterScope = DateFormatterScope(locale)
 

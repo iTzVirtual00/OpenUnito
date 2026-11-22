@@ -9,6 +9,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.first
 import me.itzvirtual.openunito.data.agenda.remote.AgendaEntryDto
@@ -92,5 +93,9 @@ class UnitoApi(
     ): ExamBookingResponse{
         val ctx = context ?: getCareerContext()
         return client.delete("students/${ctx.id}/exams/${exam.adsceId}/sessions/${exam.cdsAppId},${exam.adAppId},${exam.appId}").body()
+    }
+
+    suspend fun logout(): HttpStatusCode {
+        return client.get("auth/logout").status
     }
 }

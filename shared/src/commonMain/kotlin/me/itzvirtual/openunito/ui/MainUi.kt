@@ -79,7 +79,11 @@ val LocalResolvedLocale = staticCompositionLocalOf {
     ResolvedLocale(
         langCode = "",
         regionCode = "",
-        locale = Locale.current,
+
+        uiLocale = Locale.current,
+        formattingLocale = Locale.current,
+        systemLocale = Locale.current,
+
         apiLanguage = ""
     )
 }
