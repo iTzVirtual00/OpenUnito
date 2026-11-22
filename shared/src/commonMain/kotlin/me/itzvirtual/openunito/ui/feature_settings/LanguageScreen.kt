@@ -215,7 +215,8 @@ fun LanguageScreenContent(
 
 @Composable
 fun LanguageUserPreview(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    debug: Boolean = false,
 ) {
 
     Column(
@@ -260,6 +261,13 @@ fun LanguageUserPreview(
                     Text(Clock.System.now().formatFriendlyTime())
                     Text(Clock.System.now().formatFullMonth())
                     Text(Clock.System.now().formatMediumDate())
+                }
+
+                if(debug){
+                    Spacer(Modifier.height(12.dp))
+                    HorizontalDivider(Modifier.height(12.dp))
+                    Text("System: " + LocalResolvedLocale.current.systemLocale.toLanguageTag())
+                    Text("Current: " + LocalResolvedLocale.current.uiLocale.toLanguageTag())
                 }
             }
         }
