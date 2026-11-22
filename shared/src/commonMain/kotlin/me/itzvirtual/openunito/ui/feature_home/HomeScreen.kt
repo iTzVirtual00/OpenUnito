@@ -234,11 +234,11 @@ fun UserProfileIcon(
             3: Luca Neri // Genetics was cool but not present in this lib
     */
     val icon = when (special) {
-        0 -> Icons.Default.Person
+        0 -> Icons.Default.SatelliteAlt
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
         3 -> Icons.Default.Translate // TODO: add library
-        else -> Icons.Outlined.Person
+        else -> Icons.Default.Person
     }
 
     Surface(
