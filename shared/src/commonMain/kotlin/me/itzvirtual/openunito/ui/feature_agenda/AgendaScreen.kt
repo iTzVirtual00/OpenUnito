@@ -320,7 +320,7 @@ fun AgendaScreenContent(
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .padding(horizontal = 16.dp),
-                    visible = true//isCacheStale,
+                    visible = isCacheStale,
                 )
 
                 WeekDaysHeader(
