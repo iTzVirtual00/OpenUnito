@@ -189,7 +189,7 @@ fun ExamSessionScreenContent(
                             containerColor = Color.Transparent,
                         )
                     )
-                    FilterTopBar( // TODO: change colors to lighter ones
+                    FilterTopBar(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),

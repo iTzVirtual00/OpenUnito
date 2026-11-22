@@ -44,7 +44,6 @@ enum class GradeStatus {
 private val oneHourAgo: Instant
     get() = Clock.System.now().minus(1.hours)
 
-@OptIn(ExperimentalTime::class)
 val examResultsDataSample = listOf(
     ExamResult(
         id = "1",

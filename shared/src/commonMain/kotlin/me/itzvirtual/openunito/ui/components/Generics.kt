@@ -84,7 +84,7 @@ object ShadowDefaults {
     val Text = Shadow(
         radius = 12.dp,
         spread = 0.5f.dp,
-        color = Color(0f, 0f, 0f, 0.1f),
+        color = Color(0f, 0f, 0f, 0.2f),
         offset = DpOffset(x = 0.dp, 0.dp)
     )
 
@@ -98,8 +98,12 @@ object ShadowDefaults {
 
 object StdSurfaceDefaults {
     val CornerRadius = 16.dp
+
+    val BorderColor : Color
+        @Composable get() = MaterialTheme.colorScheme.outlineVariant
+
     val Border : BorderStroke
-        @Composable get() = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        @Composable get() = BorderStroke(1.dp, BorderColor)
 
     val Color : Color
         @Composable get() = MaterialTheme.colorScheme.surface
