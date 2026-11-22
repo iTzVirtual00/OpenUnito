@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,6 +65,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
+import me.itzvirtual.openunito.domain.examdate.ExamDate
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.data_is_old
@@ -73,6 +75,9 @@ import me.itzvirtual.openunito.resources.error
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.loading
 import me.itzvirtual.openunito.resources.show_dev_button
+import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionCardContent
+import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionCardDrawer
+import me.itzvirtual.openunito.ui.feature_examsessions.ExamSessionCardHeader
 import me.itzvirtual.openunito.ui.shared.ErrorItem
 import me.itzvirtual.openunito.ui.shared.annotatedStringResource
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
@@ -98,6 +103,8 @@ object ShadowDefaults {
 
 object StdSurfaceDefaults {
     val CornerRadius = 16.dp
+
+    val InternalPadding = 16.dp
 
     val BorderColor : Color
         @Composable get() = MaterialTheme.colorScheme.outlineVariant
@@ -167,7 +174,7 @@ fun StaleCacheBanner( // TODO: UI may be better
 fun StdSurface(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = StdSurfaceDefaults.CornerRadius,
-    border: BorderStroke = StdSurfaceDefaults.Border,
+    border: BorderStroke? = StdSurfaceDefaults.Border,
     color: Color = StdSurfaceDefaults.Color,
     content: @Composable (() -> Unit),
 ) {
@@ -572,6 +579,7 @@ fun GradientBackground(
                 val projMod = (centerVec.dotProduct(directionVec) / sqrt(directionVec.length()))
                 val projVec = directionVec.times(projMod).times(1f)
 
+                // Map gradient beginning and end to the vector
                 val startVec = projVec.copy().times(0.1f)
                 val endVec = projVec.copy().times(1f)
 
@@ -597,6 +605,54 @@ fun GradientBackground(
 
         ) {
         content()
+    }
+}
+
+@Composable
+fun StdDrawerCard(
+    modifier: Modifier = Modifier,
+    expanded: Boolean,
+    onClickEnabled: Boolean = true,
+    onClick: () -> Unit,
+    border: BorderStroke? = StdSurfaceDefaults.Border,
+    internalPadding: Dp = StdSurfaceDefaults.InternalPadding,
+    headerContent: @Composable () -> Unit,
+    drawerContent: @Composable () -> Unit,
+) {
+    StdSurface(
+        modifier = modifier
+            .clickable(
+                enabled = onClickEnabled,
+                onClick = onClick
+            ),
+        border = border,
+    ) {
+
+        Box(
+            modifier = Modifier
+                .padding(vertical = internalPadding)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.TopEnd,
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(internalPadding),
+            ) {
+                headerContent()
+
+                AnimatedVisibility(
+                    visible = expanded,
+                ) {
+                    Spacer(Modifier.height(8.dp))
+
+                    HorizontalDivider()
+
+                    Spacer(Modifier.height(8.dp))
+
+                    drawerContent()
+                }
+            }
+        }
     }
 }
 
