@@ -199,7 +199,6 @@ fun StdSurface(
 ) {
     Surface(
         modifier = modifier,
-//            .fillMaxWidth(), //TODO: remove these
         shape = RoundedCornerShape(cornerRadius),
         color = color,
         border = border

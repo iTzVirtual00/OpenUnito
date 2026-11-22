@@ -239,7 +239,6 @@ fun FilterTopBar(
     onClickBooked: () -> Unit = {},
     onClickUnbooked: () -> Unit = {},
 ) {
-    // TODO: translation
     val fontSize = 16.sp
 
     val selectedColor = MaterialTheme.colorScheme.primary
@@ -649,7 +648,7 @@ fun ExamSessionCard(
 
 
 @Composable
-fun ExamSessionCardContent( // TODO: add
+fun ExamSessionCardContent(
     // TODO: add booked tag
     modifier: Modifier = Modifier,
     exam: ExamDate,

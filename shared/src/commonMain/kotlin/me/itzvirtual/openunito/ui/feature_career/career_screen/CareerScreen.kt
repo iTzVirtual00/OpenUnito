@@ -500,7 +500,7 @@ fun YearlyProgressCard( //TODO: move to components package
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "${if (current >= 0) current else "--"} / ${if (current >= 0) total else "--"} CFU", // TODO: is this any good?
+            text = "${if (current >= 0) current else "--"} / ${if (current >= 0) total else "--"} CFU",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
         )

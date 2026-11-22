@@ -125,7 +125,7 @@ fun HomeScreenContent(
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                GradientBackground( // TODO: do this for every screen
+                GradientBackground(
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
                         LocalCustomColorsPalette.current.onHomeColor
@@ -237,7 +237,7 @@ fun UserProfileIcon(
         0 -> Icons.Default.SatelliteAlt
         1 -> Icons.Default.RollerSkating
         2 -> Icons.Default.BugReport
-        3 -> Icons.Default.Translate // TODO: add library
+        3 -> Icons.Default.Translate // TODO: add cards icon
         else -> Icons.Default.Person
     }
 

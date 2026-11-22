@@ -92,8 +92,6 @@ fun ExamResultsSection(
 ) {
     var expandedExamId by remember { mutableStateOf<String?>(null) }
 
-    val gradesList = examResultsDataSample // TODO: TEMP
-
     ListWrapper(
         modifier = modifier,
         isEmpty = gradesList.isEmpty(),
@@ -118,7 +116,7 @@ fun ExamResultsSection(
                     modifier = Modifier
                         .padding(bottom = 10.dp),
                     internalPadding = PaddingValues(horizontal = 0.dp),
-                    expanded = grade.id == expandedExamId, // TODO: TEMP
+                    expanded = grade.id == expandedExamId,
                     headerContent = {
                         GradeEntryHeader(
                             modifier = Modifier
@@ -144,12 +142,20 @@ fun ExamResultsSection(
                             grade = grade,
                             selectedStatus = selectedStatus,
                             onAccept = {
-                                showDialog = true
-                                selectedStatus = GradeStatus.ACCEPTED
+                                if (grade.status != GradeStatus.ACCEPTED) {
+                                    showDialog = true
+                                    selectedStatus = GradeStatus.ACCEPTED
+                                } else {
+                                    // TODO: add Toast "Already accepted"
+                                }
                             },
                             onReject = {
-                                showDialog = true
-                                selectedStatus = GradeStatus.REJECTED
+                                if (grade.status != GradeStatus.REJECTED) {
+                                    showDialog = true
+                                    selectedStatus = GradeStatus.REJECTED
+                                } else {
+                                    // TODO: add Toast "Already rejected"
+                                }
                             },
                         )
                     }
@@ -453,7 +459,7 @@ fun GradeWrapper(examGraderade: ExamResult) {
     }
 }
 
-// TODO: Decide if we want to put it in again
+// TODO: Implement bar again
 //
 //@Composable
 //fun GradeEntryBar(

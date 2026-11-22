@@ -288,10 +288,10 @@ fun AgendaScreenContent(
             containerColor = Color.Transparent,
             modifier = modifier,
             topBar = {
-                GradientBackground( // TODO: do this for every screen
+                GradientBackground(
                     colors = listOf(
                         MaterialTheme.colorScheme.onPrimary,
-                        LocalCustomColorsPalette.current.onAgendaColor, // TODO: find a fucking cool color
+                        LocalCustomColorsPalette.current.onAgendaColor,
                     ),
                 ) {
                     AgendaHeader(

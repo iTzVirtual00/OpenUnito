@@ -73,7 +73,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.reflect.KClass
 
 // TODO: add recovery points
-// TODO: add a background gradient or smth
+// TODO: think about adding a background gradient
 
 val LocalResolvedLocale = staticCompositionLocalOf {
     ResolvedLocale(
