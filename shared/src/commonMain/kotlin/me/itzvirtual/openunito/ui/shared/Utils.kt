@@ -58,14 +58,23 @@ expect class CalendarLauncher {
     fun addEvent(event: CalendarEventModel)
 }
 
-expect @Composable fun rememberCalendarLauncher(): CalendarLauncher
+@Composable
+expect fun rememberCalendarLauncher(): CalendarLauncher
 // End StackOverflow + slop
+
+expect class ToastLauncher {
+    fun sendToast(stringResource: StringResource)
+}
+
+@Composable
+expect fun rememberToastLauncher(): ToastLauncher
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingIconItem(modifier: Modifier) {
     Box(contentAlignment = Alignment.Center) {
-        LoadingIndicator(
+        LoadingIndicator( // Wtf is this?? xD
             modifier = Modifier
                 .fillMaxWidth()
                 .then(modifier)

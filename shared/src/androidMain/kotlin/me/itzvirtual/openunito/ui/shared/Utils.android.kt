@@ -6,6 +6,9 @@ import android.provider.CalendarContract
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.grade_already_accepted
+import org.jetbrains.compose.resources.StringResource
 import kotlin.system.exitProcess
 
 @Composable
@@ -42,4 +45,16 @@ actual class CalendarLauncher(private val context: Context) {
 actual fun rememberCalendarLauncher(): CalendarLauncher {
     val context = LocalContext.current
     return remember { CalendarLauncher(context) }
+}
+
+actual class ToastLauncher (private val context: Context) {
+    actual fun sendToast(stringResource: StringResource) {
+        // TODO: implement this
+    }
+}
+
+@Composable
+actual  fun rememberToastLauncher(): ToastLauncher {
+    val context = LocalContext.current
+    return remember(context) { ToastLauncher(context) }
 }

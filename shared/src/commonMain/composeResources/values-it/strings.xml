@@ -66,4 +66,6 @@
     <string name="debug_entry">Debug</string>
     <string name="show_dev_button">Mostra Opzioni Sviluppatore</string>
     <string name="data_is_old">I dati sono obsoleti!</string>
+    <string name="grade_already_accepted">Il voto è stato già accettato</string>
+    <string name="grade_already_rejected">Il voto è stato già rifiutato</string>
 </resources>
