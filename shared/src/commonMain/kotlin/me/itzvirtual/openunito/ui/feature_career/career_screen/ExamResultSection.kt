@@ -50,18 +50,16 @@ import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
 import me.itzvirtual.openunito.resources.grade_already_accepted
-import me.itzvirtual.openunito.resources.grade_already_rejected
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdDrawerCard
 import me.itzvirtual.openunito.ui.components.StdTextButton
 import me.itzvirtual.openunito.ui.shared.AnimatedSymmetricalBorder
-import me.itzvirtual.openunito.ui.shared.rememberSendToast
-import me.itzvirtual.openunito.ui.shared.rememberToastLauncher
-import me.itzvirtual.openunito.ui.shared.sendToast
+import me.itzvirtual.openunito.ui.shared.Toaster
 import me.itzvirtual.openunito.ui.shared.shimmerEffect
 import me.itzvirtual.openunito.ui.shared.unShoutCourseName
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 
 data class ExamResultActions(
@@ -95,6 +93,7 @@ fun ExamResultsSection(
     debug: Boolean? = null,
 ) {
     var expandedExamId by remember { mutableStateOf<String?>(null) }
+    val toaster: Toaster = koinInject()
 
     ListWrapper(
         modifier = modifier,
@@ -138,8 +137,6 @@ fun ExamResultsSection(
                         )
                     },
                     drawerContent = {
-                        val toastLauncher = rememberToastLauncher() // TODO: uncomment when implemented
-
                         GradeEntryDrawer(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -152,7 +149,7 @@ fun ExamResultsSection(
                                     showDialog = true
                                     selectedStatus = GradeStatus.ACCEPTED
                                 } else {
-                                    toastLauncher.sendToast(Res.string.grade_already_accepted)
+                                    toaster.show(Res.string.grade_already_accepted)
                                 }
                             },
                             onReject = {
@@ -160,7 +157,7 @@ fun ExamResultsSection(
                                     showDialog = true
                                     selectedStatus = GradeStatus.REJECTED
                                 } else {
-                                    toastLauncher.sendToast(Res.string.grade_already_accepted)
+                                    toaster.show(Res.string.grade_already_accepted)
                                 }
                             },
                         )

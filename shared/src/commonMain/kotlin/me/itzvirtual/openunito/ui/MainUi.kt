@@ -62,6 +62,7 @@ import me.itzvirtual.openunito.ui.feature_settings.customization_screen.Customiz
 import me.itzvirtual.openunito.ui.feature_settings.dev_screen.DevScreen
 import me.itzvirtual.openunito.ui.shared.OfflineBanner
 import me.itzvirtual.openunito.ui.shared.OpenUnitoNavState
+import me.itzvirtual.openunito.ui.shared.Toaster
 import me.itzvirtual.openunito.ui.shared.rememberOpenUnitoNavState
 import me.itzvirtual.openunito.ui.shared.tabAwareEnterTransition
 import me.itzvirtual.openunito.ui.shared.tabAwareExitTransition
@@ -168,6 +169,8 @@ fun OpenUnitoApp(
     onSessionExpired: () -> Unit = {},
     navState: OpenUnitoNavState = rememberOpenUnitoNavState()
 ) {
+    val toaster: Toaster = koinInject()
+
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
         isBackEnabled = navState.isBackEnabled,
@@ -249,6 +252,9 @@ fun OpenUnitoApp(
                                     navState.navController.navigate(
                                         InvokeRoute
                                     )
+                                },
+                                onOpenStatistics = {
+                                    toaster.show("Coming soon!")
                                 }
                             )
                         }

@@ -3,19 +3,23 @@ package me.itzvirtual.openunito
 import android.content.Context
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import kotlinx.coroutines.CoroutineScope
 import me.itzvirtual.openunito.core.database.AppDatabase
+import me.itzvirtual.openunito.core.network.CoroutineScopesModule
 import me.itzvirtual.openunito.data.localization.PlatformLanguageManager
-import me.itzvirtual.openunito.data.localization.SupportedLanguage
 import me.itzvirtual.openunito.domain.AndroidClipboardManagerImpl
 import me.itzvirtual.openunito.domain.AndroidLanguageManagerImpl
 import me.itzvirtual.openunito.domain.PlatformClipboardManager
+import me.itzvirtual.openunito.ui.shared.AndroidToasterImpl
+import me.itzvirtual.openunito.ui.shared.Toaster
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 
 actual fun platform() = "Android"
 
-@Module
+@Module(includes = [CoroutineScopesModule::class])
 class AndroidPlatformModule {
     @Single
     fun databaseBuilder(@Provided context: Context): RoomDatabase.Builder<AppDatabase>{
@@ -33,4 +37,11 @@ class AndroidPlatformModule {
     @Single
     fun platformLanguageManager(@Provided context: Context): PlatformLanguageManager =
         AndroidLanguageManagerImpl(context)
+
+    @Single
+    fun toaster(
+        @Provided context: Context,
+        @Named("ApplicationScope") applicationScope: CoroutineScope
+    ): Toaster =
+        AndroidToasterImpl(context, applicationScope)
 }
