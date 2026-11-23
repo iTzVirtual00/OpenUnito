@@ -187,6 +187,7 @@ fun ExamResultsSection(
                                     isGradeStatusLoadingState.value = false
                                 }
                             }
+                            showDialog = false
                         },
                         onClickNo = {
                             showDialog = false
