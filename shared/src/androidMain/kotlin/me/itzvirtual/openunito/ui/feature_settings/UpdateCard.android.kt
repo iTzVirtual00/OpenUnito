@@ -42,8 +42,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.itzvirtual.openunito.BuildKonfig
+import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.updater_check_updates_button
+import me.itzvirtual.openunito.resources.updater_checking_for_updates
+import me.itzvirtual.openunito.resources.updater_checking_updates
+import me.itzvirtual.openunito.resources.updater_current_version
+import me.itzvirtual.openunito.resources.updater_download_button
+import me.itzvirtual.openunito.resources.updater_download_complete
+import me.itzvirtual.openunito.resources.updater_download_failed
+import me.itzvirtual.openunito.resources.updater_downloading
+import me.itzvirtual.openunito.resources.updater_downloading_progress
+import me.itzvirtual.openunito.resources.updater_error
+import me.itzvirtual.openunito.resources.updater_install_button
+import me.itzvirtual.openunito.resources.updater_no_updates_checked
+import me.itzvirtual.openunito.resources.updater_status_label
+import me.itzvirtual.openunito.resources.updater_title
+import me.itzvirtual.openunito.resources.updater_up_to_date
+import me.itzvirtual.openunito.resources.updater_update_available
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
+import org.jetbrains.compose.resources.stringResource
 import java.io.File
 
 enum class buttonType {
@@ -52,6 +70,17 @@ enum class buttonType {
     INSTALL,
 }
 
+
+private sealed interface UpdateStatusState {
+    data object Idle : UpdateStatusState
+    data object Checking : UpdateStatusState
+    data class Available(val versionName: String, val versionCode: Int) : UpdateStatusState
+    data object UpToDate : UpdateStatusState
+    data class Error(val message: String) : UpdateStatusState
+    data object Downloading : UpdateStatusState
+    data object DownloadComplete : UpdateStatusState
+    data object DownloadFailed : UpdateStatusState
+}
 
 @Composable
 actual fun UpdateCard(
@@ -66,18 +95,31 @@ actual fun UpdateCard(
     val currentVersionCode = BuildKonfig.VERSION_CODE
     val currentVersionName = BuildKonfig.VERSION_NAME
 
-    var updateStatus by remember { mutableStateOf("No updates checked") }
+    var statusState by remember { mutableStateOf<UpdateStatusState>(UpdateStatusState.Idle) }
     var availableVersion by remember { mutableStateOf<VersionInfo?>(null) }
     var downloadedFile by remember { mutableStateOf<File?>(null) }
     var isChecking by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
 
+    val updateStatusText = when (val status = statusState) {
+        UpdateStatusState.Idle -> stringResource(Res.string.updater_no_updates_checked)
+        UpdateStatusState.Checking -> stringResource(Res.string.updater_checking_for_updates)
+        is UpdateStatusState.Available -> stringResource(
+            Res.string.updater_update_available,
+            status.versionName,
+            status.versionCode
+        )
+        UpdateStatusState.UpToDate -> stringResource(Res.string.updater_up_to_date)
+        is UpdateStatusState.Error -> stringResource(Res.string.updater_error, status.message)
+        UpdateStatusState.Downloading -> stringResource(Res.string.updater_downloading)
+        UpdateStatusState.DownloadComplete -> stringResource(Res.string.updater_download_complete)
+        UpdateStatusState.DownloadFailed -> stringResource(Res.string.updater_download_failed)
+    }
+
     Column(
         modifier = Modifier
-            .clickable(
-                onClick = onClick
-            )
+            .clickable(onClick = onClick)
             .then(modifier),
     ) {
         val titleSize = 20.sp
@@ -87,35 +129,33 @@ actual fun UpdateCard(
                     RoundedCornerShape(16.dp),
                     shadow = ShadowDefaults.Text
                 ),
-            text = "Updater",
+            text = stringResource(Res.string.updater_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             fontSize = titleSize,
             lineHeight = titleSize.times(1.4f)
         )
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Current: $currentVersionName (Code: $currentVersionCode)",
+            text = stringResource(
+                Res.string.updater_current_version,
+                currentVersionName,
+                currentVersionCode
+            ),
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Spacer(
-            modifier = Modifier.height(4.dp)
-        )
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Status: $updateStatus",
+            text = stringResource(Res.string.updater_status_label, updateStatusText),
             style = MaterialTheme.typography.bodySmall, // i feel smart
             color = MaterialTheme.colorScheme.outline // i fill smart pt2
         )
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -128,28 +168,30 @@ actual fun UpdateCard(
                 modifier = Modifier
                     .weight(checkButtonWeight)
                     .dropShadow(
-                        androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        RoundedCornerShape(16.dp),
                         shadow = ShadowDefaults.Surface
                     ),
                 onClick = {
                     isChecking = true
-                    updateStatus = "Checking for updates..."
+                    statusState = UpdateStatusState.Checking
                     CoroutineScope(Dispatchers.Main).launch {
                         when (val result = updater.checkForUpdates(currentVersionCode)) {
                             is UpdateCheckResult.UpdateAvailable -> {
                                 availableVersion = result.versionInfo
-                                updateStatus =
-                                    "Update available: ${result.versionInfo.versionName} (Code: ${result.versionInfo.versionCode})"
+                                statusState = UpdateStatusState.Available(
+                                    versionName = result.versionInfo.versionName,
+                                    versionCode = result.versionInfo.versionCode
+                                )
                             }
 
                             is UpdateCheckResult.NoUpdateAvailable -> {
                                 availableVersion = null
-                                updateStatus = "You're up to date!"
+                                statusState = UpdateStatusState.UpToDate
                             }
 
                             is UpdateCheckResult.Error -> {
                                 availableVersion = null
-                                updateStatus = "Error: ${result.message}"
+                                statusState = UpdateStatusState.Error(result.message)
                             }
                         }
                         isChecking = false
@@ -158,9 +200,8 @@ actual fun UpdateCard(
                 enabled = !isChecking && !isDownloading,
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(25f),
-
-                ) {
+                shape = RoundedCornerShape(25f),
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -173,24 +214,22 @@ actual fun UpdateCard(
                         contentDescription = null,
                     )
 
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Text(
-                        modifier = Modifier.Companion,
-                        text = if (isChecking) "Checking..." else "Check",
+                        text = if (isChecking) {
+                            stringResource(Res.string.updater_checking_updates)
+                        } else {
+                            stringResource(Res.string.updater_check_updates_button)
+                        },
                         fontWeight = FontWeight.Bold,
                     )
-                    Spacer(
-                        modifier = Modifier.weight(1.4f)
-                    )
+
+                    Spacer(modifier = Modifier.weight(1.4f))
                 }
             }
 
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
+            Spacer(modifier = Modifier.width(8.dp))
 
             val selectedButton = when {
                 downloadedFile != null -> buttonType.INSTALL // Install Button
@@ -203,29 +242,30 @@ actual fun UpdateCard(
                 modifier = Modifier
                     .weight(1 - checkButtonWeight)
                     .dropShadow(
-                        androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        RoundedCornerShape(16.dp),
                         shadow = ShadowDefaults.Surface
                     ),
                 onClick = {
                     if (selectedButton == buttonType.DOWNLOAD) {
                         isDownloading = true
                         downloadProgress = 0f
-                        updateStatus = "Downloading..."
+                        statusState = UpdateStatusState.Downloading
 
                         CoroutineScope(Dispatchers.Main).launch {
-                            downloadedFile = updater.downloadApk { progress ->
+                            val file = updater.downloadApk { progress ->
                                 downloadProgress = progress
                             }
+                            downloadedFile = file
                             isDownloading = false
-                            updateStatus = if (downloadedFile != null) {
-                                "Download complete! Ready to install"
+                            if (file != null) {
+                                statusState = UpdateStatusState.DownloadComplete
+                                updater.triggerInstallation(file)
                             } else {
-                                "Download failed"
+                                statusState = UpdateStatusState.DownloadFailed
                             }
-                            updater.triggerInstallation(downloadedFile!!)
                         }
                     } else if (selectedButton == buttonType.INSTALL) {
-                        updater.triggerInstallation(downloadedFile!!)
+                        downloadedFile?.let { updater.triggerInstallation(it) }
                     }
                 },
                 enabled = when (selectedButton) {
@@ -244,7 +284,7 @@ actual fun UpdateCard(
                         else -> MaterialTheme.colorScheme.primary
                     }
                 ),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(25f),
+                shape = RoundedCornerShape(25f),
             ) {
                 Row(
                     modifier = Modifier
@@ -267,23 +307,22 @@ actual fun UpdateCard(
                         tint = color,
                     )
 
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Text(
                         text = when (selectedButton) {
-                            buttonType.INSTALL -> "Install" // downloadedFile != null
-                            buttonType.DOWNLOAD if isDownloading -> "Downloading ${(downloadProgress * 100).toInt()}%"
-                            else -> "Download"
+                            buttonType.INSTALL -> stringResource(Res.string.updater_install_button) // downloadedFile != null
+                            buttonType.DOWNLOAD if isDownloading -> stringResource(
+                                Res.string.updater_downloading_progress,
+                                (downloadProgress * 100).toInt()
+                            )
+                            else -> stringResource(Res.string.updater_download_button)
                         },
                         color = color,
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(
-                        modifier = Modifier.weight(1.4f)
-                    )
+                    Spacer(modifier = Modifier.weight(1.4f))
                 }
             }
         }

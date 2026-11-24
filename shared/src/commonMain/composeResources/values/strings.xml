@@ -84,4 +84,22 @@
     <string name="date_formatting_entry_label">Date Formatting</string>
     <string name="language_preview_label" translatable="false">Preview</string>
     <string name="log_out_label" translatable="false">Log Out</string>
+
+    <!-- Updater -->
+    <string name="updater_title">Updater</string>
+    <string name="updater_no_updates_checked">No updates checked</string>
+    <string name="updater_checking_for_updates">Checking for updates...</string>
+    <string name="updater_up_to_date">Up to date!</string>
+    <string name="updater_downloading">Downloading...</string>
+    <string name="updater_checking_updates">Checking...</string>
+    <string name="updater_check_updates_button">Check</string>
+    <string name="updater_current_version">Current: %1$s (Code: %2$d)</string>
+    <string name="updater_status_label">Status: %1$s</string>
+    <string name="updater_update_available">Update available: %1$s (Code: %2$d)</string>
+    <string name="updater_error">Error: %1$s</string>
+    <string name="updater_download_complete">Download complete! Ready to install</string>
+    <string name="updater_download_failed">Download failed</string>
+    <string name="updater_install_button">Install</string>
+    <string name="updater_downloading_progress">Downloading %1$d%%</string>
+    <string name="updater_download_button">Download</string>
 </resources>

@@ -81,4 +81,22 @@
     <string name="exam_book_button">Prenota</string>
     <string name="exam_unbook_button">Unprenot</string>
     <string name="date_formatting_entry_label">Formattazione Data</string>
+
+    <!-- Updater -->
+    <string name="updater_title">Updater</string>
+    <string name="updater_no_updates_checked">Nessun update controllato</string>
+    <string name="updater_checking_for_updates">Controllo aggiornamenti...</string>
+    <string name="updater_up_to_date">Hai l'ultima versione!</string>
+    <string name="updater_downloading">Download...</string>
+    <string name="updater_checking_updates">Verifica...</string>
+    <string name="updater_check_updates_button">Controlla</string>
+    <string name="updater_current_version">Attuale: %1$s (Code: %2$d)</string>
+    <string name="updater_status_label">Stato: %1$s</string>
+    <string name="updater_update_available">Aggiornamento disponibile: %1$s (Code: %2$d)</string>
+    <string name="updater_error">Errore: %1$s</string>
+    <string name="updater_download_complete">Download completato! Pronto per l'installazione</string>
+    <string name="updater_download_failed">Download non riuscito</string>
+    <string name="updater_install_button">Installa</string>
+    <string name="updater_downloading_progress">Download %1$d%%</string>
+    <string name="updater_download_button">Scarica</string>
 </resources>
