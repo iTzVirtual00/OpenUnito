@@ -27,11 +27,11 @@ object SupportedLocales {
             tag = "en-US",
             displayName = "English"
         ),
-        SupportedLanguage(
-            tag = "it-IT-x-pugliese",
-            displayName = "PUGLIËSAH",
-            isCustom = true,
-        )
+//        SupportedLanguage(
+//            tag = "it-IT-x-pugliese",
+//            displayName = "PUGLIËSAH",
+//            isCustom = true,
+//        )
     )
 
     val regions: List<SupportedRegion> = listOf(
