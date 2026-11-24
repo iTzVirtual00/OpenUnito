@@ -58,6 +58,8 @@ class ExamDateRepository(
     private val activeRefreshJob = AtomicReference<Job?>(null)
     private val refreshMutex = Mutex()
 
+    private val erroredNoteText = "**error**"
+
     val examDatesCacheFlow: Flow<CachedExamDates?> = studentRepo.careerContextFlow
         .distinctUntilChanged()
         .flatMapLatest { career ->
@@ -114,12 +116,13 @@ class ExamDateRepository(
         }
     }
 
-    // This mess is
+    // This mess is because of Cineca does not return note directly when an exam is booked
+    // TODO: retry failed notes even when ExamDate is not stale
     suspend fun refresh(careerId: Int): Result<Unit> = runCatching {
         refreshMutex.withLock {
             val cachedNotes: Map<ExamDateId, String> = dao.getOnce(careerId)
                 ?.let { runCatching { it.toDomain(json) }.getOrNull() }
-                ?.mapNotNull { exam -> exam.note?.let { exam.id() to it } }
+                ?.mapNotNull { exam -> exam.note?.takeIf { it != erroredNoteText }?.let { exam.id() to it } }
                 ?.toMap()
                 .orEmpty()
 
@@ -152,7 +155,7 @@ class ExamDateRepository(
                 semaphore.withPermit {
                     val note = runCatching { api.getSingleExam(dto) }.fold(
                         onSuccess = { exam -> exam.note.orEmpty() },
-                        onFailure = { "**error**" }
+                        onFailure = { erroredNoteText }
                     )
                     dto.id() to note
                 }

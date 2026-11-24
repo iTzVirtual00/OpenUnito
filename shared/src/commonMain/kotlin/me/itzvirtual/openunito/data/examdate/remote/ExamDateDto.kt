@@ -2,6 +2,7 @@ package me.itzvirtual.openunito.data.examdate.remote
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import me.itzvirtual.openunito.core.network.MicrosoftDateSerializer
 import kotlin.time.Instant
 
@@ -45,7 +46,7 @@ data class ExamDateDto(
     @SerialName("dom_part_cod") val domPartCod: String? = null,
     @SerialName("fat_part_cod") val fatPartCod: String? = null,
     @SerialName("turni") val turni: String? = null,
-    @SerialName("sessioni") val sessioni: String? = null,
+    @SerialName("sessioni") val sessioni: JsonElement? = null,
     @SerialName("misureComp") val misureComp: String? = null,
     @SerialName("tipiSvolgimentoEsame") val tipiSvolgimentoEsame: String? = null,
     @SerialName("chkQuestVal") val chkQuestVal: String = "0",
