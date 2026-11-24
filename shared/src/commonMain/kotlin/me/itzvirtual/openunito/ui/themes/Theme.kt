@@ -1,6 +1,7 @@
 package me.itzvirtual.openunito.ui.themes
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -11,6 +12,9 @@ import me.itzvirtual.openunito.ui.themes.simpleblue.LightCustomColorsPalette
 
 
 val LocalCustomColorsPalette = staticCompositionLocalOf { CustomColorsPalette() }
+
+@Composable
+expect fun platformDynamicColorScheme(darkTheme: Boolean): ColorScheme?
 
 @Composable
 fun OpenUnitoTheme(

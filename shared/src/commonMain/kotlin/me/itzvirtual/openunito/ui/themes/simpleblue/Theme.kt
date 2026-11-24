@@ -7,7 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import me.itzvirtual.openunito.ui.themes.main.platformDynamicColorScheme
+import me.itzvirtual.openunito.ui.themes.platformDynamicColorScheme
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,

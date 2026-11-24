@@ -1,4 +1,4 @@
-package me.itzvirtual.openunito.ui.themes.main
+package me.itzvirtual.openunito.ui.themes
 
 import android.os.Build
 import androidx.compose.material3.ColorScheme
