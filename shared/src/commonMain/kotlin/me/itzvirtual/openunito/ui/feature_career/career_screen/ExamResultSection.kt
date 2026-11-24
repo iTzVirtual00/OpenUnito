@@ -387,7 +387,8 @@ fun GradeWrapper(examGraderade: ExamResult) {
     ) {
         Box (
             modifier = Modifier
-                .size(MaterialTheme.typography.headlineMedium.lineHeight.value.dp),
+                // TODO: fix this, .times()
+                .size(MaterialTheme.typography.headlineMedium.lineHeight.value.dp.times(1.5f)),
             contentAlignment = Alignment.Center,
         ) {
             Column(
