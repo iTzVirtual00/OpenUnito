@@ -29,6 +29,17 @@ jobs:
       - name: Assemble Release APK
         run: ./gradlew --build-cache --configuration-cache :androidApp:assembleRelease -x lintVitalRelease
 
+      - name: Sign app APK
+        uses: ilharp/sign-android-release@v2
+        id: sign_app
+        with:
+          releaseDir: androidApp/build/outputs/apk/release
+          signingKey: ${{ secrets.ANDROID_SIGNING_KEY }}
+          keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          buildToolsVersion: 36.0.0
+
       - name: Extract version from version.properties
         id: version
         run: |
