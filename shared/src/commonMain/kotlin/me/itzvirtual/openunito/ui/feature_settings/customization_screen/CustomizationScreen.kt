@@ -37,9 +37,11 @@ import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StdSurface
 import me.itzvirtual.openunito.ui.components.StdSwitch
+import me.itzvirtual.openunito.ui.shared.Toaster
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -49,13 +51,15 @@ fun CustomizationScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.screenState.collectAsStateWithLifecycle()
+    val toaster: Toaster = koinInject()
 
     CustomizationScreenContent(
         modifier = modifier,
         onBack = onBack,
         showAttendanceValue = state.showAttendance,
         onChangeShowAttendance = { value ->
-            viewModel.setShowAttendance(value)
+//            viewModel.setShowAttendance(value)
+            toaster.show("Coming soon!")
         },
     )
 }
