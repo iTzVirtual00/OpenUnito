@@ -9,6 +9,9 @@
 **OpenUnito** è un'applicazione per la gestione della vita universitaria gratuita ed Open Source,
 sviluppata come un'alternativa alle soluzioni ufficiali di UniTO.
 
+![Home](./files/screenshot_home.png) |  ![Career](./files/screenshot_career.png) | ![Exams](./files/screenshot_exams.png) | ![Calendar](./files/screenshot_calendar.png)
+:-------------------------:|:-------------------------:|:-------------------------: | :-------------------------:
+
 > [!IMPORTANT]
 > **OpenUnito è in fase di continuo sviluppo.** 
 > Alcune funzionalità richiedono ancora un testing approfondito.
@@ -16,6 +19,7 @@ sviluppata come un'alternativa alle soluzioni ufficiali di UniTO.
 ## Features
 
 ### Calendario
+
 - Calendario Settimanale.
 - Bacheca delle lezioni giornaliere.
 
@@ -23,6 +27,7 @@ sviluppata come un'alternativa alle soluzioni ufficiali di UniTO.
 - Prenotazione degli esami.
 - Gestione dei voti.
 - Visualizzazione del Libretto.
+
 
 ### Altro
 - Caching per l'utilizzo offline.
