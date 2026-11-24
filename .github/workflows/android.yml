@@ -43,8 +43,9 @@ jobs:
       - name: Extract version from version.properties
         id: version
         run: |
-          TAG=$(grep '^versionName=' version.properties | cut -d'=' -f2 | tr -d '[:space:]')
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          V_NAME=$(grep '^versionName=' version.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          V_CODE=$(grep '^versionCode=' version.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          echo "tag=${V_NAME}+${V_CODE}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
