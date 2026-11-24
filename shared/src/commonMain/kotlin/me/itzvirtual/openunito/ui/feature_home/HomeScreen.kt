@@ -2,6 +2,7 @@ package me.itzvirtual.openunito.ui.feature_home
 
 
 import androidx.compose.animation.AnimatedVisibility
+import me.itzvirtual.openunito.resources.playing_cards_35dp_E3E3E3_FILL1_wght400_GRAD0_opsz40 as PlayingCards
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RollerSkating
 import androidx.compose.material.icons.filled.SatelliteAlt
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -76,6 +77,7 @@ import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -218,11 +220,11 @@ fun HomeScreenContent(
 }
 
 // Used for personalized icons of beta testers
-val betaIconsMap = hashMapOf(
-    "c9bb5e3383e6aaac2c6b44bb0c572224d223aadded0947ac42c1dd10cc24145f" to Icons.Default.SatelliteAlt,
-    "92a0b1d961ae6c72ef3380227530c265b1c9e661cde5b52808852cf1aa0dc252" to Icons.Default.RollerSkating,
-    "fa6921e4620036d72f762b43db2d8926dfa375f66e18a22410bb96bcbb1a5dc6" to Icons.Default.BugReport,
-    "a6887cf1b3cce4a53de9dc1db5feed4ccde2f91c7a816f79167495138ac27212" to Icons.Default.Translate,
+val betaIconsMap = hashMapOf<String, @Composable () -> ImageVector>(
+    "e85aa4af4e348da557d873fbd8c2409a9f6c47939e664e7af20ad911f769f121" to { Icons.Default.SatelliteAlt },
+    "cb8492b9700132342ab261cd32e74dd1e43feb7c5ed02cf4858caeff970f9dbe" to { Icons.Default.RollerSkating },
+    "685dd34902489fa59c91bf6075fdd867b5f8b1066fae214644e0468d24a5b2c7" to { Icons.Default.BugReport },
+    "e1cfdf08b21bdc53c0e42479c9d68ccdf4e79dffed479e5346c204326fd87403" to { vectorResource(Res.drawable.PlayingCards) }
 )
 
 @Composable
@@ -231,7 +233,7 @@ fun UserProfileIcon(
     userHash: String,
     size: Dp = 40.dp
 ) {
-    val icon = betaIconsMap.getOrElse(userHash) { Icons.Default.Person }
+    val icon = betaIconsMap[userHash]?.invoke() ?: Icons.Default.Person
 
     Surface(
         modifier = modifier
@@ -266,7 +268,7 @@ fun ProfileSection(
 ) {
     val firstName = data?.firstname ?: stringResource(Res.string.ND)
     val lastName = data?.lastname ?: ""
-    val userHash = remember(firstName + lastName) { sha256sum(firstName + lastName) }
+    val userHash = remember("$firstName $lastName") { sha256sum("$firstName $lastName") }
 
     Box(
         modifier = Modifier
