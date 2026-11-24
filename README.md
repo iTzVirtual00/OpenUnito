@@ -1,80 +1,85 @@
-### 🇬🇧 [English version](README-ENG.md)
-
-[![License](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](LICENSE)
-![Status](https://img.shields.io/badge/status-beta-yellow?style=for-the-badge)
-![Platforms](https://img.shields.io/badge/platforms:-gray?style=for-the-badge)![Android](https://img.shields.io/badge/Android-brightgreen?style=for-the-badge&color=brightgreen)![KotlinMultiplatform](https://img.shields.io/badge/Kotlin%20Multiplatform-brightgreen?style=for-the-badge&color=darkviolet)
+### 🇬🇧 [Go to English version](README-ENG.md)
 
 # OpenUnito
 
-OpenUnito is a free and Open Source unofficial university application for UniTO,
-developed as community-maintained alternative to the standard app.
+[![Licenza](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](LICENSE)
+![Status](https://img.shields.io/badge/status-beta-yellow?style=for-the-badge)
+![Piattaforme](https://img.shields.io/badge/platforms:-gray?style=for-the-badge)![Android](https://img.shields.io/badge/Android-brightgreen?style=for-the-badge&color=brightgreen)![KotlinMultiplatform](https://img.shields.io/badge/Kotlin%20Multiplatform-brightgreen?style=for-the-badge&color=darkviolet)
 
-The app is currently available only on **Android** platforms.
+**OpenUnito** è un'applicazione per la gestione della vita universitaria gratuita ed Open Source,
+sviluppata come un'alternativa alle soluzioni ufficiali di UniTO.
 
-**OpenUnito is still under HEAVY development.** Some features still require further testing.
+> [!IMPORTANT]
+> **OpenUnito è in fase di continuo sviluppo.** 
+> Alcune funzionalità richiedono ancora un testing approfondito.
 
 ## Features
 
-### Calendar
-- Weekly calendar
-- Daily lessons dashboard
+### Calendario
+- Calendario Settimanale.
+- Bacheca delle lezioni giornaliere.
 
-### Exams
-- Exam booking 
-- Manage exam results
-- Visualize transcript
+### Esami
+- Prenotazione degli esami.
+- Gestione dei voti.
+- Visualizzazione del Libretto.
 
-### Other
-- Offline support
-- Multiple career support
+### Altro
+- Caching per l'utilizzo offline.
+- Supporto per carriere universitarie multiple.
 
 ## Privacy
 
-We ***do not*** acquire any of your data nor send it to any third-party!
+Noi ***non*** entriamo in possesso dei tuoi dati nè li divulghiamo a terzi!
 
-Information about you, your exams or your dog
-are transferred only between the official Unito servers and your local application, 
-without any intermediaries. 
+Le informazioni sulla tua carriera, sui tuoi esami o sul tuo cane
+vengono scambiate solamente tra il server ufficiale di Unito e la tua applicazione locale,
+senza alcun intermediario.
 
-OpenUnito ***does not*** store your login information. Only a login token is kept.
+**OpenUnito** ***non*** archivia le tue credenziali (nome e password), 
+viene conservato solamente un token di login.
 
-## Installation and update
+## Installazione ed aggiornamento
 
-Download the latest APK release from Releases section.
+Scarica l'APK più recente dalla sezione Releases.
 
-Updates are managed directly inside the app in the Settings tab.
+Gli aggiornamenti vengono effettuati direttamente dall'app, nella sezione Settings.
 
 > [!NOTE] 
-> Starting from 2027,
-> all apps not published through Google Play Store, including OpenUnito, may encounter problems.
-> <br> For the updated state of this issue, read more at [Keep Android Open](https://keepandroidopen.org/).
+> A partire dal 2027, 
+> tutte le app che *non* vengono pubblicate tramite il circuito di **Google Play Store**,
+> compresa **OpenUnito**, potranno riscontrare delle problematiche.
+> 
+> Per saperne di più e visualizzare lo stato corrente di questa problematica, 
+> visita [Keep Android Open](https://keepandroidopen.org/). 
 
-## Future features
+## Prossime funzionalità
 
-- Attendance tracking
-- Career dashboard
-- Support for more languages
-- Theme customization setting
+- Rilevazione frequenze.
+- Dashboard carriera.
+- Supporto per altre lingue.
+- Personalizzazione del tema.
 
-## Current TODOs
-- Implement pull to refresh (currently done only at startup)
-- Improve calendar UI
-    - Overhaul ui code
-    - Handle overlapping classes
-    - Classess whitelisting
-- Make the UI more homogenous
-- Ensure accessibility features
+## TODOs
+- Implementare tasto refresh (al momento viene fatto solo all'avvio).
+- Migliorare l'interfaccia del calendario.
+    - Riformattare il codice dell'interfaccia.
+    - Gestire le lezioni sovrapposte.
+    - Filtrare le lezioni.
+- Rendere l'interfaccia più omogenea.
+- Migliorare l'accessibilità.
 
-## Developers
+## Missione
 
-We are two Computer Science students from Unito who harvested the colletive hate for the current official solution 
-and wanted to make something better, that's publicly available and mantainable.
+Siamo degli studenti di Informatica ad Unito, che hanno canalizzato l'odio collettivo
+per l'attuale applicazione ufficiale,
+nell'obbiettivo di creare un'alternativa che fosse migliore, gratuita, 
+ma soprattutto mantenuta dalle stesse persone che la utilizzano.
 
 ![iTzVirtual](https://img.shields.io/badge/iTzVirtual-gray?style=flat-square) [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/iTzVirtual00) [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/iTzVirtual) 
 
 ![Dinraal](https://img.shields.io/badge/Dinraal-gray?style=flat-square) [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/Dinraal1)
 
-## Contributing
+## Contribuire
 
-This is an Open Source project and PRs and Issues are welcome! 
-Having this app contributed by the same students that uses it is the goal of the whole project.
+Questo è un progetto Open Source, sono ben accette qualunque Issues o PR!
