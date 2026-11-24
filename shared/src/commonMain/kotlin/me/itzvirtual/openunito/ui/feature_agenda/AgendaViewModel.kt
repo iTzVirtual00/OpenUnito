@@ -82,7 +82,6 @@ class AgendaViewModel(
                     endDate = endInstant
                 ).map { cachedAgenda ->
                     val hasCachedData = cachedAgenda != null
-                    Logger.d(tag = "AgendaViewModel") { "hasCachedData: $hasCachedData" }
                     AgendaUiData(
                         week = week,
                         isLoading = !hasCachedData,

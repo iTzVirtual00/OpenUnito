@@ -52,7 +52,9 @@ class NetworkModule {
         install(Logging) {
             logger = object : KtorLogger {
                 override fun log(message: String) {
-                    Logger.i(tag = "UnitoAPI") { message }
+                    // TODO: log only if Developer.debug is active
+//                    Logger.i(tag = "UnitoAPI") { message }
+
                 }
             }
             level = LogLevel.BODY

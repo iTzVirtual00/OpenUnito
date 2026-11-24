@@ -95,7 +95,6 @@ class AgendaRepository(
     ): Flow<CachedAgenda?> {
         val key = buildKey(calendarLinkId, startDate, endDate)
         return agendaFlowCache.getOrPut(key) {
-            Logger.d(tag="getAgendaFlow") { "getting new Flow for key $key"}
             dao.getByKeyFlow(key)
                 .map { entity ->
                     if (entity == null) {
@@ -107,7 +106,6 @@ class AgendaRepository(
                         )
                         null
                     } else {
-                        Logger.d(tag="getAgendaFlow") { "got entity for key $key"}
                         val isStale =
                             getNowMillis() - entity.cachedAt > CacheConfig.AGENDA_STALE_MS
 

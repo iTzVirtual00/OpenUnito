@@ -761,7 +761,6 @@ private fun AgendaGrid(
                         totalDrag = 0f
                     },
                     onDragStopped = {
-                        Logger.d(tag = "AgendaGrid") { "Total drag: $totalDrag" }
                         val threshold = 200f
                         if (totalDrag < -threshold) {
                             onNextWeek()

@@ -112,7 +112,6 @@ fun RootNavigation(
             }
             UniToLoginScreen(
                 onAuthSuccess = { token ->
-                    Logger.d(tag = "OpenUnito") { "Received token: $token" }
                     authViewModel.login(token) {
                         navController.navigate("main") {
                             popUpTo("login") { inclusive = true } // it destroys
