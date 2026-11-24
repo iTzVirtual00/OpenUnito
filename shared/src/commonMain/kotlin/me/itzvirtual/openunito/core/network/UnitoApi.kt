@@ -22,6 +22,7 @@ import me.itzvirtual.openunito.data.examresult.remote.ExamResultDto
 import me.itzvirtual.openunito.data.grade.remote.ExamGradeDto
 import me.itzvirtual.openunito.data.student.StudentRepository
 import me.itzvirtual.openunito.domain.examdate.ExamDate
+import me.itzvirtual.openunito.domain.examdate.ExamDateId
 
 data class CareerContext(
     val id: Int,
@@ -50,6 +51,12 @@ class UnitoApi(
     suspend fun getExamDates(context: CareerContext? = null): List<ExamDateDto> {
         val ctx = context ?: getCareerContext()
         return client.get("students/${ctx.id}/careers/${ctx.registrationId}/exams").body()
+    }
+
+    suspend fun getSingleExam(examDate: ExamDateDto): ExamDateDto = getSingleExam(null, examDate.adsceId, examDate.cdsAppId, examDate.adAppId, examDate.appId)
+    suspend fun getSingleExam(context: CareerContext? = null, adsceId: Long, cdsAppId: Long, adAppId: Long, appId: Long): ExamDateDto {
+        val ctx = context ?: getCareerContext()
+        return client.get("students/${ctx.id}/careers/${ctx.registrationId}/exams/${adsceId}/${cdsAppId}/${adAppId}/${appId}").body()
     }
 
     suspend fun getTranscript(context: CareerContext? = null): List<ExamGradeDto> {

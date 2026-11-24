@@ -62,3 +62,5 @@ fun List<ExamDateDto>.toEntity(json: Json, careerId: Int) =
 
 fun ExamDateEntity.toDomain(json: Json): List<ExamDate> =
     json.decodeFromString<List<ExamDateDto>>(data).map { it.toDomain() }
+
+fun ExamDateDto.isBooked() = !bookableExam

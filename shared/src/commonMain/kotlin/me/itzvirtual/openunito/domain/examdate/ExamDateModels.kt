@@ -1,5 +1,6 @@
 package me.itzvirtual.openunito.domain.examdate
 
+import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
 import kotlin.time.Instant
 
 data class ExamDate(
@@ -13,7 +14,7 @@ data class ExamDate(
     val activityCode: String,
     val title: String,
     val description: String,
-    val note: String,
+    val note: String?,
 
     val date: Instant,
     val bookingStartDate: Instant,
@@ -33,6 +34,10 @@ typealias ExamDateId = Triple<Long, Long, Long>
 
 // None of the ids seems to be unique :(
 fun ExamDate.id(): ExamDateId {
+    return Triple(adsceId, adId, appId)
+}
+
+fun ExamDateDto.id(): ExamDateId {
     return Triple(adsceId, adId, appId)
 }
 

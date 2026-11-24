@@ -3,6 +3,9 @@ package me.itzvirtual.openunito.data.examdate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -14,15 +17,21 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.json.Json
 import me.itzvirtual.openunito.core.cache.CacheConfig
 import me.itzvirtual.openunito.core.network.UnitoApi
 import me.itzvirtual.openunito.data.examdate.local.ExamDateDao
+import me.itzvirtual.openunito.data.examdate.mapper.isBooked
 import me.itzvirtual.openunito.data.examdate.mapper.toDomain
 import me.itzvirtual.openunito.data.examdate.mapper.toEntity
+import me.itzvirtual.openunito.data.examdate.remote.ExamDateDto
 import me.itzvirtual.openunito.data.student.StudentRepository
 import me.itzvirtual.openunito.domain.examdate.ExamDate
+import me.itzvirtual.openunito.domain.examdate.ExamDateId
+import me.itzvirtual.openunito.domain.examdate.id
 import me.itzvirtual.openunito.domain.getNowMillis
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -105,10 +114,57 @@ class ExamDateRepository(
         }
     }
 
+    // This mess is
     suspend fun refresh(careerId: Int): Result<Unit> = runCatching {
         refreshMutex.withLock {
-            val response = api.getExamDates()
-            dao.upsert(response.toEntity(json, careerId))
+            val cachedNotes: Map<ExamDateId, String> = dao.getOnce(careerId)
+                ?.let { runCatching { it.toDomain(json) }.getOrNull() }
+                ?.mapNotNull { exam -> exam.note?.let { exam.id() to it } }
+                ?.toMap()
+                .orEmpty()
+
+            val mergedInitialList = api.getExamDates().map { exam ->
+                if (exam.isBooked() && exam.note == null) {
+                    exam.copy(note = cachedNotes[exam.id()])
+                } else {
+                    exam
+                }
+            }
+
+            dao.upsert(mergedInitialList.toEntity(json, careerId))
+
+            enrichBookedNotes(mergedInitialList)?.let {
+                dao.upsert(it.toEntity(json, careerId))
+            }
+        }
+    }
+
+    private suspend fun enrichBookedNotes(
+        examDateDtoList: List<ExamDateDto>
+    ): List<ExamDateDto>? = coroutineScope {
+        val semaphore = Semaphore(permits = 2)
+
+        val toEnrich = examDateDtoList.filter { it.isBooked() }
+        if (toEnrich.isEmpty()) return@coroutineScope null
+
+        val fetchedNotes: Map<ExamDateId, String> = toEnrich.map { dto ->
+            async {
+                semaphore.withPermit {
+                    val note = runCatching { api.getSingleExam(dto) }.fold(
+                        onSuccess = { exam -> exam.note.orEmpty() },
+                        onFailure = { "**error**" }
+                    )
+                    dto.id() to note
+                }
+            }
+        }.awaitAll().toMap()
+
+        examDateDtoList.map { dto ->
+            if (dto.isBooked()) {
+                dto.copy(note = fetchedNotes[dto.id()] ?: dto.note)
+            } else {
+                dto
+            }
         }
     }
 

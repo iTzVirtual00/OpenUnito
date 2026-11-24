@@ -72,6 +72,7 @@ import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
+import me.itzvirtual.openunito.resources.loading
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
@@ -733,7 +734,7 @@ fun ExamSessionCardDrawer(
             activityCode = exam.activityCode,
             president = exam.president,
             subscribedStudents = exam.subscribedStudents,
-            note = exam.note,
+            note = exam.note ?: stringResource(Res.string.loading), // TODO: show loading
             spacing = 4.dp,
         )
 

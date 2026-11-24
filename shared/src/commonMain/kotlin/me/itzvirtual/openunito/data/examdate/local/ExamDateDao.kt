@@ -10,6 +10,9 @@ interface ExamDateDao {
     @Query("SELECT * FROM exam_date_cache WHERE id = :careerId")
     fun observe(careerId: Int): Flow<ExamDateEntity?>
 
+    @Query("SELECT * FROM exam_date_cache WHERE id = :careerId")
+    suspend fun getOnce(careerId: Int): ExamDateEntity?
+
     @Upsert
     suspend fun upsert(entity: ExamDateEntity)
 

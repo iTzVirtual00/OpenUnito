@@ -12,7 +12,7 @@ data class ExamDateDto(
     @SerialName("cod") val cod: String = "",
     @SerialName("title") val title: String = "",
     @SerialName("description") val description: String = "",
-    @SerialName("note") val note: String = "",
+    @SerialName("note") val note: String? = "",
 
     @Serializable(with = MicrosoftDateSerializer::class)
     @SerialName("date") val date: Instant,
