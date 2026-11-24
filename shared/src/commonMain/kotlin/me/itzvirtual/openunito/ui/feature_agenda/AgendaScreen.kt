@@ -118,6 +118,14 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Instant
 
+/*********************************************************************************************
+ * IMPORTANT:
+ * This screen was generated with AI as a proof of concept at the beginning of development,
+ * and it was fully functional, so we kept it while developing the rest of the app.
+ * We are planning to rewrite and improve it in the near future.
+ * Please don't start screaming "AHHHH, THIS APP IS FULLY SLOPPED AHHHHH", it is not.
+ *********************************************************************************************/
+
 /**
  * Filter options for the agenda
  */

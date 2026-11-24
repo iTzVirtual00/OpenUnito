@@ -82,4 +82,18 @@ ma soprattutto mantenuta dalle stesse persone che la utilizzano.
 
 ## Contribuire
 
-Questo è un progetto Open Source, sono ben accette qualunque Issues o PR!
+Questo è un progetto Open Source, sono ben accette Issues o PR.
+
+Sarebbe comunque preferibile che nuove aggiunte al codice seguissero 
+gli standard di design e architettura preesistenti.
+Rimaniamo tuttavia aperti a discutere di qualunque idea ci vogliate proporre.
+
+(Ah, please, non vibecodate completamente le PR. Non serve a nessuno.)
+
+## Utilizzo di AI
+
+Il codice di **OpenUnito** *non* è stato generato in massa da agenti AI.
+
+L'IA è stata utilizzata per generazione di piccole frazioni di codice,
+di cui comunque conosciamo perfettamente il funzionamento,
+e per la velocizzazione di procedure tediose.
