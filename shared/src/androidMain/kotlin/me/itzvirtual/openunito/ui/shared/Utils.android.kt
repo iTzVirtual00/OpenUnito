@@ -2,13 +2,21 @@ package me.itzvirtual.openunito.ui.shared
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.CalendarContract
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import me.itzvirtual.openunito.resources.Res
-import me.itzvirtual.openunito.resources.grade_already_accepted
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.Named
 import kotlin.system.exitProcess
 
 @Composable
@@ -47,14 +55,28 @@ actual fun rememberCalendarLauncher(): CalendarLauncher {
     return remember { CalendarLauncher(context) }
 }
 
-actual class ToastLauncher (private val context: Context) {
-    actual fun sendToast(stringResource: StringResource) {
-        // TODO: implement this
-    }
-}
+class AndroidToasterImpl(
+    private val context: Context,
+    @Named("ApplicationScope") private val applicationScope: CoroutineScope
+) : Toaster {
+    private val mainExecutor = ContextCompat.getMainExecutor(context)
+    private var currentToast: Toast? = null
 
-@Composable
-actual  fun rememberToastLauncher(): ToastLauncher {
-    val context = LocalContext.current
-    return remember(context) { ToastLauncher(context) }
+    override fun show(message: String, isLong: Boolean) {
+        val duration = if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+
+        mainExecutor.execute {
+            currentToast?.cancel()
+            currentToast = Toast.makeText(context, message, duration).apply {
+                show()
+            }
+        }
+    }
+
+    override fun show(resource: StringResource, isLong: Boolean) {
+        applicationScope.launch {
+            val message = getString(resource)
+            show(message, isLong)
+        }
+    }
 }

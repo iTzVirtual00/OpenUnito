@@ -62,13 +62,6 @@ expect class CalendarLauncher {
 expect fun rememberCalendarLauncher(): CalendarLauncher
 // End StackOverflow + slop
 
-expect class ToastLauncher {
-    fun sendToast(stringResource: StringResource)
-}
-
-@Composable
-expect fun rememberToastLauncher(): ToastLauncher
-
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -254,4 +247,9 @@ fun annotatedStringResource(
             }
         }
     }
+}
+
+interface Toaster {
+    fun show(message: String, isLong: Boolean = false)
+    fun show(resource: StringResource, isLong: Boolean = false)
 }
