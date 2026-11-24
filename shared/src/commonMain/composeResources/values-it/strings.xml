@@ -84,7 +84,7 @@
 
     <!-- Updater -->
     <string name="updater_title">Updater</string>
-    <string name="updater_no_updates_checked">Nessun update controllato</string>
+    <string name="updater_no_updates_checked">Nessun aggiornamento controllato</string>
     <string name="updater_checking_for_updates">Controllo aggiornamenti...</string>
     <string name="updater_up_to_date">Hai l'ultima versione!</string>
     <string name="updater_downloading">Download...</string>
