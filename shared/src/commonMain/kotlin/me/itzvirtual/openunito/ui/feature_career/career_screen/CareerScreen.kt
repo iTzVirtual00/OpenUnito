@@ -222,60 +222,6 @@ fun CareerScreenContent(
 }
 
 @Composable
-fun CfooBar(
-    modifier: Modifier = Modifier,
-    currentCredits: Int = 0,
-    totalCredits: Int = 180,
-    onOpenStatistics: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .clickable(
-                onClick = onOpenStatistics,
-            )
-            .then(modifier)
-    ) {
-        Text(
-            text = "CFU TOTALI (Moh! Totaleee!!)",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-
-        Spacer(Modifier.height(6.dp))
-
-        StdSurface (
-            modifier = Modifier
-                .height(34.dp)
-                .fillMaxWidth(),
-            cornerRadius = 12.dp
-        ) {
-            Row {
-                GradientBackground(
-                    modifier = Modifier
-                        .weight(currentCredits.toFloat())
-                        .fillMaxHeight()
-                        .background(Color.White),
-                    colors = listOf(
-                        MaterialTheme.colorScheme.onPrimary,
-                        LocalCustomColorsPalette.current.careerColor.copy(alpha = 0.5f),
-                    ),
-                ) {}
-                Spacer(
-                    modifier = Modifier
-                        .weight(totalCredits.toFloat() - currentCredits.toFloat())
-                )
-            }
-        }
-
-        Text(
-            text = "60 / 180 CFU" // TODO: Trans
-        )
-
-        GoToStatisticsSection()
-    }
-}
-
-@Composable
 fun GoToStatisticsSection(
     modifier: Modifier = Modifier,
 ) {
