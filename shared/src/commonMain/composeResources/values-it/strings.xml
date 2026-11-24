@@ -79,7 +79,7 @@
     <string name="exam_info_president">Presidente: </string>
     <string name="exam_info_notes">Note: </string>
     <string name="exam_book_button">Prenota</string>
-    <string name="exam_unbook_button">Unprenot</string>
+    <string name="exam_unbook_button">Disdici</string>
     <string name="date_formatting_entry_label">Formattazione Data</string>
 
     <!-- Updater -->
