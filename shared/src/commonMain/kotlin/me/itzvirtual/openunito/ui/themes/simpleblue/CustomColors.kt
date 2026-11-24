@@ -47,18 +47,20 @@ val OnCareerColor = lerp(
     0.4f
 )
 
-val AgendaColor = Color(0xFFDE8129)
+
+val AgendaColor = Color(0xFF977BE5)
 val OnAgendaColor = lerp(
     AgendaColor,
     Color.Black,
-    0.15f
+    0.4f
 )
+
 
 val SettingsColor = Color(0xFF977BE5)
 val OnSettingsColor = lerp(
     SettingsColor,
     Color.Black,
-    0.3f
+    0.4f
 )
 
 // SettingsScreen Icon Colors

@@ -484,15 +484,15 @@ fun ExamBookingList(
                                 val id = exam.id()
                                 expandedExamId = if (expandedExamId != id) id else null
 
-                                if (expandedExamId != null) { // Only when expanding
-                                    coroutineScope.launch {
-                                        // TODO: make it concurrent to the animation
-                                        delay(300L.milliseconds)
-
-                                        val id = exams.indexOf(exam)
-                                        listState.animateScrollToItem(id)
-                                    }
-                                }
+//                                if (expandedExamId != null) { // Only when expanding
+//                                    coroutineScope.launch {
+//                                        // TODO: make it concurrent to the animation
+//                                        delay(300L.milliseconds)
+//
+//                                        val id = exams.indexOf(exam)
+//                                        listState.animateScrollToItem(id)
+//                                    }
+//                                }
                             },
                             onExamBooked = onExamBooked,
                             onExamUnbooked = onExamUnbooked,
@@ -669,17 +669,19 @@ fun ExamSessionCardContent(
         AnimatedVisibility(
             visible = expanded,
         ) {
-            Spacer(Modifier.height(8.dp))
+            Column {
+                Spacer(Modifier.height(8.dp))
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-            ExamSessionCardDrawer(
-                exam = exam,
-                onExamBooked = onExamBooked,
-                onExamUnbooked = onExamUnbooked
-            )
+                ExamSessionCardDrawer(
+                    exam = exam,
+                    onExamBooked = onExamBooked,
+                    onExamUnbooked = onExamUnbooked
+                )
+            }
         }
     }
 }
@@ -724,7 +726,6 @@ fun ExamSessionCardDrawer(
     onExamBooked: (ExamDate) -> Unit = {},
     onExamUnbooked: (ExamDate) -> Unit = {},
 ) {
-    val prenotWeight = 0.7f
 
     Column(
         modifier = modifier,
@@ -771,20 +772,20 @@ fun ExamSessionCardDrawer(
 
 
             Spacer(
-                modifier = Modifier.width(10.dp)
+                modifier = Modifier.width(10.dp) // TODO: make thi ui relative
             )
 
+            var enabled by remember(exam.isBooked) { mutableStateOf(true) }
+
             PrenotButton(
-                // TODO: Disable and show loading state on the button, the state is automatically
-                //  updated by the repository
-                //  Proposal: also disable all the exams cards while the backend is loading
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(prenotWeight),
-                editable = exam.canEdit,
+                editable = exam.canEdit && enabled,
                 booked = exam.isBooked,
                 onClick = {
-                    if (!exam.canEdit) return@PrenotButton
+                    if (!exam.canEdit || !enabled) return@PrenotButton
+                    enabled = false
                     if (exam.isBooked) onExamUnbooked(exam)
                     else onExamBooked(exam)
                 },
@@ -975,6 +976,7 @@ fun PrenotButton(
     StdButtonEmpty(
         modifier = modifier,
         border = BorderStroke(2.dp, borderColor),
+        enabled = editable,
         onClick = onClick
     ) {
         Row(
@@ -987,6 +989,7 @@ fun PrenotButton(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
+                tint = textColor,
             )
 
             Spacer(
