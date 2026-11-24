@@ -266,8 +266,8 @@ fun ProfileSection(
     debug: Boolean? = null,
     onOpenProfile: () -> Unit,
 ) {
-    val firstName = "Mario" // data?.firstname ?: stringResource(Res.string.ND)
-    val lastName = "Rossi" // data?.lastname ?: ""
+    val firstName = data?.firstname ?: stringResource(Res.string.ND)
+    val lastName = data?.lastname ?: ""
     val userHash = remember("$firstName $lastName") { sha256sum("$firstName $lastName") }
 
     Box(
