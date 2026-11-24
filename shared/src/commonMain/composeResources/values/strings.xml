@@ -30,7 +30,7 @@
     <string name="percorso_label">Track</string>
     <string name="copied_label">Copied!</string>
 
-    <!-- Agenda Section -->
+    <!-- TODO: sort this strings -->
     <string name="nearest_agenda_title">Coming Up</string>
     <string name="next_day_plan_title">Tomorrow's Schedule</string>
     <string name="no_agenda_tomorrow">No classes scheduled for tomorrow</string>
@@ -102,4 +102,39 @@
     <string name="updater_install_button">Install</string>
     <string name="updater_downloading_progress">Downloading %1$d%%</string>
     <string name="updater_download_button">Download</string>
+
+    <!-- Calendar Screen -->
+    <string name="agenda_no_calendar">No calendar</string>
+    <string name="agenda_rename_calendar_cd">Rename</string>
+    <string name="agenda_delete_calendar_cd">Delete</string>
+    <string name="agenda_add_calendar">Add Calendar</string>
+    <string name="agenda_previous_week_cd">Previous week</string>
+    <string name="agenda_next_week_cd">Next week</string>
+    <string name="agenda_date_range">%1$s - %2$s</string>
+
+    <string name="agenda_delete_calendar_title">Delete Calendar</string>
+    <string name="agenda_delete_calendar_message">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string name="agenda_edit_calendar">Edit Calendar</string>
+    <string name="agenda_calendar_name_label">Name</string>
+    <string name="agenda_calendar_link_label">Calendar Link ID or URL</string>
+    <string name="agenda_validating">Validating...</string>
+    <string name="agenda_error_empty_name">Name cannot be empty.</string>
+    <string name="agenda_error_invalid_link">Invalid format. Enter a 24-char hex ID or a URL containing linkCalendarioId.</string>
+    <string name="action_add">Add</string>
+    <string name="action_edit">Edit</string>
+
+    <string name="action_close_cd">Close</string>
+    <string name="agenda_activity_code_label">Activity Code</string>
+    <string name="agenda_time_range">%1$s - %2$s</string>
+    <string name="agenda_room_capacity">Capacity: %1$d seats</string>
+    <string name="agenda_professor_singular">Professor</string>
+    <string name="agenda_professor_plural">Professors</string>
+    <string name="agenda_course_year_label">Course year</string>
+    <string name="agenda_course_year_value">Year %1$d</string>
+    <string name="agenda_delivery_mode_label">Mode</string>
+    <string name="agenda_delivery_mode_remote">Remote teaching</string>
+    <string name="agenda_english_title_label">Title (EN)</string>
 </resources>

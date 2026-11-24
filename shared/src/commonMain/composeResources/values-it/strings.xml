@@ -99,4 +99,39 @@
     <string name="updater_install_button">Installa</string>
     <string name="updater_downloading_progress">Download %1$d%%</string>
     <string name="updater_download_button">Scarica</string>
+
+    <!-- Calendar Screen -->
+    <string name="agenda_no_calendar">Nessun calendario</string>
+    <string name="agenda_rename_calendar_cd">Rinomina</string>
+    <string name="agenda_delete_calendar_cd">Elimina</string>
+    <string name="agenda_add_calendar">Aggiungi calendario</string>
+    <string name="agenda_previous_week_cd">Settimana precedente</string>
+    <string name="agenda_next_week_cd">Settimana successiva</string>
+    <string name="agenda_date_range">%1$s - %2$s</string>
+
+    <string name="agenda_delete_calendar_title">Elimina calendario</string>
+    <string name="agenda_delete_calendar_message">Sei sicuro di voler eliminare \"%1$s\"?</string>
+    <string name="action_delete">Elimina</string>
+    <string name="action_cancel">Annulla</string>
+
+    <string name="agenda_edit_calendar">Modifica calendario</string>
+    <string name="agenda_calendar_name_label">Nome</string>
+    <string name="agenda_calendar_link_label">ID link calendario o URL</string>
+    <string name="agenda_validating">Verifica in corso...</string>
+    <string name="agenda_error_empty_name">Il nome non può essere vuoto.</string>
+    <string name="agenda_error_invalid_link">Formato non valido. Inserisci un ID esadecimale di 24 caratteri o un URL contenente linkCalendarioId.</string>
+    <string name="action_add">Aggiungi</string>
+    <string name="action_edit">Modifica</string>
+
+    <string name="action_close_cd">Chiudi</string>
+    <string name="agenda_activity_code_label">Codice Attività</string>
+    <string name="agenda_time_range">%1$s - %2$s</string>
+    <string name="agenda_room_capacity">Capienza: %1$d posti</string>
+    <string name="agenda_professor_singular">Docente</string>
+    <string name="agenda_professor_plural">Docenti</string>
+    <string name="agenda_course_year_label">Anno di corso</string>
+    <string name="agenda_course_year_value">%1$d° anno</string>
+    <string name="agenda_delivery_mode_label">Modalità</string>
+    <string name="agenda_delivery_mode_remote">Teledidattica</string>
+    <string name="agenda_english_title_label">Titolo (EN)</string>
 </resources>

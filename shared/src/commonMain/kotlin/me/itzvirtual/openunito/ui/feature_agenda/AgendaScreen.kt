@@ -104,8 +104,7 @@ import me.itzvirtual.openunito.domain.getDayOfWeek
 import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.domain.toLocalDate
 import me.itzvirtual.openunito.domain.toLocalTime
-import me.itzvirtual.openunito.resources.Res
-import me.itzvirtual.openunito.resources.error_no_calendar_configured
+import me.itzvirtual.openunito.resources.*
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
 import me.itzvirtual.openunito.ui.components.StaleCacheBanner
@@ -133,6 +132,12 @@ enum class AgendaFilter {
     EVENTS,
     LESSONS,
     EXAMS
+}
+
+private sealed interface UpsertErrorState {
+    data object EmptyName : UpsertErrorState
+    data object InvalidLink : UpsertErrorState
+    data class Remote(val message: String) : UpsertErrorState
 }
 
 // Predefined colors for events based on activity code hash
@@ -408,7 +413,7 @@ private fun AgendaHeader(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = selectedCalendar?.name ?: "No calendar",
+                        text = selectedCalendar?.name ?: stringResource(Res.string.agenda_no_calendar),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -446,7 +451,7 @@ private fun AgendaHeader(
                                 ) {
                                     Icon(
                                         Icons.Default.Edit,
-                                        contentDescription = "Rename",
+                                        contentDescription = stringResource(Res.string.agenda_rename_calendar_cd),
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -459,7 +464,7 @@ private fun AgendaHeader(
                                 ) {
                                     Icon(
                                         Icons.Default.Delete,
-                                        contentDescription = "Delete",
+                                        contentDescription = stringResource(Res.string.agenda_delete_calendar_cd),
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -481,7 +486,7 @@ private fun AgendaHeader(
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add Calendar")
+                            Text(stringResource(Res.string.agenda_add_calendar))
                         }
                     },
                     onClick = {
@@ -496,23 +501,25 @@ private fun AgendaHeader(
         Row(
             modifier = Modifier
                 .dropShadow(
-                RoundedCornerShape(16.dp),
-                shadow = ShadowDefaults.Text
-            ),
+                    RoundedCornerShape(16.dp),
+                    shadow = ShadowDefaults.Text
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             IconButton(onClick = onPreviousWeek, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Previous week"
+                    contentDescription = stringResource(Res.string.agenda_previous_week_cd)
                 )
             }
             withDateFormatter {
                 Text(
-                    text = "${currentWeekStart.formatFriendlyDayMonth()} - ${
+                    text = stringResource(
+                        Res.string.agenda_date_range,
+                        currentWeekStart.formatFriendlyDayMonth(),
                         currentWeekEnd.formatFriendlyDayMonth()
-                    }",
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -521,7 +528,7 @@ private fun AgendaHeader(
             IconButton(onClick = onNextWeek, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Next week"
+                    contentDescription = stringResource(Res.string.agenda_next_week_cd)
                 )
             }
         }
@@ -560,19 +567,22 @@ private fun AgendaHeader(
     deleteTarget?.let { cal ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete Calendar") },
-            text = { Text("Are you sure you want to delete \"${cal.name}\"?") },
+            title = { Text(stringResource(Res.string.agenda_delete_calendar_title)) },
+            text = { Text(stringResource(Res.string.agenda_delete_calendar_message, cal.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     onCalendarDelete(cal.id)
                     deleteTarget = null
                 }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        stringResource(Res.string.action_delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancel")
+                    Text(stringResource(Res.string.action_cancel))
                 }
             }
         )
@@ -589,7 +599,7 @@ private fun UpsertCalendarDialog(
 ) {
     var name by remember { mutableStateOf(initialName) }
     var linkInput by remember { mutableStateOf(initialLinkId) }
-    var errorMsg by remember { mutableStateOf<String?>(null) }
+    var errorState by remember { mutableStateOf<UpsertErrorState?>(null) }
     var isValidating by remember { mutableStateOf(false) }
 
     val hexRegex = remember { Regex("^[a-fA-F0-9]{24}$") }
@@ -602,15 +612,29 @@ private fun UpsertCalendarDialog(
         return null
     }
 
+    val errorMessage = when (val err = errorState) {
+        UpsertErrorState.EmptyName -> stringResource(Res.string.agenda_error_empty_name)
+        UpsertErrorState.InvalidLink -> stringResource(Res.string.agenda_error_invalid_link)
+        is UpsertErrorState.Remote -> err.message
+        null -> null
+    }
+
     AlertDialog(
         onDismissRequest = { if (!isValidating) onDismiss() },
-        title = { Text(if (calendarEntryId == null) "Add Calendar" else "Edit Calendar") },
+        title = {
+            Text(
+                stringResource(
+                    if (calendarEntryId == null) Res.string.agenda_add_calendar
+                    else Res.string.agenda_edit_calendar
+                )
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(Res.string.agenda_calendar_name_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -618,12 +642,12 @@ private fun UpsertCalendarDialog(
                     value = linkInput,
                     onValueChange = {
                         linkInput = it
-                        errorMsg = null
+                        errorState = null
                     },
-                    label = { Text("Calendar Link ID or URL") },
+                    label = { Text(stringResource(Res.string.agenda_calendar_link_label)) },
                     singleLine = true,
-                    isError = errorMsg != null,
-                    supportingText = errorMsg?.let { { Text(it) } },
+                    isError = errorMessage != null,
+                    supportingText = errorMessage?.let { { Text(it) } },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (isValidating) {
@@ -635,7 +659,10 @@ private fun UpsertCalendarDialog(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp
                         )
-                        Text("Validating...", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(Res.string.agenda_validating),
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -645,28 +672,32 @@ private fun UpsertCalendarDialog(
                 onClick = {
                     val extracted = extractCalendarLinkId(linkInput)
                     if (name.isBlank()) {
-                        errorMsg = "Name cannot be empty."
+                        errorState = UpsertErrorState.EmptyName
                         return@TextButton
                     }
                     if (extracted == null) {
-                        errorMsg =
-                            "Invalid format. Enter a 24-char hex ID or a URL containing linkCalendarioId."
+                        errorState = UpsertErrorState.InvalidLink
                         return@TextButton
                     }
                     isValidating = true
                     onAdd(name.trim(), extracted, calendarEntryId) { success, msg ->
                         isValidating = false
-                        if (!success) errorMsg = msg
+                        if (!success) errorState = UpsertErrorState.Remote(msg)
                     }
                 },
                 enabled = !isValidating,
             ) {
-                Text(if (calendarEntryId == null) "Add" else "Edit")
+                Text(
+                    stringResource(
+                        if (calendarEntryId == null) Res.string.action_add
+                        else Res.string.action_edit
+                    )
+                )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isValidating) {
-                Text("Cancel")
+                Text(stringResource(Res.string.action_cancel))
             }
         }
     )
@@ -1010,7 +1041,7 @@ internal fun EventDetailView(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(Res.string.action_close_cd),
                         tint = Color.White
                     )
                 }
@@ -1040,7 +1071,7 @@ internal fun EventDetailView(
             ) {
                 // Activity code
                 DetailRow(
-                    label = "Codice Attività",
+                    label = stringResource(Res.string.agenda_activity_code_label),
                     value = event.activityCode
                 )
 
@@ -1064,9 +1095,11 @@ internal fun EventDetailView(
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "${
-                                    event.getStartTime().formatFriendlyTime()
-                                } - ${event.getEndTime().formatFriendlyTime()}",
+                                text = stringResource(
+                                    Res.string.agenda_time_range,
+                                    event.getStartTime().formatFriendlyTime(),
+                                    event.getEndTime().formatFriendlyTime()
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1123,7 +1156,10 @@ internal fun EventDetailView(
                                 }
                                 room.capacity?.let { capacity ->
                                     Text(
-                                        text = "Capienza: $capacity posti",
+                                        text = stringResource(
+                                            Res.string.agenda_room_capacity,
+                                            capacity
+                                        ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1148,7 +1184,10 @@ internal fun EventDetailView(
                         )
                         Column {
                             Text(
-                                text = if (event.professors.size == 1) "Docente" else "Docenti",
+                                text = stringResource(
+                                    if (event.professors.size == 1) Res.string.agenda_professor_singular
+                                    else Res.string.agenda_professor_plural
+                                ),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1166,21 +1205,21 @@ internal fun EventDetailView(
 
                 // Additional info
                 DetailRow(
-                    label = "Anno di corso",
-                    value = "${event.courseYear}° anno"
+                    label = stringResource(Res.string.agenda_course_year_label),
+                    value = stringResource(Res.string.agenda_course_year_value, event.courseYear)
                 )
 
                 if (event.isRemote) {
                     DetailRow(
-                        label = "Modalità",
-                        value = "Teledidattica"
+                        label = stringResource(Res.string.agenda_delivery_mode_label),
+                        value = stringResource(Res.string.agenda_delivery_mode_remote)
                     )
                 }
 
                 // English title if available
                 event.titleEn?.let { titleEn ->
                     DetailRow(
-                        label = "Titolo (EN)",
+                        label = stringResource(Res.string.agenda_english_title_label),
                         value = titleEn
                     )
                 }
