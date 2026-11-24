@@ -36,13 +36,17 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 36.0.0
-      - name: Upload Signed APK
-        env:
-          JSON_PATH: "androidApp/release/version.json"
-          UPLOAD_URL: ${{ secrets.UPLOAD_URL }}
-          UPLOAD_AUTH: ${{ secrets.UPLOAD_AUTH }}
+
+      - name: Extract version from version.properties
+        id: version
         run: |
-          chmod +x .github/deploy.sh
-          echo ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_AUTH" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
-          ./.github/deploy.sh "$UPLOAD_URL" "$UPLOAD_AUTH" "$ANDROID_SIGNED_FILE" "$JSON_PATH"
-          rm -f /tmp/upload.sh
+          TAG=$(grep '^versionName=' version.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          files: ${{ steps.sign_app.outputs.signedFile }}
+          generate_release_notes: true
