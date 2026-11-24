@@ -45,7 +45,9 @@ import me.itzvirtual.openunito.data.localization.SupportedRegion
 import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.getToday
 import me.itzvirtual.openunito.resources.Res
+import me.itzvirtual.openunito.resources.date_formatting_entry_label
 import me.itzvirtual.openunito.resources.good_morning
+import me.itzvirtual.openunito.resources.language_preview_label
 import me.itzvirtual.openunito.resources.language_screen_title
 import me.itzvirtual.openunito.ui.LocalResolvedLocale
 import me.itzvirtual.openunito.ui.components.GradientBackground
@@ -173,7 +175,7 @@ fun LanguageScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            text = "Language", // TODO: Add translation and change names
+                            text = stringResource(Res.string.language_screen_title),
                             fontWeight = FontWeight.Bold,
                             elementList = langDisplayNames,
                             selectedElement = selectedLanguage,
@@ -190,7 +192,7 @@ fun LanguageScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
-                            text = "Date Format", // TODO: Add translation and change names
+                            text = stringResource(Res.string.date_formatting_entry_label),
                             fontWeight = FontWeight.Bold,
                             elementList = regionDisplayNames,
                             selectedElement = selectedRegion,
@@ -218,7 +220,7 @@ fun LanguageUserPreview(
     ) {
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = "Preview", // TODO: translation
+            text = stringResource(Res.string.language_preview_label),
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
         )

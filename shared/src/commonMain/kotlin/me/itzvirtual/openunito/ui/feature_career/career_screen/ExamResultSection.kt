@@ -49,7 +49,12 @@ import me.itzvirtual.openunito.domain.examresult.GradeStatus
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.date
 import me.itzvirtual.openunito.resources.editable_until
+import me.itzvirtual.openunito.resources.grade_accept_button
 import me.itzvirtual.openunito.resources.grade_already_accepted
+import me.itzvirtual.openunito.resources.grade_reject_button
+import me.itzvirtual.openunito.resources.grade_state_exception
+import me.itzvirtual.openunito.resources.grade_status_accepting
+import me.itzvirtual.openunito.resources.grade_status_rejecting
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.StdDrawerCard
 import me.itzvirtual.openunito.ui.components.StdTextButton
@@ -345,7 +350,7 @@ fun GradeEntryDrawer(
 
         StdTextButton(
             modifier = Modifier.weight(buttonWeight),
-            text = "Reject",
+            text = stringResource(Res.string.grade_reject_button),
             textStyle = rejectTextStyle,
             border = rejectBorder,
             onClick = onReject,
@@ -355,7 +360,7 @@ fun GradeEntryDrawer(
 
         StdTextButton(
             modifier = Modifier.weight(buttonWeight * 1f),
-            text = "Accept",
+            text = stringResource(Res.string.grade_accept_button),
             textStyle = acceptTextStyle,
             border = acceptBorder,
             onClick = onAccept,
@@ -541,11 +546,9 @@ fun SelectionConfirmationDialog(
     onClickNo: () -> Unit,
 ) {
     val selectionText = when (selectedStatus) { // TODO: translations
-        GradeStatus.ACCEPTED -> "You are choosing to ACCEPT this grade."
-        GradeStatus.REJECTED -> "You are choosing to REJECT this grade."
-        GradeStatus.VIEWED -> "You are choosing remove grade choice." // Shouldn't be possible
-        GradeStatus.NOT_TOUCHED -> "You are choosing to remove grade choice (not touched)." // Shouldn't be possible
-        else -> throw Exception("Invalid grade status selection")
+        GradeStatus.ACCEPTED -> stringResource(Res.string.grade_status_accepting)
+        GradeStatus.REJECTED -> stringResource(Res.string.grade_status_rejecting)
+        else -> throw Exception(stringResource(Res.string.grade_state_exception))
     }
 
     AlertDialog(

@@ -70,9 +70,16 @@ import me.itzvirtual.openunito.domain.examdate.subjectsListSample
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.all
 import me.itzvirtual.openunito.resources.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40
+import me.itzvirtual.openunito.resources.exam_book_button
+import me.itzvirtual.openunito.resources.exam_info_activity_code
+import me.itzvirtual.openunito.resources.exam_info_notes
+import me.itzvirtual.openunito.resources.exam_info_president
+import me.itzvirtual.openunito.resources.exam_info_subscribed_number
+import me.itzvirtual.openunito.resources.exam_unbook_button
 import me.itzvirtual.openunito.resources.examsession_open_from_to
 import me.itzvirtual.openunito.resources.examsession_title
 import me.itzvirtual.openunito.resources.loading
+import me.itzvirtual.openunito.resources.subjects_drop_down_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
@@ -354,7 +361,7 @@ fun SubjectDropdownMenu(
                     val smallFontSize = fontSize.times(0.65)
 
                     Text(
-                        text = "Subjects", // TODO: add translations
+                        text = stringResource(Res.string.subjects_drop_down_title), // TODO: add translations
                         color = MaterialTheme.colorScheme.outline,
                         fontSize = smallFontSize,
                         lineHeight = smallFontSize.times(1.4),
@@ -823,7 +830,7 @@ fun InfoSection(
                     .weight(1f),
             ) {
                 Text(
-                    text = "Activity Code: ",
+                    text = stringResource(Res.string.exam_info_activity_code),
                     color = weakColor,
                     fontWeight = weakWeight,
                     fontSize = size,
@@ -842,7 +849,7 @@ fun InfoSection(
                     .weight(1f),
             ) {
                 Text(
-                    text = "Subscribed: ",
+                    text = stringResource(Res.string.exam_info_subscribed_number),
                     color = weakColor,
                     fontWeight = weakWeight,
                     fontSize = size,
@@ -868,7 +875,7 @@ fun InfoSection(
                 .height(IntrinsicSize.Max)
         ) {
             Text(
-                text = "President: ",
+                text = stringResource(Res.string.exam_info_president),
                 color = weakColor,
                 fontWeight = weakWeight,
                 fontSize = size,
@@ -892,7 +899,7 @@ fun InfoSection(
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
-                    text = "Notes: ",
+                    text = stringResource(Res.string.exam_info_notes),
                     color = weakColor,
                     fontWeight = weakWeight,
                     fontSize = size,
@@ -951,8 +958,8 @@ fun PrenotButton(
     booked: Boolean,
     onClick: () -> Unit,
 ) {
-    val bookString = "Prenota"
-    val revokeString = "UNPRENOT"
+    val bookString = stringResource(Res.string.exam_book_button)
+    val revokeString = stringResource(Res.string.exam_unbook_button)
 
     val goodRedColor = Color( // TODO: Make this into fkn error color, now it sucks
         217f / 256f,
@@ -1035,18 +1042,6 @@ fun AddCalendarButton(
                 imageVector = vectorResource(Res.drawable.calendar_add_on_35dp_e3e3e3_fill1_wght400_grad0_opsz40),
                 contentDescription = null,
             )
-
-//            Spacer(
-//                modifier = Modifier.weight(1f)
-//            )
-//
-//            Text(
-//                text = "Aggiungi",
-//                fontWeight = FontWeight.Bold
-//            )
-//            Spacer(
-//                modifier = Modifier.weight(1.4f)
-//            )
         }
     }
 }

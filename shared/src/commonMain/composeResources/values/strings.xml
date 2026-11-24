@@ -69,4 +69,19 @@
     <string name="data_is_old">Data is old!</string>
     <string name="grade_already_accepted">Grade already accepted</string>
     <string name="grade_already_rejected">Grade already rejected</string>
+    <string name="grade_status_accepting">You are choosing to ACCEPT this grade.</string>
+    <string name="grade_status_rejecting">You are choosing to REJECT this grade.</string>
+    <string name="grade_state_exception">Invalid grade status selection</string>
+    <string name="grade_reject_button">Reject</string>
+    <string name="grade_accept_button">Accept</string>
+    <string name="subjects_drop_down_title">Subjects</string>
+    <string name="exam_info_activity_code">Activity Code: </string>
+    <string name="exam_info_subscribed_number">Subscribed: </string>
+    <string name="exam_info_president">President: </string>
+    <string name="exam_info_notes">Notes: </string>
+    <string name="exam_book_button">Book</string>
+    <string name="exam_unbook_button">Unbook</string>
+    <string name="date_formatting_entry_label">Date Formatting</string>
+    <string name="language_preview_label" translatable="false">Preview</string>
+    <string name="log_out_label" translatable="false">Log Out</string>
 </resources>

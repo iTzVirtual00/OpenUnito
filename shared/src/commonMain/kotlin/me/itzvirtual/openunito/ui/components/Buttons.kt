@@ -46,7 +46,7 @@ fun StdButtonEmpty(
     onClick: () -> Unit = {},
     shape: Shape = RoundedCornerShape(25f),
     border: BorderStroke? = null,
-    color: Color = MaterialTheme.colorScheme.surface, // TODO: Add it to dependencies
+    color: Color = MaterialTheme.colorScheme.surface, // TODO: Add it to buttons that use it
     tonalElevation: Dp = 2.dp,
     content: @Composable (() -> Unit)
 ) {

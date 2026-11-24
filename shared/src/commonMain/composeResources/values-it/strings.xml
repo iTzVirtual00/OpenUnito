@@ -68,4 +68,17 @@
     <string name="data_is_old">I dati sono obsoleti!</string>
     <string name="grade_already_accepted">Il voto è stato già accettato</string>
     <string name="grade_already_rejected">Il voto è stato già rifiutato</string>
+    <string name="grade_status_accepting">Stai scegliendo di ACCETTARE questo voto.</string>
+    <string name="grade_status_rejecting">Stai scegliendo di RIFIUTARE questo voto.</string>
+    <string name="grade_state_exception">La selezione non è valida</string>
+    <string name="grade_reject_button">Rifiuta</string>
+    <string name="grade_accept_button">Accetta</string>
+    <string name="subjects_drop_down_title">Materie</string>
+    <string name="exam_info_activity_code">Codice Attività: </string>
+    <string name="exam_info_subscribed_number">Iscritti: </string>
+    <string name="exam_info_president">Presidente: </string>
+    <string name="exam_info_notes">Note: </string>
+    <string name="exam_book_button">Prenota</string>
+    <string name="exam_unbook_button">Unprenot</string>
+    <string name="date_formatting_entry_label">Formattazione Data</string>
 </resources>

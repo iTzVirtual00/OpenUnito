@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.resources.Res
 import me.itzvirtual.openunito.resources.dev_tab_title
+import me.itzvirtual.openunito.resources.language_screen_title
+import me.itzvirtual.openunito.resources.log_out_label
 import me.itzvirtual.openunito.resources.settings_customization
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.StdSurface
@@ -179,7 +181,7 @@ fun SettingsEntries(
             StdTextIconEntry(
                 modifier = Modifier
                     .padding(horizontal = horPadding, vertical = spacing),
-                text = "Language",
+                text = stringResource(Res.string.language_screen_title),
                 fontWeight = FontWeight.Bold,
                 icon = Icons.Default.Language,
                 onClick = onClickLanguage,
@@ -225,7 +227,7 @@ fun SettingsEntries(
 
 
                 Text(
-                    text = "Log Out",
+                    text = stringResource(Res.string.log_out_label),
                     fontWeight = FontWeight.Bold,
                     color = color,
                 )
