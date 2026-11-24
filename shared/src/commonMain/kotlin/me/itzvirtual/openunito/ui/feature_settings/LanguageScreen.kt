@@ -144,33 +144,27 @@ fun LanguageScreenContent(
                 val resolvedLocale = LocalResolvedLocale.current
 
                 val rawLanguages = SupportedLocales.languages
-                var selectedLanguage by remember { mutableStateOf<Int?>(null) } // TODO: Maybe get this as param
-
-                val languageList = remember(rawLanguages) {
-                    buildList {
-                        rawLanguages.forEachIndexed { index, el ->
-                            if (el.tag == resolvedLocale.langCode) {
-                                selectedLanguage = index
-                            }
-
-                            add(el.displayName)
-                        }
-                    }
+                var selectedLanguage by remember(rawLanguages, resolvedLocale) {
+                    mutableStateOf(
+                        rawLanguages
+                                .indexOfFirst { it.tag == resolvedLocale.langCode }
+                                .coerceAtLeast(0)
+                    )
+                }
+                val langDisplayNames = remember(rawLanguages) {
+                    rawLanguages.map { it.displayName }
                 }
 
                 val rawRegions = SupportedLocales.regions
-                var selectedRegion by remember { mutableStateOf<Int?>(null) }
-
-                val regionsList = remember(rawRegions) {
-                    buildList {
-                        rawRegions.forEachIndexed { index, el ->
-                            if (el.regionCode == resolvedLocale.regionCode) {
-                                selectedRegion = index
-                            }
-
-                            add(el.displayName)
-                        }
-                    }
+                var selectedRegion by remember(rawRegions, resolvedLocale) {
+                    mutableStateOf(
+                        rawRegions
+                            .indexOfFirst { it.regionCode == resolvedLocale.regionCode }
+                            .coerceAtLeast(0)
+                    )
+                }
+                val regionDisplayNames = remember(rawRegions) {
+                    rawRegions.map { it.displayName }
                 }
 
                 StdSurface {
@@ -181,7 +175,7 @@ fun LanguageScreenContent(
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             text = "Language", // TODO: Add translation and change names
                             fontWeight = FontWeight.Bold,
-                            elementList = languageList,
+                            elementList = langDisplayNames,
                             selectedElement = selectedLanguage,
                             onChangeSelected = { index ->
                                 selectedLanguage = index
@@ -198,7 +192,7 @@ fun LanguageScreenContent(
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             text = "Date Format", // TODO: Add translation and change names
                             fontWeight = FontWeight.Bold,
-                            elementList = regionsList,
+                            elementList = regionDisplayNames,
                             selectedElement = selectedRegion,
                             onChangeSelected = { index ->
                                 selectedRegion = index
