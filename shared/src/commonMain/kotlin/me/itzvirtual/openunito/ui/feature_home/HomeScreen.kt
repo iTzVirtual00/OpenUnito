@@ -2,8 +2,6 @@ package me.itzvirtual.openunito.ui.feature_home
 
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
@@ -33,8 +31,6 @@ import androidx.compose.material.icons.filled.SatelliteAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.SatelliteAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -62,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.itzvirtual.openunito.data.localization.withDateFormatter
 import me.itzvirtual.openunito.domain.agenda.AgendaEntry
 import me.itzvirtual.openunito.domain.getNowInstant
+import me.itzvirtual.openunito.domain.sha256sum
 import me.itzvirtual.openunito.domain.student.StudentData
 import me.itzvirtual.openunito.domain.student.studentDataSample
 import me.itzvirtual.openunito.resources.ND
@@ -73,8 +70,8 @@ import me.itzvirtual.openunito.resources.todays_classes_title
 import me.itzvirtual.openunito.resources.tomorrow_classes_title
 import me.itzvirtual.openunito.ui.components.GradientBackground
 import me.itzvirtual.openunito.ui.components.ListWrapper
-import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.components.ShadowDefaults
+import me.itzvirtual.openunito.ui.components.StaleCacheBanner
 import me.itzvirtual.openunito.ui.feature_agenda.EventDetailView
 import me.itzvirtual.openunito.ui.themes.LocalCustomColorsPalette
 import me.itzvirtual.openunito.ui.themes.OpenUnitoTheme
@@ -220,26 +217,21 @@ fun HomeScreenContent(
     }
 }
 
+// Used for personalized icons of beta testers
+val betaIconsMap = hashMapOf(
+    "c9bb5e3383e6aaac2c6b44bb0c572224d223aadded0947ac42c1dd10cc24145f" to Icons.Default.SatelliteAlt,
+    "92a0b1d961ae6c72ef3380227530c265b1c9e661cde5b52808852cf1aa0dc252" to Icons.Default.RollerSkating,
+    "fa6921e4620036d72f762b43db2d8926dfa375f66e18a22410bb96bcbb1a5dc6" to Icons.Default.BugReport,
+    "a6887cf1b3cce4a53de9dc1db5feed4ccde2f91c7a816f79167495138ac27212" to Icons.Default.Translate,
+)
+
 @Composable
 fun UserProfileIcon(
     modifier: Modifier = Modifier,
-    special: Int?,
+    userHash: String,
     size: Dp = 40.dp
 ) {
-    /*  Specials:
-            null: everyone (Person)
-            0: Mario
-            1: Emi // Hopefully one day she'll have the app
-            2: Anna // Beta tester #1
-            3: Luca Neri // Genetics was cool but not present in this lib
-    */
-    val icon = when (special) {
-        0 -> Icons.Default.SatelliteAlt
-        1 -> Icons.Default.RollerSkating
-        2 -> Icons.Default.BugReport
-        3 -> Icons.Default.Translate // TODO: add cards icon
-        else -> Icons.Default.Person
-    }
+    val icon = betaIconsMap.getOrElse(userHash) { Icons.Default.Person }
 
     Surface(
         modifier = modifier
@@ -274,6 +266,7 @@ fun ProfileSection(
 ) {
     val firstName = data?.firstname ?: stringResource(Res.string.ND)
     val lastName = data?.lastname ?: ""
+    val userHash = remember(firstName + lastName) { sha256sum(firstName + lastName) }
 
     Box(
         modifier = Modifier
@@ -304,12 +297,7 @@ fun ProfileSection(
                 ) {
                     UserProfileIcon(
                         size = 44.dp,
-                        special = when {
-                            firstName == "Mario" && lastName == "Rossi" -> 0 // TODO: REMOVE these name, maybe hash
-                            firstName == "Maria" && lastName == "Bianchi" -> 1
-                            firstName == "Anna" && lastName == "Verdi" -> 2
-                            else -> null
-                        }
+                        userHash = userHash
                     )
 
                     Spacer(

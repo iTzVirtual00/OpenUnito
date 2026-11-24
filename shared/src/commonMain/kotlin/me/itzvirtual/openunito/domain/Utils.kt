@@ -14,6 +14,7 @@ import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import okio.ByteString.Companion.encodeUtf8
 import kotlin.math.PI
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -126,4 +127,8 @@ class ConcurrentLruMap<K, V>(@PublishedApi internal val maxSize: Int) {
             return value
         }
     }
+}
+
+fun sha256sum(s: String): String {
+    return s.encodeUtf8().sha256().hex()
 }

@@ -160,6 +160,8 @@ kotlin {
                 implementation(libs.locale.core)
                 implementation(libs.locale.platform)
                 implementation(libs.locale.datetime.cldr.skeletons)
+
+                implementation(libs.okio)
             }
         }
 
