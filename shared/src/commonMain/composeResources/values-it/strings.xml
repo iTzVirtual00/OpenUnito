@@ -134,4 +134,6 @@
     <string name="agenda_delivery_mode_label">Modalità</string>
     <string name="agenda_delivery_mode_remote">Teledidattica</string>
     <string name="agenda_english_title_label">Titolo (EN)</string>
+    <string name="link_to_repo_button">Link alla repo</string>
+    <string name="unofficial_disclaimer">Questa app non è ufficiale.</string>
 </resources>

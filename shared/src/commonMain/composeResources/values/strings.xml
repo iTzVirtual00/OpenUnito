@@ -137,4 +137,6 @@
     <string name="agenda_delivery_mode_label">Mode</string>
     <string name="agenda_delivery_mode_remote">Remote teaching</string>
     <string name="agenda_english_title_label">Title (EN)</string>
+    <string name="link_to_repo_button">Link to repo</string>
+    <string name="unofficial_disclaimer">This app is unofficial.</string>
 </resources>
