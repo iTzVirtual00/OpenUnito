@@ -9,6 +9,9 @@
 **OpenUnito** is a free and Open Source university life management application,
 developed as an alternative to the official app from UniTO.
 
+![Home](./files/screenshot_home.png) |  ![Career](./files/screenshot_career.png) | ![Exams](./files/screenshot_exams.png) | ![Calendar](./files/screenshot_calendar.png)
+:-------------------------:|:-------------------------:|:-------------------------: | :-------------------------:
+
 > [!IMPORTANT]
 > **OpenUnito is under active development.** 
 > Some features still require further testing.
