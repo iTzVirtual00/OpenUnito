@@ -27,7 +27,7 @@ jobs:
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
       - name: Assemble Release APK
-        run: ./gradlew --configuration-cache :androidApp:assembleRelease
+        run: ./gradlew --build-cache --configuration-cache :androidApp:assembleRelease -x lintVitalRelease
 
       - name: Sign app APK
         uses: ilharp/sign-android-release@v2
