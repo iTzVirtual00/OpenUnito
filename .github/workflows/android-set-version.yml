@@ -34,26 +34,26 @@ jobs:
           echo "INPUT_VERSION_CODE='${INPUT_VERSION_CODE}'"
           echo "INPUT_VERSION_NAME='${INPUT_VERSION_NAME}'"
           echo "::endgroup::"
-          
+
           CURRENT_CODE="1"
           CURRENT_NAME="v0.0.1"
-          
+
           if [ -f version.properties ]; then
             echo "::group::Debug - Existing version.properties"
             cat version.properties
             echo "::endgroup::"
-          
+
             CURRENT_CODE=$(grep -E '^versionCode=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
             CURRENT_NAME=$(grep -E '^versionName=' version.properties | cut -d'=' -f2- | tr -d '[:space:]')
           else
             echo "version.properties not found. Using defaults."
           fi
-          
+
           echo "::group::Debug - Parsed Current Values"
           echo "CURRENT_CODE='${CURRENT_CODE}'"
           echo "CURRENT_NAME='${CURRENT_NAME}'"
           echo "::endgroup::"
-          
+
           # Resolve versionCode
           # Use input if not null or increment existing by one
           if [ -n "${INPUT_VERSION_CODE}" ]; then
@@ -63,7 +63,7 @@ jobs:
             RESOLVED_CODE=$(( ${CURRENT_CODE:-0} + 1 ))
             echo "Incremented versionCode from '${CURRENT_CODE:-0}' to '${RESOLVED_CODE}'"
           fi
-          
+
           # Resolve versionName
           # Use input or increment existing MINOR by one
           if [ -n "${INPUT_VERSION_NAME}" ]; then
@@ -85,17 +85,17 @@ jobs:
               RESOLVED_NAME="${CURRENT_NAME}"
             fi
           fi
-          
+
           # Write to file
           cat <<EOF > version.properties
           versionCode=${RESOLVED_CODE}
           versionName=${RESOLVED_NAME}
           EOF
-          
+
           # Set outputs for downstream steps
           echo "versionCode=${RESOLVED_CODE}" >> "$GITHUB_OUTPUT"
           echo "versionName=${RESOLVED_NAME}" >> "$GITHUB_OUTPUT"
-          
+
           echo "::group::Debug - Final Outputs Written"
           echo "versionCode=${RESOLVED_CODE}"
           echo "versionName=${RESOLVED_NAME}"
@@ -108,12 +108,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           git add version.properties
-          git commit -m "bump to ${VERSION_CODE}+${VERSION_NAME}"
-          
+          git commit -m "bump to ${VERSION_NAME}+${VERSION_CODE}"
+
           TAG_NAME="${VERSION_NAME}+${VERSION_CODE}"
           TAG_MESSAGE="Release ${VERSION_NAME} (build ${VERSION_CODE})"
           git tag -a "${TAG_NAME}" -m "${TAG_MESSAGE}"
-          
+
           git push --atomic origin "HEAD:${{ github.ref_name }}" "refs/tags/${TAG_NAME}"
