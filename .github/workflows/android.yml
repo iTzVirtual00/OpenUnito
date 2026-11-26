@@ -51,7 +51,7 @@ jobs:
       - name: Rename Signed APK
         id: rename_apk
         run: |
-          NEW_NAME="OpenUnito-${{ steps.version.outputs.versionName }}.apk"
+          NEW_NAME="OpenUnito-${{ steps.version.outputs.tag }}.apk"
           mv "${{ steps.sign_app.outputs.signedFile }}" "$NEW_NAME"
           echo "apk_path=$NEW_NAME" >> $GITHUB_OUTPUT
 
