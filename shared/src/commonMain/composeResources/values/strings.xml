@@ -81,7 +81,7 @@
     <string name="exam_info_notes">Notes: </string>
     <string name="exam_book_button">Book</string>
     <string name="exam_unbook_button">Unbook</string>
-    <string name="date_formatting_entry_label">Date Formatting</string>
+    <string name="date_formatting_entry_label">Formatting</string>
     <string name="language_preview_label" translatable="false">Preview</string>
     <string name="log_out_label" translatable="false">Log Out</string>
 
